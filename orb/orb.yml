@@ -1,0 +1,118 @@
+version: 2.1
+description: Secret-injector orb
+
+executors:
+  secret_image:
+    docker:
+      - image: circleci/circleci-cli:alpine
+
+
+jobs:
+  dump-secrets:
+    description: Read secret from Vault and write to /secrets/secret.env
+    executor: secret_image
+    parameters:
+      vault-path:
+        type: string
+        default: ""
+        description: Secret path to read from Vault
+      workspace-path:
+        type: string
+        default: "/tmp/secrets"
+        description: Path in the workspace to store the secrets
+      output-type:
+        type: enum
+        default: "env"
+        enum: ["env", "json"]
+        description: Type of output you want to store the secrets as
+    steps:
+      - vault-login
+      - run:
+          name: Secret-injector - Install jq
+          command: |
+            apk update
+            apk add --upgrade jq
+      - run:
+          name: Secret-injector - Write secrets to file
+          command: |
+            mkdir -p << parameters.workspace-path >>
+            
+            if [ "<< parameters.vault-path >>" != "" ] ; then
+              if [ "<< parameters.output-type >>" = "json" ] ; then
+                echo "Type is set to 'json'"
+                vault kv get -format=json -field=data << parameters.vault-path >> >> << parameters.workspace-path >>/secrets.json
+              fi
+
+              if [ "<< parameters.output-type >>" = "env" ] ; then
+                echo "Type is set to 'env'"
+                vault kv get -format=json << parameters.vault-path >> | jq -r ".data .data | to_entries | map({(\"export \" + .key):  (\"'\" + .value + \"'\" )}) | add | to_entries|map(\"\(.key)=\(.value|tostring)\") | .[]" >> << parameters.workspace-path >>/secrets.env
+              fi
+            fi
+
+            vault kv get -format=json $VAULT_COMMON_SECRETS | jq -r ".data .data | to_entries | map({(\"export K8S_CLUSTER_\" + .key):  (\"'\" + .value + \"'\" )}) | add | to_entries|map(\"\(.key)=\(.value|tostring)\") | .[]" >> << parameters.workspace-path >>/secrets.env
+            vault kv get -format=json $VAULT_CLUSTER_SECRETS | jq -r ".data .data | to_entries | map({(\"export K8S_CLUSTER_\" + .key):  (\"'\" + .value + \"'\" )}) | add | to_entries|map(\"\(.key)=\(.value|tostring)\") | .[]" >> << parameters.workspace-path >>/secrets.env
+            vault kv get -format=json $VAULT_CONTEXT_SECRETS | jq -r ".data .data | to_entries | map({(\"export K8S_CLUSTER_\" + .key):  (\"'\" + .value + \"'\" )}) | add | to_entries|map(\"\(.key)=\(.value|tostring)\") | .[]" >> << parameters.workspace-path >>/secrets.env
+            vault kv get -format=json ES/service_accounts/harbor/$SHORT-ci | jq -r ".data .data | to_entries | map({(\"export DOCKER_\" + .key):  (\"'\" + .value + \"'\" )}) | add | to_entries|map(\"\(.key)=\(.value|tostring)\") | .[]" >> << parameters.workspace-path >>/secrets.env
+
+      - persist_to_workspace:
+          root: << parameters.workspace-path >>
+          paths:
+            - secrets.env
+            - secrets.json
+
+commands:
+  vault-login:
+    steps:
+      - run:
+          name: Secret-injector - Install Vault and login
+          command: |
+            VERSION=1.2.3
+            wget -O ./vault_$VERSION\_linux_amd64.zip https://releases.hashicorp.com/vault/$VERSION/vault_$VERSION\_linux_amd64.zip
+            unzip -o vault_$VERSION\_linux_amd64.zip
+            chmod +x vault
+            mv vault /usr/bin/.
+            vault login -method=userpass username=$VAULT_USERNAME password=$VAULT_PASSWORD
+  inject:
+    description: Secret-injector orb
+    parameters:
+      app-name:
+        description: Name of the deployment to inject secrets into
+        type: string
+      deploy-file:
+        description: Path to your deployment file
+        type: string
+      secret-file:
+        description: Path to your secret file
+        type: string
+    steps:
+      - run:
+          name: Secret-injector - Download & install yq
+          command: |
+            VERSION=2.4.0
+            wget -O /usr/bin/yq https://github.com/mikefarah/yq/releases/download/$VERSION/yq_linux_amd64
+            chmod +x /usr/bin/yq
+      - vault-login
+      - run:
+          name: Secret-injector - Fetch the secret sauce from Vault
+          command: |
+            vault kv get -field=kustomization $VAULT_HARPOCRATES_SECRETS > kustomization.yaml
+            vault kv get -field=secret-dumper $VAULT_HARPOCRATES_SECRETS > secret-dumper.yaml
+            echo 'export HARPOCRATES_VERSION=$(vault kv get -field=harpocrates-version $VAULT_HARPOCRATES_SECRETS)' >> $BASH_ENV
+      - run:
+          name: Secret-injector - kubectl kustomize
+          command: |
+            source ${BASH_ENV}
+
+            export DEPLOY_FILE=<< parameters.deploy-file >>
+            export APP_NAME=<< parameters.app-name >>
+            export SECRET_FILE=<< parameters.secret-file >>
+            export SECRETS=$(yq read $SECRET_FILE -j)
+
+            envsubst < ./kustomization.yaml > ./kustomization_var.yaml
+            mv ./kustomization_var.yaml ./kustomization.yaml
+
+            envsubst < ./secret-dumper.yaml > ./secret-dumper_var.yaml
+            mv ./secret-dumper_var.yaml ./secret-dumper.yaml
+
+            kubectl kustomize . > new.yml
+            mv new.yml $DEPLOY_FILE
