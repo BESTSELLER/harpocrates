@@ -1,0 +1,130 @@
+version: 2.1
+executors:
+  go_image:
+    docker:
+      - image: circleci/golang:1.13.1
+
+orbs:
+  secret-injector: bestsellerit/secret-injector@0.0.217
+
+jobs:
+  test:
+    executor: go_image
+    working_directory: /go/src/bitbucket.org/bestsellerit/harpocrates
+    steps:
+      - checkout
+      - run:
+          name: download dependencies
+          command: GO111MODULE=on CGO_ENABLED=0 go mod vendor
+      - run:
+          name: go get
+          command: |
+            go get ./...
+      - run:
+          name: go test - sonar
+          command: |
+            echo -n > /tmp/report.json
+            go test ./... -coverprofile=coverage.out -json harpocrates >> /tmp/report.json
+      - store_test_results:
+          path: /tmp/report.json
+      - persist_to_workspace:
+          root: /tmp
+          paths:
+            - report.json
+
+  test-sonar:
+    executor: go_image
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - checkout
+      - run:
+          name: Install Sonarqube scanner
+          command: |
+            SONAR_VERSION=4.2.0.1873-linux
+            wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-$SONAR_VERSION.zip -P /tmp/
+            cd /tmp
+            unzip /tmp/sonar-scanner-cli-$SONAR_VERSION.zip
+            mv /tmp/sonar-scanner-$SONAR_VERSION /tmp/sonar-scanner
+      - run:
+          name: Run SonarCloud Scanner
+          command: |
+            source /tmp/secrets.env
+            export SONAR_SCANNER_OPTS="-Xmx2048m"
+            eval /tmp/sonar-scanner/bin/sonar-scanner \
+              -Dsonar.projectKey=$K8S_CLUSTER_SONAR_ORG"_"$CIRCLE_PROJECT_REPONAME \
+              -Dsonar.projectName=$CIRCLE_PROJECT_REPONAME \
+              -Dsonar.organization=$K8S_CLUSTER_SONAR_ORG \
+              -Dsonar.sources=. \
+              -Dsonar.test.inclusions=**/**_test.go \
+              -Dsonar.sources.inclusions=**/**.go \
+              -Dsonar.host.url=$K8S_CLUSTER_SONAR_HOST \
+              -Dsonar.login=$K8S_CLUSTER_SONAR_LOGIN \
+              -Dsonar.links.scm=$CIRCLE_REPOSITORY_URL \
+              -Dsonar.go.coverage.reportPaths=/tmp/report.json
+
+  build:
+    docker:
+      - image: docker:18.06.3-ce-git
+    working_directory: /app
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Push and build image
+          command: |
+            source /tmp/secrets.env
+            docker build -t $K8S_CLUSTER_docker_registry_url/library/$CIRCLE_PROJECT_REPONAME:$CIRCLE_BUILD_NUM .
+            docker login -u $docker_harpocrates_username -p $docker_harpocrates_password $K8S_CLUSTER_docker_registry_url
+            docker push $K8S_CLUSTER_docker_registry_url/library/$CIRCLE_PROJECT_REPONAME:$CIRCLE_BUILD_NUM
+      - run:
+          name: Install Vault and login
+          command: |
+            VERSION=1.2.3
+            wget https://releases.hashicorp.com/vault/$VERSION/vault_$VERSION\_linux_amd64.zip
+            unzip -o vault_$VERSION\_linux_amd64.zip -d /usr/bin/
+            chmod +x /usr/bin/vault
+            vault login -method=userpass username=$VAULT_USERNAME password=$VAULT_PASSWORD
+      - run:
+          name: Write stuff to Vault
+          command: |
+            vault kv put SHARED/harpocrates harpocrates-version=$CIRCLE_BUILD_NUM kustomization=@./orb/kustomization.yml secret-dumper=@./orb/secret-dumper.yml
+      - run:
+          name: Publish CircleCI orb
+          command: |
+            wget https://github.com/CircleCI-Public/circleci-cli/releases/download/v0.1.5879/circleci-cli_0.1.5879_linux_amd64.tar.gz
+            tar -xf circleci-cli_0.1.5879_linux_amd64.tar.gz
+            mv circleci-cli_0.1.5879_linux_amd64 cli
+
+            export CIRCLECI_CLI_TOKEN=$(vault kv get -field=circleci_token ES/harpocrates)
+            CC_NAMESPACE=bestsellerit
+            ORB_PATH=./orb/orb.yml
+            ORB_NAME=secret-injector
+            
+            ./cli/circleci orb validate $ORB_PATH
+            ./cli/circleci orb publish $ORB_PATH $CC_NAMESPACE/$ORB_NAME@0.0.$CIRCLE_BUILD_NUM
+            ./cli/circleci orb unlist $CC_NAMESPACE/$ORB_NAME true
+
+workflows:
+  test-build:
+    jobs:
+      - secret-injector/dump-secrets:
+          vault-path: ES/service_accounts/harbor/harpocrates-ci
+          context: es03-prod
+      - test
+      - test-sonar:
+          context: es03-prod
+          requires:
+            - test
+            - secret-injector/dump-secrets
+      - build:
+          context: es03-prod
+          requires:
+            - test
+            - secret-injector/dump-secrets
+            - test-sonar
+          filters:
+            branches:
+              only: master
