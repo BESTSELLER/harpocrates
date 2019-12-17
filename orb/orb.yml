@@ -84,6 +84,10 @@ commands:
       secret-file:
         description: Path to your secret file
         type: string
+      deploy-type:
+        type: enum
+        default: "Deployment"
+        enum: ["Deployment", "StatefulSet"]
     steps:
       - run:
           name: Secret-injector - Download & install yq
@@ -103,6 +107,7 @@ commands:
           command: |
             source ${BASH_ENV}
 
+            export DEPLOYMENT_TYPE=<< parameters.deploy-type >>
             export DEPLOY_FILE=<< parameters.deploy-file >>
             export APP_NAME=<< parameters.app-name >>
             export SECRET_FILE=<< parameters.secret-file >>

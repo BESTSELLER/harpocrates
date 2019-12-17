@@ -10,6 +10,7 @@ import (
 type GlobalConfig struct {
 	VaultAddress string `required:"true" envconfig:"vault_address"`
 	ClusterName  string `required:"true" envconfig:"cluster_name"`
+	TokenPath    string `required:"false" envconfig:"token_path"`
 	SecretPrefix string `required:"false"`
 	VaultToken   string `required:"false"`
 }

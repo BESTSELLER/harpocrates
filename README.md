@@ -56,3 +56,8 @@ CircleCI steps:
     file: deployment.yml
     secretFile: alfeios-db-secrets.yml
 ```
+
+
+## TO-DO
+
+* Support files ?

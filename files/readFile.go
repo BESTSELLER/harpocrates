@@ -4,11 +4,19 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+
+	"bitbucket.org/bestsellerit/harpocrates/config"
 )
 
-// ReadTokenFile will read the token from Kubernetes service account
+// ReadTokenFile will read a file and return the content as string
 func ReadTokenFile() string {
+	// Defaults to Kubernetes Service Account
 	filePath := "/var/run/secrets/kubernetes.io/serviceaccount/token"
+
+	if config.Config.TokenPath != "" {
+		filePath = config.Config.TokenPath
+	}
+
 	data, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		fmt.Printf("Unable to read the file at path '%s': %v\n", filePath, err)
