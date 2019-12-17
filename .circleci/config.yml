@@ -112,15 +112,15 @@ workflows:
     jobs:
       - secret-injector/dump-secrets:
           vault-path: ES/service_accounts/harbor/harpocrates-ci
-          context: es03-prod
+          # context: es03-prod
       - test
       - test-sonar:
-          context: es03-prod
+          # context: es03-prod
           requires:
             - test
             - secret-injector/dump-secrets
       - build:
-          context: es03-prod
+          # context: es03-prod
           requires:
             - test
             - secret-injector/dump-secrets
