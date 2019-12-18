@@ -106,6 +106,10 @@ commands:
           name: Secret-injector - kubectl kustomize
           command: |
             source ${BASH_ENV}
+            
+            if [ -f "/tmp/secrets.env" ]; then
+              source /tmp/secrets.env
+            fi
 
             export DEPLOYMENT_TYPE=<< parameters.deploy-type >>
             export DEPLOY_FILE=<< parameters.deploy-file >>
