@@ -1,5 +1,5 @@
 apiVersion: apps/v1
-kind: $DEPLOYMENT_TYPE
+kind: Deployment
 metadata:
   name: $APP_NAME
 spec:

@@ -1,4 +1,4 @@
 resources:
 - $DEPLOY_FILE
 patchesStrategicMerge:
-- secret-dumper.yaml
+- $DEPLOYMENT_TYPE.yml
