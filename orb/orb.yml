@@ -93,7 +93,7 @@ commands:
       deploy-type:
         type: enum
         default: "Deployment"
-        enum: ["Deployment", "StatefulSet"]
+        enum: ["Deployment", "StatefulSet", "CronJob"]
     steps:
       - run:
           name: Secret-injector - Download & install yq
