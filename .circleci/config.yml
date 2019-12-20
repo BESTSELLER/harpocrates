@@ -90,7 +90,7 @@ jobs:
       - run:
           name: Write stuff to Vault
           command: |
-            vault kv put SHARED/harpocrates harpocrates-version=$CIRCLE_TAG kustomization=@./orb/kustomization.yml secret-dumper=@./orb/secret-dumper.yml
+            vault kv put SHARED/harpocrates harpocrates-version=$CIRCLE_TAG
       - run:
           name: Publish CircleCI orb
           command: |
