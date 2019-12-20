@@ -61,6 +61,12 @@ jobs:
             - secrets.json
 
 commands:
+  use-secrets:
+    description: Will add the secrets.env to BASH_ENV
+    steps:
+      - run:
+          name: Secret-injector - Adding secrets to BASH_ENV
+          command: cat /tmp/secrets.env >> $BASH_ENV
   vault-login:
     steps:
       - run:
