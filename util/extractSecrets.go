@@ -10,8 +10,8 @@ import (
 )
 
 // ExtractSecrets will loop through al those damn interfaces
-func ExtractSecrets(input SecretJSON) map[string]string {
-	result := make(map[string]string)
+func ExtractSecrets(input SecretJSON) map[string]interface{} {
+	result := make(map[string]interface{})
 
 	for _, a := range input.Secrets {
 
@@ -65,7 +65,7 @@ func ExtractSecrets(input SecretJSON) map[string]string {
 		} else {
 			var secretValue = vault.ReadSecret(fmt.Sprintf("%s", a))
 			for aa, bb := range secretValue {
-				result[aa] = bb.(string)
+				result[aa] = bb
 			}
 		}
 	}

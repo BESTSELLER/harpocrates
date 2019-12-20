@@ -10,11 +10,12 @@ import (
 )
 
 // FormatAsJSON will format a map[string]string to json
-func FormatAsJSON(input map[string]string) string {
-	var result map[string]string
+func FormatAsJSON(input map[string]interface{}) string {
+	var result = make(map[string]interface{})
 
+	prefix := getPrefix()
 	for key, val := range input {
-		leKey := fmt.Sprintf("%s%s", getPrefix(), key)
+		leKey := fmt.Sprintf("%s%s", prefix, key)
 		result[leKey] = val
 	}
 
@@ -28,11 +29,12 @@ func FormatAsJSON(input map[string]string) string {
 
 // FormatAsENV will format a map[string]string to a env file
 // export KEY='value'
-func FormatAsENV(input map[string]string) string {
+func FormatAsENV(input map[string]interface{}) string {
 	var result string
 
+	prefix := getPrefix()
 	for key, val := range input {
-		leKey := fmt.Sprintf("%s%s", getPrefix(), key)
+		leKey := fmt.Sprintf("%s%s", prefix, key)
 		result += fmt.Sprintf("export %s='%s'\n", strings.ToUpper(leKey), val)
 	}
 	return result
