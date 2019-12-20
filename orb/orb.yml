@@ -115,9 +115,8 @@ commands:
             export SECRET_FILE=<< parameters.secret-file >>
             export SECRETS=$(yq read $SECRET_FILE -j)
 
-            # maybe link to a specific $HARPOCRATES_VERSION
-            curl -s -H "Accept:application/vnd.github.v3.raw" https://api.github.com/repos/BESTSELLER/harpocrates/contents/orb/$DEPLOYMENT_TYPE.yml
-            curl -s -H "Accept:application/vnd.github.v3.raw" https://api.github.com/repos/BESTSELLER/harpocrates/contents/orb/kustomization.yml
+            curl -s -H "Accept:application/vnd.github.v3.raw" -O -L https://api.github.com/repos/BESTSELLER/harpocrates/contents/orb/$DEPLOYMENT_TYPE.yml?ref=$HARPOCRATES_VERSION
+            curl -s -H "Accept:application/vnd.github.v3.raw" -O -L https://api.github.com/repos/BESTSELLER/harpocrates/contents/orb/kustomization.yml?ref=$HARPOCRATES_VERSION
 
             envsubst < ./kustomization.yaml > ./kustomization_var.yaml
             mv ./kustomization_var.yaml ./kustomization.yaml
