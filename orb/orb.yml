@@ -124,11 +124,11 @@ commands:
             curl -s -H "Accept:application/vnd.github.v3.raw" -O -L https://api.github.com/repos/BESTSELLER/harpocrates/contents/orb/$DEPLOYMENT_TYPE.yml?ref=$HARPOCRATES_VERSION
             curl -s -H "Accept:application/vnd.github.v3.raw" -O -L https://api.github.com/repos/BESTSELLER/harpocrates/contents/orb/kustomization.yml?ref=$HARPOCRATES_VERSION
 
-            envsubst < ./kustomization.yaml > ./kustomization_var.yaml
-            mv ./kustomization_var.yaml ./kustomization.yaml
+            envsubst < ./kustomization.yml > ./kustomization_var.yml
+            mv ./kustomization_var.yml ./kustomization.yml
 
-            envsubst < ./$DEPLOYMENT_TYPE.yml > ./$DEPLOYMENT_TYPE_var.yaml
-            mv ./$DEPLOYMENT_TYPE_var.yaml ./$DEPLOYMENT_TYPE.yml
+            envsubst < ./$DEPLOYMENT_TYPE.yml > ./$DEPLOYMENT_TYPE_var.yml
+            mv ./$DEPLOYMENT_TYPE_var.yml ./$DEPLOYMENT_TYPE.yml
 
             kubectl kustomize . > new.yml
             mv new.yml $DEPLOY_FILE
