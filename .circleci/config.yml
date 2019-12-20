@@ -76,9 +76,9 @@ jobs:
           name: Push and build image
           command: |
             source /tmp/secrets.env
-            docker build -t $K8S_CLUSTER_docker_registry_url/library/$CIRCLE_PROJECT_REPONAME:$CIRCLE_BUILD_NUM .
+            docker build -t $K8S_CLUSTER_docker_registry_url/library/$CIRCLE_PROJECT_REPONAME:$CIRCLE_TAG .
             docker login -u $docker_harpocrates_username -p $docker_harpocrates_password $K8S_CLUSTER_docker_registry_url
-            docker push $K8S_CLUSTER_docker_registry_url/library/$CIRCLE_PROJECT_REPONAME:$CIRCLE_BUILD_NUM
+            docker push $K8S_CLUSTER_docker_registry_url/library/$CIRCLE_PROJECT_REPONAME:$CIRCLE_TAG
       - run:
           name: Install Vault and login
           command: |
@@ -90,7 +90,7 @@ jobs:
       - run:
           name: Write stuff to Vault
           command: |
-            vault kv put SHARED/harpocrates harpocrates-version=$CIRCLE_BUILD_NUM kustomization=@./orb/kustomization.yml secret-dumper=@./orb/secret-dumper.yml
+            vault kv put SHARED/harpocrates harpocrates-version=$CIRCLE_TAG
       - run:
           name: Publish CircleCI orb
           command: |
@@ -104,10 +104,22 @@ jobs:
             ORB_NAME=secret-injector
             
             ./cli/circleci orb validate $ORB_PATH
-            ./cli/circleci orb publish $ORB_PATH $CC_NAMESPACE/$ORB_NAME@0.1.$CIRCLE_BUILD_NUM
+            ./cli/circleci orb publish $ORB_PATH $CC_NAMESPACE/$ORB_NAME@$CIRCLE_TAG
             ./cli/circleci orb unlist $CC_NAMESPACE/$ORB_NAME true
 
 workflows:
+  test:
+    jobs:
+      - secret-injector/dump-secrets:
+          vault-path: ES/service_accounts/harbor/harpocrates-ci
+          # context: es03-prod
+      - test
+      - test-sonar:
+          # context: es03-prod
+          requires:
+            - test
+            - secret-injector/dump-secrets
+
   test-build:
     jobs:
       - secret-injector/dump-secrets:
@@ -126,5 +138,7 @@ workflows:
             - secret-injector/dump-secrets
             - test-sonar
           filters:
+            tags:
+              only: /^v[0-9]+(\.[0-9]+)*(-.*)*$/
             branches:
-              only: master
+              ignore: /.*/

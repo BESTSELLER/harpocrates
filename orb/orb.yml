@@ -99,8 +99,6 @@ commands:
       - run:
           name: Secret-injector - Fetch the secret sauce from Vault
           command: |
-            vault kv get -field=kustomization $VAULT_HARPOCRATES_SECRETS > kustomization.yaml
-            vault kv get -field=secret-dumper $VAULT_HARPOCRATES_SECRETS > secret-dumper.yaml
             echo 'export HARPOCRATES_VERSION=$(vault kv get -field=harpocrates-version $VAULT_HARPOCRATES_SECRETS)' >> $BASH_ENV
       - run:
           name: Secret-injector - kubectl kustomize
@@ -117,11 +115,14 @@ commands:
             export SECRET_FILE=<< parameters.secret-file >>
             export SECRETS=$(yq read $SECRET_FILE -j)
 
+            curl -s -H "Accept:application/vnd.github.v3.raw" -O -L https://api.github.com/repos/BESTSELLER/harpocrates/contents/orb/$DEPLOYMENT_TYPE.yml?ref=$HARPOCRATES_VERSION
+            curl -s -H "Accept:application/vnd.github.v3.raw" -O -L https://api.github.com/repos/BESTSELLER/harpocrates/contents/orb/kustomization.yml?ref=$HARPOCRATES_VERSION
+
             envsubst < ./kustomization.yaml > ./kustomization_var.yaml
             mv ./kustomization_var.yaml ./kustomization.yaml
 
-            envsubst < ./secret-dumper.yaml > ./secret-dumper_var.yaml
-            mv ./secret-dumper_var.yaml ./secret-dumper.yaml
+            envsubst < ./$DEPLOYMENT_TYPE.yml > ./$DEPLOYMENT_TYPE_var.yaml
+            mv ./$DEPLOYMENT_TYPE_var.yaml ./$DEPLOYMENT_TYPE.yml
 
             kubectl kustomize . > new.yml
             mv new.yml $DEPLOY_FILE
