@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"regexp"
 	"strings"
 
 	"bitbucket.org/bestsellerit/harpocrates/config"
@@ -34,7 +35,8 @@ func FormatAsENV(input map[string]interface{}) string {
 
 	prefix := getPrefix()
 	for key, val := range input {
-		leKey := fmt.Sprintf("%s%s", prefix, key)
+		leKey := fixEnvName(fmt.Sprintf("%s%s", prefix, key))
+		fmt.Println(leKey)
 		result += fmt.Sprintf("export %s='%s'\n", strings.ToUpper(leKey), val)
 	}
 	return result
@@ -45,4 +47,11 @@ func getPrefix() string {
 		return config.Config.SecretPrefix
 	}
 	return ""
+}
+
+func fixEnvName(currentName string) string {
+	reg, _ := regexp.Compile("[^a-zA-Z0-9]+")
+	envVar := reg.ReplaceAllString(currentName, "_")
+
+	return envVar
 }

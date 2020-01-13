@@ -35,7 +35,4 @@ func main() {
 		files.WriteFile(input.DirPath, fmt.Sprintf("secrets.%s", input.Format), files.FormatAsENV(allSecrets))
 	}
 
-	// This needs to be removed, it's just for testing !
-	// for {
-	// }
 }
