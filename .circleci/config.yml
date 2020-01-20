@@ -102,7 +102,7 @@ jobs:
           name: Download ghr
           command: |
             GHR_VERSION=v0.13.0
-            curl -o ghr.tar.gz -L https://github.com/tcnksm/ghr/releases/download/$GHR_VERSION/ghr_$GHR_VERSION\_linux_386.tar.gz
+            wget -O ghr.tar.gz https://github.com/tcnksm/ghr/releases/download/$GHR_VERSION/ghr_$GHR_VERSION\_linux_386.tar.gz
             tar -xvzf ghr.tar.gz
             mv ghr_$GHR_VERSION\_linux_386/ghr /usr/local/bin
       - run:
