@@ -103,10 +103,6 @@ commands:
             chmod +x /usr/bin/yq
       - vault-login
       - run:
-          name: Secret-injector - Fetch the secret sauce from Vault
-          command: |
-            echo 'export HARPOCRATES_VERSION=$(vault kv get -field=harpocrates-version $VAULT_HARPOCRATES_SECRETS)' >> $BASH_ENV
-      - run:
           name: Secret-injector - kubectl kustomize
           command: |
             source ${BASH_ENV}
