@@ -113,7 +113,7 @@ jobs:
             cp orb/CronJob.yml ./releases
             cp orb/Deployment.yml ./releases
             cp orb/StatefulSet.yml ./releases
-            cp orb/kustomization.yml
+            cp orb/kustomization.yml ./releases
       - run:
           name: Download ghr
           command: |
