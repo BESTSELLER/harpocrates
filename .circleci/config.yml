@@ -178,10 +178,19 @@ workflows:
               only: /^[0-9]+(\.[0-9]+)*(-.*)*$/
             branches:
               ignore: /.*/
-      - build:
+      - build-docker:
           # context: es03-prod
           requires:
             - test-sonar
+          filters:
+            tags:
+              only: /^[0-9]+(\.[0-9]+)*(-.*)*$/
+            branches:
+              ignore: /.*/
+      - publish:
+          # context: es03-prod
+          requires:
+            - build-docker
           filters:
             tags:
               only: /^[0-9]+(\.[0-9]+)*(-.*)*$/
