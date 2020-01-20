@@ -21,6 +21,19 @@ jobs:
           command: |
             go get ./...
       - run:
+          name: upx
+          command: |
+            VERSION=3.95
+            wget  https://github.com/upx/upx/releases/download/v$VERSION/upx-$VERSION-amd64_linux.tar.xz
+            tar -xvzf upx-$VERSION-amd64_linux.tar.xz
+            sudo mv upx-$VERSION-amd64_linux/upx /usr/local/bin
+      - run:
+          name: go build
+          command: |
+            source /tmp/secrets.env
+            go build -ldflags="-s -w" && upx harpocrates
+            ls -l harpocrates
+      - run:
           name: go test - sonar
           command: |
             echo -n > /tmp/report.json
@@ -89,10 +102,18 @@ jobs:
       - checkout
       - setup_remote_docker
       - run:
-          name: Push and build image
+          name: upx
+          command: |
+            VERSION=3.95
+            wget  https://github.com/upx/upx/releases/download/v$VERSION/upx-$VERSION-amd64_linux.tar.xz
+            tar -xvzf upx-$VERSION-amd64_linux.tar.xz
+            sudo mv upx-$VERSION-amd64_linux/upx /usr/local/bin
+      - run:
+          name: go build
           command: |
             source /tmp/secrets.env
             go build
+            go build -ldflags="-s -w" && upx harpocrates
             mkdir releases
             cp harpocrates ./releases
       - run:
