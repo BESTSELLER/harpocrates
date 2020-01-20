@@ -119,7 +119,7 @@ jobs:
             GHR_VERSION=v0.13.0
             wget -O ghr.tar.gz https://github.com/tcnksm/ghr/releases/download/$GHR_VERSION/ghr_$GHR_VERSION\_linux_386.tar.gz
             tar -xvzf ghr.tar.gz
-            mv ghr_$GHR_VERSION\_linux_386/ghr /usr/local/bin
+            sudo mv ghr_$GHR_VERSION\_linux_386/ghr /usr/local/bin
       - run:
           name: Create Github releases
           command: |
