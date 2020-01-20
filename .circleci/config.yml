@@ -82,6 +82,7 @@ jobs:
   
   publish:
     executor: go_image
+    working_directory: /go/src/bitbucket.org/bestsellerit/harpocrates
     steps:
       - attach_workspace:
           at: /tmp
@@ -98,8 +99,8 @@ jobs:
           command: |
             VERSION=1.2.3
             wget https://releases.hashicorp.com/vault/$VERSION/vault_$VERSION\_linux_amd64.zip
-            unzip -o vault_$VERSION\_linux_amd64.zip -d /usr/bin/
-            chmod +x /usr/bin/vault
+            sudo unzip -o vault_$VERSION\_linux_amd64.zip -d /usr/bin/
+            sudo chmod +x /usr/bin/vault
             vault login -method=userpass username=$VAULT_USERNAME password=$VAULT_PASSWORD
       - run:
           name: Update stuff with git tag
