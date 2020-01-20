@@ -25,7 +25,7 @@ jobs:
           command: |
             VERSION=3.95
             wget  https://github.com/upx/upx/releases/download/v$VERSION/upx-$VERSION-amd64_linux.tar.xz
-            tar -xvzf upx-$VERSION-amd64_linux.tar.xz
+            tar -xf upx-$VERSION-amd64_linux.tar.xz
             sudo mv upx-$VERSION-amd64_linux/upx /usr/local/bin
       - run:
           name: go build
