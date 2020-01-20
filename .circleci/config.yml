@@ -93,6 +93,7 @@ jobs:
           command: |
             source /tmp/secrets.env
             go build
+            mkdir releases
             cp harpocrates ./releases
       - run:
           name: Install Vault and login
@@ -109,7 +110,6 @@ jobs:
             sed -i -e "s?\$HARPOCRATES_VERSION?$CIRCLE_TAG?g" orb/Deployment.yml
             sed -i -e "s?\$HARPOCRATES_VERSION?$CIRCLE_TAG?g" orb/orb.yml
             sed -i -e "s?\$HARPOCRATES_VERSION?$CIRCLE_TAG?g" orb/StatefulSet.yml
-            mkdir releases
             cp orb/CronJob.yml ./releases
             cp orb/Deployment.yml ./releases
             cp orb/StatefulSet.yml ./releases
