@@ -30,7 +30,6 @@ jobs:
       - run:
           name: go build
           command: |
-            source /tmp/secrets.env
             go build -ldflags="-s -w" && upx harpocrates
             ls -l harpocrates
       - run:
