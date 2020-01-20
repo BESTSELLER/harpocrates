@@ -63,7 +63,7 @@ jobs:
               -Dsonar.links.scm=$CIRCLE_REPOSITORY_URL \
               -Dsonar.go.coverage.reportPaths=/tmp/report.json
 
-  build:
+  build-docker:
     docker:
       - image: docker:18.06.3-ce-git
     working_directory: /app
@@ -79,6 +79,20 @@ jobs:
             docker build -t $K8S_CLUSTER_docker_registry_url/library/$CIRCLE_PROJECT_REPONAME:$CIRCLE_TAG .
             docker login -u $docker_harpocrates_username -p $docker_harpocrates_password $K8S_CLUSTER_docker_registry_url
             docker push $K8S_CLUSTER_docker_registry_url/library/$CIRCLE_PROJECT_REPONAME:$CIRCLE_TAG
+  
+  publish:
+    executor: go_image
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Push and build image
+          command: |
+            source /tmp/secrets.env
+            go build
+            cp harpocrates ./releases
       - run:
           name: Install Vault and login
           command: |
