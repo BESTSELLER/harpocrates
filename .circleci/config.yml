@@ -148,7 +148,7 @@ jobs:
           name: Create release folder
           command: |
             mkdir releases
-            cp /tmp/harpocrates* ./releases
+            cp /tmp/harpocrates_* ./releases
       - run:
           name: Update stuff with git tag
           command: |
