@@ -79,6 +79,8 @@ jobs:
     executor: go_image
     working_directory: /go/src/bitbucket.org/bestsellerit/harpocrates
     steps:
+      - attach_workspace:
+          at: /tmp
       - checkout
       - run:
           name: Install upx
@@ -108,7 +110,7 @@ jobs:
       - persist_to_workspace:
           root: /tmp
           paths:
-            - harpocrates
+            - harpocrates*
   build-docker:
     docker:
       - image: docker:18.06.3-ce-git
