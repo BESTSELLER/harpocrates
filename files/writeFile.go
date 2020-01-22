@@ -2,7 +2,6 @@ package files
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -21,10 +20,17 @@ func WriteFile(dirPath string, fileName string, content string) {
 		}
 	}
 
-	fileContent := []byte(content)
-	err := ioutil.WriteFile(path, fileContent, 0644)
+	f, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
+		fmt.Printf("An error happened while trying to open file %s: %s\n", path, err)
+		os.Exit(1)
+	}
+
+	defer f.Close()
+
+	if _, err = f.WriteString(content); err != nil {
 		fmt.Printf("Unable to write to file '%s': %v\n", path, err)
+		f.Close()
 		os.Exit(1)
 	}
 }
