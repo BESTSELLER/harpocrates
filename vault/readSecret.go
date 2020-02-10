@@ -16,8 +16,17 @@ func ReadSecret(path string) map[string]interface{} {
 		os.Exit(1)
 	}
 
-	mySecret := secretValues.Data
-	secretData := mySecret["data"]
+	// if secretValues.Data == nil {
+	// 	secretData := secretValues
+	// } else {
+
+	// }
+
+	secretData := secretValues.Data["data"]
+
+	if secretData == nil {
+		secretData = secretValues.Data
+	}
 
 	b, err := json.Marshal(secretData)
 	if err != nil {
