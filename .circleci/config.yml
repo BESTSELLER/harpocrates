@@ -90,7 +90,7 @@ jobs:
       - run:
           name: go build - linux/amd64
           command: |
-            GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o harpocrates
+            GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o harpocrates
             tar -czvf /tmp/harpocrates_$CIRCLE_TAG\_linux_amd64.tar.gz harpocrates
             mv harpocrates /tmp
       - persist_to_workspace:
