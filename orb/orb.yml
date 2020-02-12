@@ -25,17 +25,24 @@ jobs:
         default: "env"
         enum: ["env", "json"]
         description: Type of output you want to store the secrets as
+      short:
+        type: string
+        default: ""
+        description: Vault account prefix to pull, will default to an environment var called SHORT
     steps:
       - vault-login
       - run:
           name: Secret-injector - Install jq
           command: |
-            apk update
-            apk add --upgrade jq
+            apk --no-cache add --upgrade jq
       - run:
           name: Secret-injector - Write secrets to file
           command: |
             mkdir -p << parameters.workspace-path >>
+
+            if [ "<< parameters.short >>" != "" ] ; then
+              export SHORT="<< parameters.short >>"
+            fi
             
             if [ "<< parameters.vault-path >>" != "" ] ; then
               if [ "<< parameters.output-type >>" = "json" ] ; then
@@ -105,7 +112,9 @@ commands:
       - run:
           name: Secret-injector - kubectl kustomize
           command: |
-            source ${BASH_ENV}
+            if [ -f ${BASH_ENV} ]; then
+              source ${BASH_ENV}
+            fi
             
             if [ -f "/tmp/secrets.env" ]; then
               source /tmp/secrets.env
