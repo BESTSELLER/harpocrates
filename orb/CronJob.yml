@@ -7,7 +7,6 @@ spec:
     spec:
       template:
         spec:
-          serviceAccountName: $CLUSTER_NAME-vault
           initContainers:
             - name: secret-dumper
               image: harbor.bestsellerit.com/library/harpocrates:$HARPOCRATES_VERSION
