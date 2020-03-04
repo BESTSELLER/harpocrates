@@ -23,7 +23,7 @@ jobs:
       output-type:
         type: enum
         default: "env"
-        enum: ["env", "json"]
+        enum: ["env", "json", "secret"]
         description: Type of output you want to store the secrets as
       short:
         type: string
@@ -43,7 +43,7 @@ jobs:
             if [ "<< parameters.short >>" != "" ] ; then
               export SHORT="<< parameters.short >>"
             fi
-            
+
             if [ "<< parameters.vault-path >>" != "" ] ; then
               if [ "<< parameters.output-type >>" = "json" ] ; then
                 echo "Type is set to 'json'"
@@ -53,6 +53,11 @@ jobs:
               if [ "<< parameters.output-type >>" = "env" ] ; then
                 echo "Type is set to 'env'"
                 vault kv get -format=json << parameters.vault-path >> | jq -r ".data .data | to_entries | map({(\"export \" + .key):  (\"'\" + .value + \"'\" )}) | add | to_entries|map(\"\(.key)=\(.value|tostring)\") | .[]" >> << parameters.workspace-path >>/secrets.env
+              fi
+
+              if [ "<< parameters.output-type >>" = "secret" ] ; then
+                echo "Type is set to 'secret'"
+                vault kv get -format=json << parameters.vault-path >> | jq -r ".data .data | to_entries | map({(.key):  (\"'\" + .value + \"'\" )}) | add | to_entries|map(\"\(.key)=\(.value|tostring)\") | .[]" >> << parameters.workspace-path >>/secrets.secrets
               fi
             fi
 
@@ -66,6 +71,7 @@ jobs:
           paths:
             - secrets.env
             - secrets.json
+            - secrets.secret
 
 commands:
   use-secrets:
