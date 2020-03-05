@@ -57,7 +57,7 @@ jobs:
 
               if [ "<< parameters.output-type >>" = "secret" ] ; then
                 echo "Type is set to 'secret'"
-                vault kv get -format=json << parameters.vault-path >> | jq -r ".data .data | to_entries | map({(.key):  (\"'\" + .value + \"'\" )}) | add | to_entries|map(\"\(.key)=\(.value|tostring)\") | .[]" >> << parameters.workspace-path >>/secrets.secrets
+                vault kv get -format=json << parameters.vault-path >> | jq -r ".data .data | to_entries | map({(.key):  (.value)}) | add | to_entries|map(\"\(.key)=\(.value|tostring)\") | .[]" >> << parameters.workspace-path >>/secrets.secrets
               fi
             fi
 
