@@ -77,6 +77,8 @@ commands:
   use-secrets:
     description: Will add the secrets.env to BASH_ENV
     steps:
+      - attach_workspace:
+          at: /tmp
       - run:
           name: Secret-injector - Adding secrets to BASH_ENV
           command: cat /tmp/secrets.env >> $BASH_ENV
@@ -108,6 +110,8 @@ commands:
         default: "Deployment"
         enum: ["Deployment", "StatefulSet", "CronJob"]
     steps:
+      - attach_workspace:
+          at: /tmp
       - run:
           name: Secret-injector - Download & install yq
           command: |
