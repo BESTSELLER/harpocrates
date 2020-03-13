@@ -49,8 +49,9 @@ func getPrefix() string {
 	return ""
 }
 
+// fixEnvName replaces all unsported env characters with "_"
 func fixEnvName(currentName string) string {
-	reg, _ := regexp.Compile("[^a-zA-Z0-9]+")
+	reg, _ := regexp.Compile("[^a-zA-Z0-9_]+")
 	envVar := reg.ReplaceAllString(currentName, "_")
 
 	return envVar
