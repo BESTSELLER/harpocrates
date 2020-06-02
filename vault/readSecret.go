@@ -6,6 +6,9 @@ import (
 	"os"
 )
 
+const keyNotFound = "The key '%s' was not found in the path '%s'\n"
+const secretNotFound = "The secret '%s' was not found \n"
+
 // ReadSecret from Vault
 func ReadSecret(path string) map[string]interface{} {
 	client := createClient()
@@ -16,15 +19,15 @@ func ReadSecret(path string) map[string]interface{} {
 		os.Exit(1)
 	}
 
-	// if secretValues.Data == nil {
-	// 	secretData := secretValues
-	// } else {
-
-	// }
+	if secretValues == nil {
+		fmt.Printf(secretNotFound, path)
+		os.Exit(1)
+	}
 
 	secretData := secretValues.Data["data"]
 
 	if secretData == nil {
+		fmt.Println("secretValues", secretValues)
 		secretData = secretValues.Data
 	}
 
@@ -49,9 +52,13 @@ func ReadSecret(path string) map[string]interface{} {
 // ReadSecretKey from Vault
 func ReadSecretKey(path string, key string) string {
 	secret := ReadSecret(path)
+	if secret == nil {
+		fmt.Printf(keyNotFound, key, path)
+		os.Exit(1)
+	}
 	secretKey := secret[key]
 	if secretKey == nil {
-		fmt.Printf("The key '%s' was not found in the path '%s'\n", key, path)
+		fmt.Printf(keyNotFound, key, path)
 		os.Exit(1)
 	}
 
