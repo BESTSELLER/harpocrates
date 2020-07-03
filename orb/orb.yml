@@ -20,6 +20,10 @@ jobs:
         type: string
         default: "/tmp/secrets"
         description: Path in the workspace to store the secrets
+      output-file-name:
+        type: string
+        default: "secrets"
+        description: Name of the secret file that will be generated. Without extension.
       output-type:
         type: enum
         default: "env"
@@ -47,41 +51,39 @@ jobs:
             if [ "<< parameters.vault-path >>" != "" ] ; then
               if [ "<< parameters.output-type >>" = "json" ] ; then
                 echo "Type is set to 'json'"
-                vault kv get -format=json -field=data << parameters.vault-path >> >> << parameters.workspace-path >>/secrets.json
+                vault kv get -format=json -field=data << parameters.vault-path >> >> << parameters.workspace-path >>/<< parameters.output-file-name >>.json
               fi
 
               if [ "<< parameters.output-type >>" = "env" ] ; then
                 echo "Type is set to 'env'"
-                vault kv get -format=json << parameters.vault-path >> | jq -r ".data .data | to_entries | map({(\"export \" + .key):  (\"'\" + .value + \"'\" )}) | add | to_entries|map(\"\(.key)=\(.value|tostring)\") | .[]" >> << parameters.workspace-path >>/secrets.env
+                vault kv get -format=json << parameters.vault-path >> | jq -r ".data .data | to_entries | map({(\"export \" + .key):  (\"'\" + .value + \"'\" )}) | add | to_entries|map(\"\(.key)=\(.value|tostring)\") | .[]" >> << parameters.workspace-path >>/<< parameters.output-file-name >>.env
               fi
 
               if [ "<< parameters.output-type >>" = "secret" ] ; then
                 echo "Type is set to 'secret'"
-                vault kv get -format=json << parameters.vault-path >> | jq -r ".data .data | to_entries | map({(.key):  (.value)}) | add | to_entries|map(\"\(.key)=\(.value|tostring)\") | .[]" >> << parameters.workspace-path >>/secrets.secret
+                vault kv get -format=json << parameters.vault-path >> | jq -r ".data .data | to_entries | map({(.key):  (.value)}) | add | to_entries|map(\"\(.key)=\(.value|tostring)\") | .[]" >> << parameters.workspace-path >>/<< parameters.output-file-name >>.secret
               fi
             fi
 
-            vault kv get -format=json $VAULT_COMMON_SECRETS | jq -r ".data .data | to_entries | map({(\"export K8S_CLUSTER_\" + .key):  (\"'\" + .value + \"'\" )}) | add | to_entries|map(\"\(.key)=\(.value|tostring)\") | .[]" >> << parameters.workspace-path >>/secrets.env
-            vault kv get -format=json $VAULT_CLUSTER_SECRETS | jq -r ".data .data | to_entries | map({(\"export K8S_CLUSTER_\" + .key):  (\"'\" + .value + \"'\" )}) | add | to_entries|map(\"\(.key)=\(.value|tostring)\") | .[]" >> << parameters.workspace-path >>/secrets.env
-            vault kv get -format=json $VAULT_CONTEXT_SECRETS | jq -r ".data .data | to_entries | map({(\"export K8S_CLUSTER_\" + .key):  (\"'\" + .value + \"'\" )}) | add | to_entries|map(\"\(.key)=\(.value|tostring)\") | .[]" >> << parameters.workspace-path >>/secrets.env
-            vault kv get -format=json ES/service_accounts/harbor/$SHORT-ci | jq -r ".data .data | to_entries | map({(\"export DOCKER_\" + .key):  (\"'\" + .value + \"'\" )}) | add | to_entries|map(\"\(.key)=\(.value|tostring)\") | .[]" >> << parameters.workspace-path >>/secrets.env
+            vault kv get -format=json $VAULT_COMMON_SECRETS | jq -r ".data .data | to_entries | map({(\"export K8S_CLUSTER_\" + .key):  (\"'\" + .value + \"'\" )}) | add | to_entries|map(\"\(.key)=\(.value|tostring)\") | .[]" >> << parameters.workspace-path >>/<< parameters.output-file-name >>.env
+            vault kv get -format=json $VAULT_CLUSTER_SECRETS | jq -r ".data .data | to_entries | map({(\"export K8S_CLUSTER_\" + .key):  (\"'\" + .value + \"'\" )}) | add | to_entries|map(\"\(.key)=\(.value|tostring)\") | .[]" >> << parameters.workspace-path >>/<< parameters.output-file-name >>.env
+            vault kv get -format=json $VAULT_CONTEXT_SECRETS | jq -r ".data .data | to_entries | map({(\"export K8S_CLUSTER_\" + .key):  (\"'\" + .value + \"'\" )}) | add | to_entries|map(\"\(.key)=\(.value|tostring)\") | .[]" >> << parameters.workspace-path >>/<< parameters.output-file-name >>.env
+            vault kv get -format=json ES/service_accounts/harbor/$SHORT-ci | jq -r ".data .data | to_entries | map({(\"export DOCKER_\" + .key):  (\"'\" + .value + \"'\" )}) | add | to_entries|map(\"\(.key)=\(.value|tostring)\") | .[]" >> << parameters.workspace-path >>/<< parameters.output-file-name >>.env
 
       - persist_to_workspace:
           root: << parameters.workspace-path >>
           paths:
-            - secrets.env
-            - secrets.json
-            - secrets.secret
+            - << parameters.output-file-name >>.*
 
 commands:
   use-secrets:
-    description: Will add the secrets.env to BASH_ENV
+    description: Will add the secrets to BASH_ENV
     steps:
       - attach_workspace:
           at: /tmp
       - run:
           name: Secret-injector - Adding secrets to BASH_ENV
-          command: cat /tmp/secrets.env >> $BASH_ENV
+          command: for f in /tmp/*.env; do cat $f >> $BASH_ENV; done
   vault-login:
     steps:
       - run:
@@ -127,7 +129,7 @@ commands:
             fi
             
             if [ -f "/tmp/secrets.env" ]; then
-              source /tmp/secrets.env
+              for f in /tmp/*.env; do source $f; done
             fi
 
             export DEPLOYMENT_TYPE=<< parameters.deploy-type >>
