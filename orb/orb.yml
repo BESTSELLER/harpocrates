@@ -66,13 +66,13 @@ jobs:
               fi
             fi
 
-            if [ $VAULT_COMMON_SECRETS != '' ] ; then
+            if [ "$VAULT_COMMON_SECRETS" != "" ] ; then
               vault kv get -format=json $VAULT_COMMON_SECRETS | jq -r ".data .data | to_entries | map({(\"export K8S_CLUSTER_\" + .key):  (\"'\" + .value + \"'\" )}) | add | to_entries|map(\"\(.key)=\(.value|tostring)\") | .[]" >> << parameters.workspace-path >>/<< parameters.output-file-name >>.env
             fi
-            if [ $VAULT_CLUSTER_SECRETS != '' ] ; then
+            if [ "$VAULT_CLUSTER_SECRETS" != "" ] ; then
               vault kv get -format=json $VAULT_CLUSTER_SECRETS | jq -r ".data .data | to_entries | map({(\"export K8S_CLUSTER_\" + .key):  (\"'\" + .value + \"'\" )}) | add | to_entries|map(\"\(.key)=\(.value|tostring)\") | .[]" >> << parameters.workspace-path >>/<< parameters.output-file-name >>.env
             fi
-            if [ $VAULT_CONTEXT_SECRETS != '' ] ; then
+            if [ "$VAULT_CONTEXT_SECRETS" != "" ] ; then
               vault kv get -format=json $VAULT_CONTEXT_SECRETS | jq -r ".data .data | to_entries | map({(\"export K8S_CLUSTER_\" + .key):  (\"'\" + .value + \"'\" )}) | add | to_entries|map(\"\(.key)=\(.value|tostring)\") | .[]" >> << parameters.workspace-path >>/<< parameters.output-file-name >>.env
             fi
 
