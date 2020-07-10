@@ -46,7 +46,6 @@ jobs:
 
             if [ "<< parameters.short >>" != "" ] ; then
               export SHORT="<< parameters.short >>"
-              vault kv get -format=json ES/service_accounts/harbor/$SHORT-ci | jq -r ".data .data | to_entries | map({(\"export DOCKER_\" + .key):  (\"'\" + .value + \"'\" )}) | add | to_entries|map(\"\(.key)=\(.value|tostring)\") | .[]" >> << parameters.workspace-path >>/<< parameters.output-file-name >>.env
             fi
 
             if [ "<< parameters.vault-path >>" != "" ] ; then
@@ -74,6 +73,9 @@ jobs:
             fi
             if [ "$VAULT_CONTEXT_SECRETS" != "" ] ; then
               vault kv get -format=json $VAULT_CONTEXT_SECRETS | jq -r ".data .data | to_entries | map({(\"export K8S_CLUSTER_\" + .key):  (\"'\" + .value + \"'\" )}) | add | to_entries|map(\"\(.key)=\(.value|tostring)\") | .[]" >> << parameters.workspace-path >>/<< parameters.output-file-name >>.env
+            fi
+            if [ "$SHORT" != "" ] ; then
+              vault kv get -format=json ES/service_accounts/harbor/$SHORT-ci | jq -r ".data .data | to_entries | map({(\"export DOCKER_\" + .key):  (\"'\" + .value + \"'\" )}) | add | to_entries|map(\"\(.key)=\(.value|tostring)\") | .[]" >> << parameters.workspace-path >>/<< parameters.output-file-name >>.env
             fi
 
       - persist_to_workspace:
