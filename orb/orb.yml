@@ -102,7 +102,7 @@ commands:
             unzip -o vault_$VERSION\_linux_amd64.zip
             chmod +x vault
             mv vault /usr/bin/.
-            vault login -method=userpass username=$VAULT_USERNAME password=$VAULT_PASSWORD
+            vault login -method=userpass username=$VAULT_USERNAME password=$VAULT_PASSWORD >/dev/null
   inject:
     description: Secret-injector orb
     parameters:
