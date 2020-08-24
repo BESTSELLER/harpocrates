@@ -61,3 +61,12 @@ CircleCI steps:
 ## TO-DO
 
 * Support files ?
+
+
+## NOTES
+We have to set the following annotation, in order for the autoscaler to be able to scale down again.
+```
+annotations:
+    "cluster-autoscaler.kubernetes.io/safe-to-evict": "true"
+```
+https://issuetracker.google.com/issues/148295270
