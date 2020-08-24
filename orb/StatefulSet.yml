@@ -3,9 +3,12 @@ kind: StatefulSet
 metadata:
   name: $APP_NAME
   annotations:
-    cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+    "cluster-autoscaler.kubernetes.io/safe-to-evict": "true"
 spec:
   template:
+    metadata:
+      annotations:
+        "cluster-autoscaler.kubernetes.io/safe-to-evict": "true"
     spec:
       initContainers:
         - name: secret-dumper
