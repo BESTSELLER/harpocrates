@@ -6,6 +6,9 @@ metadata:
     cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
 spec:
   template:
+    metadata:
+      annotations:
+        "cluster-autoscaler.kubernetes.io/safe-to-evict": "true"
     spec:
       initContainers:
         - name: secret-dumper
