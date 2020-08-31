@@ -10,7 +10,7 @@ And then it can be exchanged to a Vault token by posting it to `/auth/kubernetes
 Example of a secret file:
 ```yaml
 format: json
-dirPath: path/to/dir/to/save/secret/to
+output: path/to/dir/to/save/secret/to
 secrets:
   - path/to/secret1
   - path/to/secret2:
@@ -31,7 +31,7 @@ initContainers:
   - name: secret-dumper
     image: harbor.bestsellerit.com/library/harpocrates:68
     args:
-      - '{"format":"env","dirPath":"/secrets","prefix":"alfeios_","secrets":["ES/data/alfeios/prod"]}'
+      - '{"format":"env","output":"/secrets","prefix":"alfeios_","secrets":["ES/data/alfeios/prod"]}'
     volumeMounts:
       - name: secrets
         mountPath: /secrets

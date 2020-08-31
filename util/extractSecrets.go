@@ -50,7 +50,7 @@ func ExtractSecrets(input SecretJSON) map[string]interface{} {
 								var secretValue = vault.ReadSecretKey(fmt.Sprintf("%s", c), h)
 								if some.(bool) {
 									fmt.Println("Creating file...", h)
-									files.WriteFile(input.DirPath, h, secretValue)
+									files.WriteFile(input.Output, h, secretValue)
 								} else {
 									result[h] = secretValue
 								}

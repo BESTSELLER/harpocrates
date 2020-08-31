@@ -22,11 +22,11 @@ func main() {
 	// allSecrets := util.ExtractSecrets(input)
 
 	// if input.Format == "json" {
-	// 	files.WriteFile(input.DirPath, fmt.Sprintf("secrets.%s", input.Format), files.FormatAsJSON(allSecrets))
+	// 	files.WriteFile(input.Output, fmt.Sprintf("secrets.%s", input.Format), files.FormatAsJSON(allSecrets))
 	// }
 
 	// if input.Format == "env" {
-	// 	files.WriteFile(input.DirPath, fmt.Sprintf("secrets.%s", input.Format), files.FormatAsENV(allSecrets))
+	// 	files.WriteFile(input.Output, fmt.Sprintf("secrets.%s", input.Format), files.FormatAsENV(allSecrets))
 	// }
 
 }

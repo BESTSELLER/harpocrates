@@ -12,7 +12,7 @@ import (
 // SecretJSON holds the information about which secrets to fetch and how to save them again
 type SecretJSON struct {
 	Format  string        `json:"format,omitempty"   yaml:"format,omitempty"`
-	DirPath string        `json:"dirPath,omitempty"  yaml:"dirPath,omitempty"`
+	Output  string        `json:"output,omitempty"  yaml:"output,omitempty"`
 	Prefix  string        `json:"prefix,omitempty"   yaml:"prefix,omitempty"`
 	Secrets []interface{} `json:"secrets,omitempty"  yaml:"secrets,omitempty"`
 }
@@ -41,8 +41,8 @@ MoveOn:
 		}
 	}
 
-	if secretJSON.DirPath == "" {
-		secretJSON.DirPath = "/secrets"
+	if secretJSON.Output == "" {
+		secretJSON.Output = "/secrets"
 	}
 	if len(secretJSON.Secrets) == 0 {
 		fmt.Println("No secrets provided")
