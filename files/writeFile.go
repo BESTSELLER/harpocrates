@@ -8,14 +8,14 @@ import (
 )
 
 // WriteFile will write some string data to a file
-func WriteFile(dirPath string, fileName string, content string) {
+func WriteFile(output string, fileName string, content string) {
 	fileName = fixFileName(fileName)
-	path := filepath.Join(dirPath, fileName)
+	path := filepath.Join(output, fileName)
 
-	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
-		err = os.MkdirAll(dirPath, 0700)
+	if _, err := os.Stat(output); os.IsNotExist(err) {
+		err = os.MkdirAll(output, 0700)
 		if err != nil {
-			fmt.Printf("Unable to create dir at path '%s': %v\n", dirPath, err)
+			fmt.Printf("Unable to create dir at path '%s': %v\n", output, err)
 			os.Exit(1)
 		}
 	}
