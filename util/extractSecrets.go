@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"bitbucket.org/bestsellerit/harpocrates/files"
+	"github.com/BESTSELLER/harpocrates/files"
 
-	"bitbucket.org/bestsellerit/harpocrates/vault"
+	"github.com/BESTSELLER/harpocrates/vault"
 )
 
 // ExtractSecrets will loop through al those damn interfaces

@@ -16,9 +16,9 @@ spec:
                 - name: secrets
                   mountPath: /secrets
               env:
-                - name: VAULT_ADDRESS
+                - name: HARPOCRATES_VAULT_ADDRESS
                   value: $VAULT_ADDR
-                - name: CLUSTER_NAME
+                - name: HARPOCRATES_CLUSTER_NAME
                   value: $CLUSTER_NAME
               
           containers:

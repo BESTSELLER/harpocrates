@@ -8,8 +8,8 @@ import (
 
 // GlobalConfig defines the structure of the global configuration parameters
 type GlobalConfig struct {
-	VaultAddress string `required:"true" envconfig:"vault_address"`
-	ClusterName  string `required:"true" envconfig:"cluster_name"`
+	VaultAddress string `required:"false" envconfig:"vault_address"`
+	ClusterName  string `required:"false" envconfig:"cluster_name"`
 	TokenPath    string `required:"false" envconfig:"token_path"`
 	SecretPrefix string `required:"false"`
 	VaultToken   string `required:"false"`
@@ -21,9 +21,9 @@ var Config GlobalConfig
 //LoadConfig Loads config from env
 func LoadConfig() {
 
-	configErr := envconfig.Process("", &Config)
-	if configErr != nil {
-		log.Fatal(configErr)
+	err := envconfig.Process("harpocrates", &Config)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 }

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"bitbucket.org/bestsellerit/harpocrates/config"
+	"github.com/BESTSELLER/harpocrates/config"
 	"github.com/hashicorp/vault/api"
 )
 

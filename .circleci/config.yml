@@ -2,15 +2,15 @@ version: 2.1
 executors:
   go_image:
     docker:
-      - image: circleci/golang:1.13.1
+      - image: circleci/golang:1.15
 
 orbs:
-  secret-injector: bestsellerit/secret-injector@0.0.217
+  secret-injector: bestsellerit/secret-injector@0.2.34
 
 jobs:
   test:
     executor: go_image
-    working_directory: /go/src/bitbucket.org/bestsellerit/harpocrates
+    working_directory: /go/src/github.com/BESTSELLER/harpocrates
     steps:
       - checkout
       - run:
@@ -37,40 +37,9 @@ jobs:
           paths:
             - report.json
 
-  test-sonar:
-    executor: go_image
-    steps:
-      - attach_workspace:
-          at: /tmp
-      - checkout
-      - run:
-          name: Install Sonarqube scanner
-          command: |
-            SONAR_VERSION=4.2.0.1873-linux
-            wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-$SONAR_VERSION.zip -P /tmp/
-            cd /tmp
-            unzip /tmp/sonar-scanner-cli-$SONAR_VERSION.zip
-            mv /tmp/sonar-scanner-$SONAR_VERSION /tmp/sonar-scanner
-      - run:
-          name: Run SonarCloud Scanner
-          command: |
-            source /tmp/secrets.env
-            export SONAR_SCANNER_OPTS="-Xmx2048m"
-            eval /tmp/sonar-scanner/bin/sonar-scanner \
-              -Dsonar.projectKey=$K8S_CLUSTER_SONAR_ORG"_"$CIRCLE_PROJECT_REPONAME \
-              -Dsonar.projectName=$CIRCLE_PROJECT_REPONAME \
-              -Dsonar.organization=$K8S_CLUSTER_SONAR_ORG \
-              -Dsonar.sources=. \
-              -Dsonar.test.inclusions=**/**_test.go \
-              -Dsonar.sources.inclusions=**/**.go \
-              -Dsonar.host.url=$K8S_CLUSTER_SONAR_HOST \
-              -Dsonar.login=$K8S_CLUSTER_SONAR_LOGIN \
-              -Dsonar.links.scm=$CIRCLE_REPOSITORY_URL \
-              -Dsonar.go.coverage.reportPaths=/tmp/report.json
-
   build-go:
     executor: go_image
-    working_directory: /go/src/bitbucket.org/bestsellerit/harpocrates
+    working_directory: /go/src/github.com/BESTSELLER/harpocrates
     steps:
       - attach_workspace:
           at: /tmp
@@ -121,7 +90,7 @@ jobs:
   
   publish:
     executor: go_image
-    working_directory: /go/src/bitbucket.org/bestsellerit/harpocrates
+    working_directory: /go/src/github.com/BESTSELLER/harpocrates
     steps:
       - attach_workspace:
           at: /tmp
@@ -184,11 +153,6 @@ workflows:
           vault-path: ES/service_accounts/harbor/harpocrates-ci
           # context: es03-prod
       - test
-      - test-sonar:
-          # context: es03-prod
-          requires:
-            - test
-            - secret-injector/dump-secrets
 
   test-build:
     jobs:
@@ -206,20 +170,8 @@ workflows:
                 only: /^[0-9]+(\.[0-9]+)*(-.*)*$/
               branches:
                 ignore: /.*/
-      - test-sonar:
-          # context: es03-prod
-          requires:
-            - test
-            - secret-injector/dump-secrets
-          filters:
-            tags:
-              only: /^[0-9]+(\.[0-9]+)*(-.*)*$/
-            branches:
-              ignore: /.*/
       - build-go:
           # context: es03-prod
-          requires:
-            - test-sonar
           filters:
             tags:
               only: /^[0-9]+(\.[0-9]+)*(-.*)*$/
