@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"bitbucket.org/bestsellerit/harpocrates/config"
+	"github.com/BESTSELLER/harpocrates/config"
 )
 
 // SecretJSON holds the information about which secrets to fetch and how to save them again

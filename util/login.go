@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"os"
 
-	"bitbucket.org/bestsellerit/harpocrates/config"
-	"bitbucket.org/bestsellerit/harpocrates/files"
+	"github.com/BESTSELLER/harpocrates/config"
+	"github.com/BESTSELLER/harpocrates/files"
 )
 
 // GetVaultToken will exchange the JWT token to a Vaul token

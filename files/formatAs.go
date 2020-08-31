@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"strings"
 
-	"bitbucket.org/bestsellerit/harpocrates/config"
+	"github.com/BESTSELLER/harpocrates/config"
 )
 
 // FormatAsJSON will format a map[string]string to json

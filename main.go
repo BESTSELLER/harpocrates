@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"bitbucket.org/bestsellerit/harpocrates/config"
-	"bitbucket.org/bestsellerit/harpocrates/files"
-	"bitbucket.org/bestsellerit/harpocrates/util"
+	"github.com/BESTSELLER/harpocrates/config"
+	"github.com/BESTSELLER/harpocrates/files"
+	"github.com/BESTSELLER/harpocrates/util"
 )
 
 var secretJSON string

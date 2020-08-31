@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"bitbucket.org/bestsellerit/harpocrates/config"
+	"github.com/BESTSELLER/harpocrates/config"
 )
 
 // ReadTokenFile will read a file and return the content as string

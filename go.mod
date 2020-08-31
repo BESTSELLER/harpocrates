@@ -1,6 +1,6 @@
-module bitbucket.org/bestsellerit/harpocrates
+module github.com/BESTSELLER/harpocrates
 
-go 1.13
+go 1.15
 
 require (
 	github.com/frankban/quicktest v1.7.2 // indirect
