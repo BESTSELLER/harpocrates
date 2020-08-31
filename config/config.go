@@ -21,9 +21,9 @@ var Config GlobalConfig
 //LoadConfig Loads config from env
 func LoadConfig() {
 
-	configErr := envconfig.Process("harpocrates", &Config)
-	if configErr != nil {
-		log.Fatal(configErr)
+	err := envconfig.Process("harpocrates", &Config)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 }
