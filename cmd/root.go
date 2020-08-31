@@ -19,7 +19,13 @@ var (
 
 	rootCmd = &cobra.Command{
 		Run: func(cmd *cobra.Command, args []string) {
-			data := files.ReadFile(secretFile)
+			var data string
+
+			if secretFile == "" {
+				data = args[0]
+			} else {
+				data = files.ReadFile(secretFile)
+			}
 
 			input := util.ReadInput(data)
 			allSecrets := util.ExtractSecrets(input)
