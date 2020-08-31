@@ -17,6 +17,11 @@ func ReadTokenFile() string {
 		filePath = config.Config.TokenPath
 	}
 
+	return ReadFile(filePath)
+}
+
+// ReadFile will read the the content of a file and return it as a string.
+func ReadFile(filePath string) string {
 	data, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		fmt.Printf("Unable to read the file at path '%s': %v\n", filePath, err)
