@@ -5,7 +5,7 @@ executors:
       - image: circleci/golang:1.15
 
 orbs:
-  secret-injector: bestsellerit/secret-injector@0.0.217
+  secret-injector: bestsellerit/secret-injector@0.2.34
 
 jobs:
   test:
