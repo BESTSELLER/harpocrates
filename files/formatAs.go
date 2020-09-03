@@ -6,17 +6,14 @@ import (
 	"os"
 	"regexp"
 	"strings"
-
-	"github.com/BESTSELLER/harpocrates/config"
 )
 
 // FormatAsJSON will format a map[string]string to json
 func FormatAsJSON(input map[string]interface{}) string {
 	var result = make(map[string]interface{})
 
-	prefix := getPrefix()
 	for key, val := range input {
-		leKey := fmt.Sprintf("%s%s", prefix, key)
+		leKey := fmt.Sprintf("%s", key)
 		result[leKey] = val
 	}
 
@@ -33,20 +30,12 @@ func FormatAsJSON(input map[string]interface{}) string {
 func FormatAsENV(input map[string]interface{}) string {
 	var result string
 
-	prefix := getPrefix()
 	for key, val := range input {
-		leKey := fixEnvName(fmt.Sprintf("%s%s", prefix, key))
+		leKey := fixEnvName(fmt.Sprintf("%s", key))
 		fmt.Println(leKey)
 		result += fmt.Sprintf("export %s='%s'\n", strings.ToUpper(leKey), val)
 	}
 	return result
-}
-
-func getPrefix() string {
-	if config.Config.SecretPrefix != "" {
-		return config.Config.SecretPrefix
-	}
-	return ""
 }
 
 // fixEnvName replaces all unsported env characters with "_"
