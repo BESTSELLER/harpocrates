@@ -6,22 +6,27 @@ import (
 	"github.com/BESTSELLER/harpocrates/config"
 	"github.com/BESTSELLER/harpocrates/files"
 	"github.com/BESTSELLER/harpocrates/util"
+	"github.com/BESTSELLER/harpocrates/vault"
 	"github.com/spf13/cobra"
+	"gopkg.in/gookit/color.v1"
 )
 
 var (
 	// Used for flags.
 	secretFile string
-	// format     string
-	// output     string
-	// prefix     string
-	// secret     string
+	secret     string
 
 	rootCmd = &cobra.Command{
 		Run: func(cmd *cobra.Command, args []string) {
 			var data string
 
-			if secretFile == "" {
+			if secret != "" {
+				fmt.Println("heey")
+			} else if secretFile == "" {
+				if len(args) == 0 {
+					cmd.Help()
+					return
+				}
 				data = args[0]
 			} else {
 				data = files.ReadFile(secretFile)
@@ -29,18 +34,19 @@ var (
 
 			input := util.ReadInput(data)
 			allSecrets := util.ExtractSecrets(input)
+			fileName := fmt.Sprintf("secrets.%s", config.Config.Format)
 
-			if input.Format == "json" {
-				files.WriteFile(input.Output, fmt.Sprintf("secrets.%s", input.Format), files.FormatAsJSON(allSecrets))
+			if config.Config.Format == "json" {
+				files.WriteFile(config.Config.Output, fileName, files.FormatAsJSON(allSecrets))
 			}
 
-			if input.Format == "env" {
-				files.WriteFile(input.Output, fmt.Sprintf("secrets.%s", input.Format), files.FormatAsENV(allSecrets))
+			if config.Config.Format == "env" {
+				files.WriteFile(config.Config.Output, fileName, files.FormatAsENV(allSecrets))
 			}
+			color.Green.Printf("Secrets written to file: %s/%s\n", config.Config.Output, fileName)
 		},
 		Use:   "harpocrates",
-		Short: "Will fetch multiple secrets from Hashicorp Vault",
-		Long:  "Will fetch multiple secrets from Hashicorp Vault and write them to disk as json, env or secret file",
+		Short: fmt.Sprintf("%sThis application will fetch secrets from Hashicorp Vault", color.Blue.Sprintf("\"Harpocrates was the god of silence, secrets and confidentiality\"\n")),
 	}
 )
 
@@ -54,19 +60,19 @@ func init() {
 
 	// Setup flags
 	rootCmd.PersistentFlags().StringVarP(&secretFile, "file", "f", "", "that contains the configuration to apply")
-	// rootCmd.PersistentFlags().StringVar(&config.Config.VaultAddress, "vault-address", "", "author name for copyright attribution")
-	// rootCmd.PersistentFlags().StringVar(&config.Config.ClusterName, "cluster-name", "", "author name for copyright attribution")
-	// rootCmd.PersistentFlags().StringVar(&config.Config.TokenPath, "token-path", "", "author name for copyright attribution")
-	// rootCmd.PersistentFlags().StringVar(&config.Config.VaultToken, "vault-token", "", "author name for copyright attribution")
+	rootCmd.PersistentFlags().StringVar(&config.Config.VaultAddress, "vault-address", "", "author name for copyright attribution")
+	rootCmd.PersistentFlags().StringVar(&config.Config.ClusterName, "cluster-name", "", "author name for copyright attribution")
+	rootCmd.PersistentFlags().StringVar(&config.Config.TokenPath, "token-path", "", "author name for copyright attribution")
+	rootCmd.PersistentFlags().StringVar(&config.Config.VaultToken, "vault-token", "", "author name for copyright attribution")
 
-	// rootCmd.PersistentFlags().StringVar(&config.Config.VaultToken, "format", "", "author name for copyright attribution")
-	// rootCmd.PersistentFlags().StringVar(&config.Config.VaultToken, "output", "", "author name for copyright attribution")
-	// rootCmd.PersistentFlags().StringVar(&config.Config.VaultToken, "prefix", "", "author name for copyright attribution")
-	// rootCmd.PersistentFlags().StringVar(&config.Config.VaultToken, "secret", "", "author name for copyright attribution")
+	rootCmd.PersistentFlags().StringVar(&config.Config.Format, "format", "", "author name for copyright attribution")
+	rootCmd.PersistentFlags().StringVar(&config.Config.Output, "output", "", "author name for copyright attribution")
+	rootCmd.PersistentFlags().StringVar(&config.Config.Prefix, "prefix", "", "author name for copyright attribution")
+	rootCmd.PersistentFlags().StringVar(&secret, "secret", "", "author name for copyright attribution")
 
 }
 
 func initConfig() {
-	config.LoadConfig()
-	util.GetVaultToken()
+	config.SyncEnvToFlags(rootCmd)
+	vault.Login()
 }
