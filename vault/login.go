@@ -1,4 +1,4 @@
-package util
+package vault
 
 import (
 	"bytes"
@@ -10,44 +10,6 @@ import (
 	"github.com/BESTSELLER/harpocrates/config"
 	"github.com/BESTSELLER/harpocrates/files"
 )
-
-// GetVaultToken will exchange the JWT token to a Vaul token
-func GetVaultToken() {
-	if config.Config.VaultToken != "" {
-		return
-	}
-
-	url := config.Config.VaultAddress + "/v1/auth/" + config.Config.ClusterName + "/login"
-
-	b := new(bytes.Buffer)
-	err := json.NewEncoder(b).Encode(JWTPayLoad{Jwt: files.ReadTokenFile(), Role: config.Config.ClusterName})
-	if err != nil {
-		fmt.Printf("Unable to prepare jwt token: %v\n", err)
-		os.Exit(1)
-	}
-
-	req, _ := http.NewRequest("POST", url, b)
-
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		fmt.Printf("Unable to make login call to Vault: %v\n", err)
-		os.Exit(1)
-	}
-
-	returnPayload := VaultLoginResult{}
-	err = json.NewDecoder(res.Body).Decode(&returnPayload)
-	if err != nil {
-		fmt.Printf("Unexpected response from Vault: %v\n", err)
-		os.Exit(1)
-	}
-
-	if len(returnPayload.Errors) != 0 {
-		fmt.Printf("API call to Vault failed with the following message: %v\n", returnPayload.Errors)
-		os.Exit(1)
-	}
-
-	config.Config.VaultToken = returnPayload.Auth.ClientToken
-}
 
 // VaultLoginResult contains the result after logging in.
 type VaultLoginResult struct {
@@ -83,4 +45,42 @@ type VaultLoginResult struct {
 type JWTPayLoad struct {
 	Jwt  string `json:"jwt"`
 	Role string `json:"role"`
+}
+
+// Login will exchange the JWT token to a Vaul token
+func Login() {
+	if config.Config.VaultToken != "" {
+		return
+	}
+
+	url := config.Config.VaultAddress + "/v1/auth/" + config.Config.ClusterName + "/login"
+
+	b := new(bytes.Buffer)
+	err := json.NewEncoder(b).Encode(JWTPayLoad{Jwt: files.ReadTokenFile(), Role: config.Config.ClusterName})
+	if err != nil {
+		fmt.Printf("Unable to prepare jwt token: %v\n", err)
+		os.Exit(1)
+	}
+
+	req, _ := http.NewRequest("POST", url, b)
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		fmt.Printf("Unable to make login call to Vault: %v\n", err)
+		os.Exit(1)
+	}
+
+	returnPayload := VaultLoginResult{}
+	err = json.NewDecoder(res.Body).Decode(&returnPayload)
+	if err != nil {
+		fmt.Printf("Unexpected response from Vault: %v\n", err)
+		os.Exit(1)
+	}
+
+	if len(returnPayload.Errors) != 0 {
+		fmt.Printf("API call to Vault failed with the following message: %v\n", returnPayload.Errors)
+		os.Exit(1)
+	}
+
+	config.Config.VaultToken = returnPayload.Auth.ClientToken
 }
