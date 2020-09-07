@@ -13,9 +13,17 @@
       "env": {
         "HARPOCRATES_CLUSTER_NAME": "es02-prod",
         "HARPOCRATES_VAULT_ADDRESS": "https://vault.bestsellerit.com",
-        "HARPOCRATES_TOKEN_PATH": "~/es02-prod.token"
+        "HARPOCRATES_TOKEN_PATH": "/Users/lasse.gaardsholt/es02-prod.token"
       },
-      "args": ["-f", "./secret.yml"]
+      // "args": ["-f", "./secret.yml"]
+      "args": [
+        "--secret",
+        "ES/data/cci-api/prod",
+        "--output",
+        "./.secrets",
+        "--prefix",
+        "SOME_"
+      ]
     }
   ]
 }
