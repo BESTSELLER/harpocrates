@@ -37,7 +37,6 @@ harpocrates
 
 # End of https://www.gitignore.io/api/go,visualstudiocode
 
-secrets/*
+.secrets/*
 secret.json
 secret.yml
-secret.yaml
