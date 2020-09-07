@@ -22,10 +22,6 @@ type Secret struct {
 	Keys   []interface{} `json:"keys,omitempty"     yaml:"keys,omitempty"`
 }
 
-type RealSecret struct {
-	Prefix string       `json:"prefix,omitempty"   yaml:"prefix,omitempty"`
-	Keys   []SecretKeys `json:"keys,omitempty"     yaml:"keys,omitempty"`
-}
 type SecretKeys struct {
 	Prefix     string `json:"prefix,omitempty"         yaml:"prefix,omitempty" mapstructure:"prefix,omitempty"`
 	SaveAsFile *bool  `json:"saveAsFile,omitempty"     yaml:"saveAsFile,omitempty"`
