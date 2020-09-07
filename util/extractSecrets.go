@@ -6,20 +6,14 @@ import (
 
 	"github.com/BESTSELLER/harpocrates/config"
 	"github.com/BESTSELLER/harpocrates/files"
+	"github.com/BESTSELLER/harpocrates/secrets"
 	"github.com/BESTSELLER/harpocrates/vault"
 	"github.com/mitchellh/mapstructure"
 )
 
-type MyResult map[string]interface{}
-
-func SecretWithKeys(a interface{}) ([]interface{}, bool) {
-	b, ok := a.([]interface{})
-	return b, ok
-}
-
 // ExtractSecrets will loop through al those damn interfaces
-func ExtractSecrets(input SecretJSON) map[string]interface{} {
-	var result = make(MyResult)
+func ExtractSecrets(input SecretJSON) secrets.Result {
+	var result = make(secrets.Result)
 	var currentPrefix = config.Config.Prefix
 
 	for _, a := range input.Secrets {
@@ -84,8 +78,4 @@ func setPrefix(potentialPrefix string, currentPrefix *string) {
 	} else {
 		*currentPrefix = config.Config.Prefix
 	}
-}
-
-func (result MyResult) Add(key string, value string, prefix string) {
-	result[fmt.Sprintf("%s%s", prefix, key)] = value
 }
