@@ -19,29 +19,41 @@ var (
 	rootCmd = &cobra.Command{
 		Run: func(cmd *cobra.Command, args []string) {
 			var data string
+			var input util.SecretJSON
 
-			if secret != "" {
-				fmt.Println("heey")
-			} else if secretFile == "" {
+			if secretFile != "" { // --file is being used
+				data = files.ReadFile(secretFile)
+				input = util.ReadInput(data)
+			} else if secret != "" { // Parameters is being used
+				if config.Config.Output == "" {
+					color.Red.Println("Output is required!")
+					cmd.Usage()
+					return
+				}
+
+				y := make([]interface{}, 1)
+				y[0] = secret
+
+				input = util.SecretJSON{
+					Secrets: y,
+				}
+			} else { // inline secret is being used
 				if len(args) == 0 {
 					cmd.Help()
 					return
 				}
-				data = args[0]
-			} else {
-				data = files.ReadFile(secretFile)
+				input = util.ReadInput(args[0])
 			}
 
-			input := util.ReadInput(data)
 			allSecrets := util.ExtractSecrets(input)
 			fileName := fmt.Sprintf("secrets.%s", config.Config.Format)
 
 			if config.Config.Format == "json" {
-				files.WriteFile(config.Config.Output, fileName, files.FormatAsJSON(allSecrets))
+				files.WriteFile(config.Config.Output, fileName, allSecrets.ToJSON())
 			}
 
 			if config.Config.Format == "env" {
-				files.WriteFile(config.Config.Output, fileName, files.FormatAsENV(allSecrets))
+				files.WriteFile(config.Config.Output, fileName, allSecrets.ToENV())
 			}
 			color.Green.Printf("Secrets written to file: %s/%s\n", config.Config.Output, fileName)
 		},
