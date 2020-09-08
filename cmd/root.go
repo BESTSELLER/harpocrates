@@ -49,12 +49,16 @@ var (
 			allSecrets := util.ExtractSecrets(input)
 			fileName := fmt.Sprintf("secrets.%s", config.Config.Format)
 
-			if config.Config.Format == "json" {
-				files.Write(config.Config.Output, fileName, allSecrets.ToJSON())
-			}
-
-			if config.Config.Format == "env" {
-				files.Write(config.Config.Output, fileName, allSecrets.ToENV())
+			if cmd.Flags().Changed("format") {
+				if config.Config.Format == "json" {
+					files.Write(config.Config.Output, fileName, allSecrets.ToJSON())
+				} else if config.Config.Format == "env" {
+					files.Write(config.Config.Output, fileName, allSecrets.ToENV())
+				} else {
+					color.Red.Printf("Please a valid format of either: json or env \n\n")
+					cmd.Help()
+					return
+				}
 			}
 			color.Green.Printf("Secrets written to file: %s/%s\n", config.Config.Output, fileName)
 		},
@@ -73,15 +77,15 @@ func init() {
 
 	// Setup flags
 	rootCmd.PersistentFlags().StringVarP(&secretFile, "file", "f", "", "that contains the configuration to apply")
-	rootCmd.PersistentFlags().StringVar(&config.Config.VaultAddress, "vault-address", "", "author name for copyright attribution")
+	rootCmd.PersistentFlags().StringVar(&config.Config.VaultAddress, "vault-address", "", "url to vault e.g. https://vault.example.com")
 	rootCmd.PersistentFlags().StringVar(&config.Config.ClusterName, "cluster-name", "", "author name for copyright attribution")
-	rootCmd.PersistentFlags().StringVar(&config.Config.TokenPath, "token-path", "", "author name for copyright attribution")
-	rootCmd.PersistentFlags().StringVar(&config.Config.VaultToken, "vault-token", "", "author name for copyright attribution")
+	rootCmd.PersistentFlags().StringVar(&config.Config.TokenPath, "token-path", "", "/path/to/token/file")
+	rootCmd.PersistentFlags().StringVar(&config.Config.VaultToken, "vault-token", "", "vault token in clear text")
 
-	rootCmd.PersistentFlags().StringVar(&config.Config.Format, "format", "", "author name for copyright attribution")
-	rootCmd.PersistentFlags().StringVar(&config.Config.Output, "output", "", "author name for copyright attribution")
-	rootCmd.PersistentFlags().StringVar(&config.Config.Prefix, "prefix", "", "author name for copyright attribution")
-	rootCmd.PersistentFlags().StringVar(&secret, "secret", "", "author name for copyright attribution")
+	rootCmd.PersistentFlags().StringVar(&config.Config.Format, "format", "", "output format, either json or env, defaults to env")
+	rootCmd.PersistentFlags().StringVar(&config.Config.Output, "output", "", "folder in which secret files will be created e.g. /path/to/folder")
+	rootCmd.PersistentFlags().StringVar(&config.Config.Prefix, "prefix", "", "key prefix e.g TEST_ will produce TEST_key=secret")
+	rootCmd.PersistentFlags().StringVar(&secret, "secret", "", "vault path to secret e.g. SECRETENGINE/data/test/dev")
 
 }
 
