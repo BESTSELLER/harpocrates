@@ -45,6 +45,7 @@ var (
 				input = util.ReadInput(args[0])
 			}
 
+			vault.Login()
 			allSecrets := util.ExtractSecrets(input)
 			fileName := fmt.Sprintf("secrets.%s", config.Config.Format)
 
@@ -86,5 +87,4 @@ func init() {
 
 func initConfig() {
 	config.SyncEnvToFlags(rootCmd)
-	vault.Login()
 }
