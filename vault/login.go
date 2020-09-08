@@ -8,7 +8,7 @@ import (
 	"os"
 
 	"github.com/BESTSELLER/harpocrates/config"
-	"github.com/BESTSELLER/harpocrates/files"
+	"github.com/BESTSELLER/harpocrates/token"
 )
 
 // VaultLoginResult contains the result after logging in.
@@ -56,7 +56,7 @@ func Login() {
 	url := config.Config.VaultAddress + "/v1/auth/" + config.Config.ClusterName + "/login"
 
 	b := new(bytes.Buffer)
-	err := json.NewEncoder(b).Encode(JWTPayLoad{Jwt: files.ReadTokenFile(), Role: config.Config.ClusterName})
+	err := json.NewEncoder(b).Encode(JWTPayLoad{Jwt: token.Read(), Role: config.Config.ClusterName})
 	if err != nil {
 		fmt.Printf("Unable to prepare jwt token: %v\n", err)
 		os.Exit(1)

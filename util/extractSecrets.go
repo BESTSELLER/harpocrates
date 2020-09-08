@@ -46,7 +46,7 @@ func ExtractSecrets(input SecretJSON) secrets.Result {
 								var secretValue = vault.ReadSecretKey(fmt.Sprintf("%s", c), h)
 								if *i.SaveAsFile {
 									fmt.Println("Creating file...", h)
-									files.WriteFile(input.Output, fmt.Sprintf("%s%s", currentPrefix, h), secretValue)
+									files.Write(input.Output, fmt.Sprintf("%s%s", currentPrefix, h), secretValue)
 								} else {
 									result.Add(h, secretValue, currentPrefix)
 								}

@@ -22,7 +22,7 @@ var (
 			var input util.SecretJSON
 
 			if secretFile != "" { // --file is being used
-				data = files.ReadFile(secretFile)
+				data = files.Read(secretFile)
 				input = util.ReadInput(data)
 			} else if secret != "" { // Parameters is being used
 				if config.Config.Output == "" {
@@ -49,11 +49,11 @@ var (
 			fileName := fmt.Sprintf("secrets.%s", config.Config.Format)
 
 			if config.Config.Format == "json" {
-				files.WriteFile(config.Config.Output, fileName, allSecrets.ToJSON())
+				files.Write(config.Config.Output, fileName, allSecrets.ToJSON())
 			}
 
 			if config.Config.Format == "env" {
-				files.WriteFile(config.Config.Output, fileName, allSecrets.ToENV())
+				files.Write(config.Config.Output, fileName, allSecrets.ToENV())
 			}
 			color.Green.Printf("Secrets written to file: %s/%s\n", config.Config.Output, fileName)
 		},

@@ -2,13 +2,25 @@ package files
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
 )
 
-// WriteFile will write some string data to a file
-func WriteFile(output string, fileName string, content string) {
+// Read will read the the content of a file and return it as a string.
+func Read(filePath string) string {
+	data, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		fmt.Printf("Unable to read the file at path '%s': %v\n", filePath, err)
+		os.Exit(1)
+	}
+
+	return fmt.Sprint(string(data))
+}
+
+// Write will write some string data to a file
+func Write(output string, fileName string, content string) {
 	fileName = fixFileName(fileName)
 	path := filepath.Join(output, fileName)
 
