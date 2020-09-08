@@ -61,6 +61,7 @@ func ExtractSecrets(input SecretJSON) secrets.Result {
 						result.Add(fmt.Sprintf("%s", f), secretValue, currentPrefix)
 					}
 				}
+				setPrefix(config.Config.Prefix, &currentPrefix)
 			}
 		} else {
 			var secretValue = vault.ReadSecret(fmt.Sprintf("%s", a))
