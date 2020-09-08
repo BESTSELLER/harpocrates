@@ -14,17 +14,15 @@ jobs:
     steps:
       - checkout
       - run:
-          name: download dependencies
-          command: GO111MODULE=on CGO_ENABLED=0 go mod vendor
-      - run:
           name: go get
           command: |
             go get ./...
       - run:
           name: go build
           command: |
-            go build -ldflags="-s -w"
-            ls -l harpocrates
+            GOOS=linux \
+            GOARCH=amd64 \
+            go build -ldflags="-w -s"
       - run:
           name: go test - sonar
           command: |
