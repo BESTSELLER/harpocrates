@@ -22,9 +22,9 @@ jobs:
       - run: 
           name: go test
           command: |
-            gotestsum --junitfile unit-tests.xml
+            gotestsum --junitfile junit/unit-tests.xml
       - store_test_results:
-          path: ~/project/unit-tests.xml
+          path: ~/project/junit
       - run:
           name: go build
           command: |
