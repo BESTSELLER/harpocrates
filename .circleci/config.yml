@@ -22,6 +22,7 @@ jobs:
       - run: 
           name: go test
           command: |
+            mkdir junit
             gotestsum --junitfile junit/unit-tests.xml
       - store_test_results:
           path: ~/project/junit
