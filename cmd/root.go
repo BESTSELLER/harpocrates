@@ -49,7 +49,12 @@ var (
 			}
 
 			vault.Login()
-			allSecrets := util.ExtractSecrets(input)
+
+			var vaultClient *vault.API
+			vaultClient = &vault.API{
+				Client: vaultClient.Create(),
+			}
+			allSecrets := vaultClient.ExtractSecrets(input)
 			fileName := fmt.Sprintf("secrets.%s", config.Config.Format)
 
 			if cmd.Flags().Changed("format") && (config.Config.Format != "json" && config.Config.Format != "env") {

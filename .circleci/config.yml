@@ -18,22 +18,31 @@ jobs:
           command: |
             go get ./...
       - run:
+          name: install gotestsum
+          command: go get -u gotest.tools/gotestsum
+      - run: 
+          name: go test
+          command: |
+            gotestsum --junitfile unit-tests.xml
+      - store_test_results:
+          path: /tmp/test-results
+      - run:
           name: go build
           command: |
             GOOS=linux \
             GOARCH=amd64 \
             go build -ldflags="-w -s"
-      - run:
-          name: go test - sonar
-          command: |
-            echo -n > /tmp/report.json
-            go test ./... -coverprofile=coverage.out -json harpocrates >> /tmp/report.json
-      - store_test_results:
-          path: /tmp/report.json
-      - persist_to_workspace:
-          root: /tmp
-          paths:
-            - report.json
+      # - run:
+      #     name: go test - sonar
+      #     command: |
+      #       echo -n > /tmp/report.json
+      #       go test ./... -coverprofile=coverage.out -json harpocrates >> /tmp/report.json
+      # - store_test_results:
+      #     path: /tmp/report.json
+      # - persist_to_workspace:
+      #     root: /tmp
+      #     paths:
+      #       - report.json
 
   build-go:
     executor: go_image

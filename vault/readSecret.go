@@ -10,10 +10,9 @@ const keyNotFound = "The key '%s' was not found in the path '%s'\n"
 const secretNotFound = "The secret '%s' was not found \n"
 
 // ReadSecret from Vault
-func ReadSecret(path string) map[string]interface{} {
-	client := createClient()
+func (client *API) ReadSecret(path string) map[string]interface{} {
 
-	secretValues, err := client.Logical().Read(path)
+	secretValues, err := client.Client.Logical().Read(path)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -50,8 +49,8 @@ func ReadSecret(path string) map[string]interface{} {
 }
 
 // ReadSecretKey from Vault
-func ReadSecretKey(path string, key string) string {
-	secret := ReadSecret(path)
+func (client *API) ReadSecretKey(path string, key string) string {
+	secret := client.ReadSecret(path)
 	if secret == nil {
 		fmt.Printf(keyNotFound, key, path)
 		os.Exit(1)

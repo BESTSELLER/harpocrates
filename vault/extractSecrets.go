@@ -1,4 +1,4 @@
-package util
+package vault
 
 import (
 	"fmt"
@@ -7,12 +7,12 @@ import (
 	"github.com/BESTSELLER/harpocrates/config"
 	"github.com/BESTSELLER/harpocrates/files"
 	"github.com/BESTSELLER/harpocrates/secrets"
-	"github.com/BESTSELLER/harpocrates/vault"
+	"github.com/BESTSELLER/harpocrates/util"
 	"github.com/mitchellh/mapstructure"
 )
 
 // ExtractSecrets will loop through al those damn interfaces
-func ExtractSecrets(input SecretJSON) secrets.Result {
+func (vaultClient *API) ExtractSecrets(input util.SecretJSON) secrets.Result {
 	var result = make(secrets.Result)
 	var currentPrefix = config.Config.Prefix
 
@@ -26,7 +26,7 @@ func ExtractSecrets(input SecretJSON) secrets.Result {
 				os.Exit(1)
 			}
 
-			aa := map[string]Secret{}
+			aa := map[string]util.Secret{}
 			mapstructure.Decode(b, &aa)
 
 			for c, d := range aa {
@@ -36,14 +36,14 @@ func ExtractSecrets(input SecretJSON) secrets.Result {
 
 					// If the key is just a secret path, then it will read that from Vault, otherwise:
 					if fmt.Sprintf("%T", f) != "string" {
-						bb := map[string]SecretKeys{}
+						bb := map[string]util.SecretKeys{}
 						mapstructure.Decode(f, &bb)
 
 						for h, i := range bb {
 							setPrefix(i.Prefix, &currentPrefix)
 
 							if i.SaveAsFile != nil {
-								var secretValue = vault.ReadSecretKey(fmt.Sprintf("%s", c), h)
+								var secretValue = vaultClient.ReadSecretKey(fmt.Sprintf("%s", c), h)
 								if *i.SaveAsFile {
 									fmt.Println("Creating file...", h)
 									files.Write(input.Output, fmt.Sprintf("%s%s", currentPrefix, h), secretValue)
@@ -51,20 +51,20 @@ func ExtractSecrets(input SecretJSON) secrets.Result {
 									result.Add(h, secretValue, currentPrefix)
 								}
 							} else {
-								var secretValue = vault.ReadSecretKey(fmt.Sprintf("%s", c), h)
+								var secretValue = vaultClient.ReadSecretKey(fmt.Sprintf("%s", c), h)
 								result.Add(h, secretValue, currentPrefix)
 							}
 							setPrefix(d.Prefix, &currentPrefix)
 						}
 					} else {
-						var secretValue = vault.ReadSecretKey(fmt.Sprintf("%s", c), fmt.Sprintf("%s", f))
+						var secretValue = vaultClient.ReadSecretKey(fmt.Sprintf("%s", c), fmt.Sprintf("%s", f))
 						result.Add(fmt.Sprintf("%s", f), secretValue, currentPrefix)
 					}
 				}
 				setPrefix(config.Config.Prefix, &currentPrefix)
 			}
 		} else {
-			var secretValue = vault.ReadSecret(fmt.Sprintf("%s", a))
+			var secretValue = vaultClient.ReadSecret(fmt.Sprintf("%s", a))
 			for aa, bb := range secretValue {
 				result.Add(aa, fmt.Sprintf("%s", bb), currentPrefix)
 			}
