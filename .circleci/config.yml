@@ -10,7 +10,6 @@ orbs:
 jobs:
   test:
     executor: go_image
-    working_directory: /go/src/github.com/BESTSELLER/harpocrates
     steps:
       - checkout
       - run:
@@ -46,7 +45,6 @@ jobs:
 
   build-go:
     executor: go_image
-    working_directory: /go/src/github.com/BESTSELLER/harpocrates
     steps:
       - attach_workspace:
           at: /tmp
@@ -97,7 +95,6 @@ jobs:
   
   publish:
     executor: go_image
-    working_directory: /go/src/github.com/BESTSELLER/harpocrates
     steps:
       - attach_workspace:
           at: /tmp
