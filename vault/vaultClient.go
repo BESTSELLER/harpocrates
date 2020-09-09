@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/BESTSELLER/harpocrates/config"
-	vaultapi "github.com/hashicorp/vault/api"
+	api "github.com/hashicorp/vault/api"
 )
 
 // Client declares a switchable api.Client
@@ -30,24 +30,23 @@ import (
 // 	return Client
 // }
 
+// API is the struct for the vault/api client
 type API struct {
-	Client *vaultapi.Client
+	Client *api.Client
 }
 
-func (client *API) Create() *vaultapi.Client {
-	if client == nil {
-		tempClient, err := vaultapi.NewClient(&vaultapi.Config{
-			Address: config.Config.VaultAddress,
-		})
-		tempClient.Token()
-		if err != nil {
-			fmt.Printf("Unable to create Vault client: %v\n", err)
-			os.Exit(1)
-		}
-		tempClient.SetToken(config.Config.VaultToken)
-		client = &API{
-			Client: tempClient,
-		}
+// NewClient will return a new *API
+func NewClient() *API {
+	client, err := api.NewClient(&api.Config{
+		Address: config.Config.VaultAddress,
+	})
+	if err != nil {
+		fmt.Printf("Unable to create Vault client: %v\n", err)
+		os.Exit(1)
 	}
-	return client.Client
+	client.SetToken(config.Config.VaultToken)
+
+	return &API{
+		Client: client,
+	}
 }

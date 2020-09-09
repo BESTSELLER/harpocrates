@@ -50,10 +50,7 @@ var (
 
 			vault.Login()
 
-			var vaultClient *vault.API
-			vaultClient = &vault.API{
-				Client: vaultClient.Create(),
-			}
+			vaultClient := vault.NewClient()
 			allSecrets := vaultClient.ExtractSecrets(input)
 			fileName := fmt.Sprintf("secrets.%s", config.Config.Format)
 

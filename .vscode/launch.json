@@ -15,15 +15,15 @@
         "HARPOCRATES_VAULT_ADDRESS": "https://vault.bestsellerit.com",
         "HARPOCRATES_TOKEN_PATH": "/Users/lasse.gaardsholt/es02-prod.token"
       },
-      // "args": ["-f", "./secret.yml"]
-      "args": [
-        "--secret",
-        "ES/data/cci-api/prod",
-        "--output",
-        "./.secrets",
-        "--prefix",
-        "SOME_"
-      ]
+      "args": ["-f", "./secret.yml"]
+      // "args": [
+      //   "--secret",
+      //   "ES/data/cci-api/prod",
+      //   "--output",
+      //   "./.secrets",
+      //   "--prefix",
+      //   "SOME_"
+      // ]
     }
   ]
 }
