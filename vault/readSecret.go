@@ -3,7 +3,7 @@ package vault
 import (
 	"encoding/json"
 	"fmt"
-	"os"
+	"log"
 )
 
 const keyNotFound = "The key '%s' was not found in the path '%s'\n"
@@ -14,13 +14,11 @@ func (client *API) ReadSecret(path string) map[string]interface{} {
 
 	secretValues, err := client.Client.Logical().Read(path)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatalln(err)
 	}
 
 	if secretValues == nil {
-		fmt.Printf(secretNotFound, path)
-		os.Exit(1)
+		log.Fatalf(secretNotFound, path)
 	}
 
 	secretData := secretValues.Data["data"]
@@ -32,15 +30,13 @@ func (client *API) ReadSecret(path string) map[string]interface{} {
 
 	b, err := json.Marshal(secretData)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatalln(err)
 	}
 
 	var f interface{}
 	err = json.Unmarshal(b, &f)
 	if err != nil {
-		fmt.Println("Unable to unmarshal response from Vault")
-		os.Exit(1)
+		log.Fatalln("Unable to unmarshal response from Vault")
 	}
 
 	myMap := f.(map[string]interface{})
@@ -52,13 +48,11 @@ func (client *API) ReadSecret(path string) map[string]interface{} {
 func (client *API) ReadSecretKey(path string, key string) string {
 	secret := client.ReadSecret(path)
 	if secret == nil {
-		fmt.Printf(keyNotFound, key, path)
-		os.Exit(1)
+		log.Fatalf(keyNotFound, key, path)
 	}
 	secretKey := secret[key]
 	if secretKey == nil {
-		fmt.Printf(keyNotFound, key, path)
-		os.Exit(1)
+		log.Fatalf(keyNotFound, key, path)
 	}
 
 	return secretKey.(string)
