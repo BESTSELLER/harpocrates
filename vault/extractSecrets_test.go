@@ -26,7 +26,6 @@ type vaultTest struct {
 }
 
 func TestMain(t *testing.T) {
-	fmt.Println("hej")
 	testVault = GetTestVaultServer(t)
 }
 
