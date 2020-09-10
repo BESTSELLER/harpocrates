@@ -78,7 +78,10 @@ func TestExtractSecretsAsExpected(t *testing.T) {
 	}
 
 	// act
-	result := vaultClient.ExtractSecrets(input)
+	result, err := vaultClient.ExtractSecrets(input)
+	if err != nil {
+		t.Error(err)
+	}
 
 	// assert
 	expected := fmt.Sprintf("%v", map[string]interface{}{input.Prefix + "key1": "value1", input.Prefix + "key2": "value2", input.Prefix + "key3": "value3"})
@@ -105,7 +108,10 @@ func TestExtractSecretsWithPrefixAsExpected(t *testing.T) {
 	}
 
 	// act
-	result := vaultClient.ExtractSecrets(input)
+	result, err := vaultClient.ExtractSecrets(input)
+	if err != nil {
+		t.Error(err)
+	}
 
 	// assert
 	expected := fmt.Sprintf("%v", map[string]interface{}{"PRE_key1": "value1", "FIX_key2": "value2", input.Prefix + "key3": "value3"})
@@ -131,7 +137,10 @@ func TestExtractSecretsSaveAsFileAsExpected(t *testing.T) {
 	}
 
 	// act
-	vaultClient.ExtractSecrets(input)
+	_, err := vaultClient.ExtractSecrets(input)
+	if err != nil {
+		t.Error(err)
+	}
 
 	// clean up
 	defer os.Remove("../.tmp/TEST_key1")
