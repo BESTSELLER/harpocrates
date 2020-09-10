@@ -11,11 +11,7 @@ const secretNotFound = "The secret '%s' was not found \n"
 // ReadSecret from Vault
 func (client *API) ReadSecret(path string) (map[string]interface{}, error) {
 
-	secretValues, err := client.Client.Logical().Read(path)
-	if err != nil {
-		return nil, err
-	}
-
+	secretValues, _ := client.Client.Logical().Read(path)
 	if secretValues == nil {
 		return nil, fmt.Errorf(secretNotFound, path)
 	}
