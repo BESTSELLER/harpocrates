@@ -3,6 +3,7 @@ package vault
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/BESTSELLER/harpocrates/config"
@@ -133,6 +134,9 @@ func TestExtractSecretsSaveAsFileAsExpected(t *testing.T) {
 	// act
 	vaultClient.ExtractSecrets(input)
 
+	// clean up
+	defer os.Remove("../.tmp/TEST_key1")
+
 	// assert
 	content, err := ioutil.ReadFile("../.tmp/TEST_key1")
 	if err != nil {
@@ -143,4 +147,5 @@ func TestExtractSecretsSaveAsFileAsExpected(t *testing.T) {
 	actual := string(content)
 
 	assert.Equal(t, expected, actual)
+
 }
