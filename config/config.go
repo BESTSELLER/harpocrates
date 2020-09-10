@@ -53,9 +53,7 @@ func SyncEnvToFlags(cmd *cobra.Command) {
 	}
 }
 func tryEnv(env string, some *string, required bool, cmd *cobra.Command) {
-	envPrefix := "harpocrates_"
-
-	envVar, ok := os.LookupEnv(strings.ToUpper(fmt.Sprintf("%s%s", envPrefix, env)))
+	envVar, ok := os.LookupEnv(strings.ToUpper(fmt.Sprintf("%s", env)))
 	if ok == true && envVar != "" {
 		*some = envVar
 	} else {
