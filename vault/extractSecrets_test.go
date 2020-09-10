@@ -2,6 +2,7 @@ package vault
 
 import (
 	"fmt"
+	"io/ioutil"
 	"testing"
 
 	"github.com/BESTSELLER/harpocrates/config"
@@ -111,5 +112,35 @@ func TestExtractSecretsWithPrefixAsExpected(t *testing.T) {
 	actual := fmt.Sprintf("%v", result)
 
 	assert.Equal(t, expected, actual)
+}
 
+// TestExtractSecretsSaveAsFileAsExpected tests if a simple secret is extracted correct
+func TestExtractSecretsSaveAsFileAsExpected(t *testing.T) {
+	// arrange
+
+	// define input
+	data := files.Read("../test_data/save_as_file.yaml")
+	input := util.ReadInput(data)
+
+	// mock prefix
+	config.Config.Prefix = input.Prefix
+
+	var vaultClient *API
+	vaultClient = &API{
+		Client: testVault.Client,
+	}
+
+	// act
+	vaultClient.ExtractSecrets(input)
+
+	// assert
+	content, err := ioutil.ReadFile("../.tmp/TEST_key1")
+	if err != nil {
+		t.Errorf("could not read file: %v", err)
+	}
+
+	expected := "value1"
+	actual := string(content)
+
+	assert.Equal(t, expected, actual)
 }

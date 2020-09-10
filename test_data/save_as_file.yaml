@@ -5,7 +5,6 @@ secrets:
   - secret/data/secret:
       keys:
         - key1:
-            prefix: PRE_
+            saveAsFile: true
         - key2:
-            prefix: FIX_
-        - key3
+            saveAsFile: false
