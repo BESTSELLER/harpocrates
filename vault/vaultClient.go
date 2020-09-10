@@ -8,28 +8,6 @@ import (
 	api "github.com/hashicorp/vault/api"
 )
 
-// Client declares a switchable api.Client
-// var Client *api.Client
-
-// func createClient() *api.Client {
-
-// 	if Client == nil {
-
-// 		client, err := api.NewClient(&api.Config{
-// 			Address: config.Config.VaultAddress,
-// 		})
-// 		client.Token()
-// 		if err != nil {
-// 			fmt.Printf("Unable to create Vault Client: %v\n", err)
-// 			os.Exit(1)
-// 		}
-// 		client.SetToken(config.Config.VaultToken)
-// 		Client = client
-// 	}
-// 	fmt.Println(Client)
-// 	return Client
-// }
-
 // API is the struct for the vault/api client
 type API struct {
 	Client *api.Client

@@ -1,0 +1,11 @@
+format: env
+output: tmp/
+prefix: TEST_
+secrets:
+  - secret/data/secret:
+      keys:
+        - key1:
+            prefix: PRE_
+        - key2:
+            prefix: FIX_
+        - key3
