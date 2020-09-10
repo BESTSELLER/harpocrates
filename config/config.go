@@ -17,6 +17,7 @@ type GlobalConfig struct {
 	Prefix       string `required:"false"`
 	Format       string `required:"false"`
 	Output       string `required:"false"`
+	FileName     string `required:"false"`
 }
 
 // Config stores the Global Configuration.
@@ -50,6 +51,12 @@ func SyncEnvToFlags(cmd *cobra.Command) {
 			Config.Format = "env"
 		}
 
+	}
+	if Config.FileName == "" {
+		tryEnv("HARPOCRATES_FILENAME", &Config.FileName, notRequired, cmd)
+		if Config.FileName == "" {
+			Config.FileName = "secrets"
+		}
 	}
 }
 func tryEnv(env string, some *string, required bool, cmd *cobra.Command) {
