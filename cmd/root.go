@@ -52,7 +52,7 @@ var (
 
 			vaultClient := vault.NewClient()
 			allSecrets := vaultClient.ExtractSecrets(input)
-			fileName := fmt.Sprintf("secrets.%s", config.Config.Format)
+			fileName := config.Config.FileName
 
 			if cmd.Flags().Changed("format") && (config.Config.Format != "json" && config.Config.Format != "env") {
 				color.Red.Printf("Please a valid format of either: json or env \n\n")
