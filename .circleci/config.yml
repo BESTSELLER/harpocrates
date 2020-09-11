@@ -162,6 +162,7 @@ workflows:
   test-build:
     jobs:
       - secret-injector/dump-secrets:
+          workspace-path: /tmp
           vault-path: ES/service_accounts/harbor/harpocrates-ci
           context: es02-prod
           filters:
