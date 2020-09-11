@@ -95,7 +95,7 @@ jobs:
           paths:
             - secrets
             - << parameters.output-file-name >>
-            - << parameters.workspace-path >>/cluster-secret.json
+            - cluster-secret.json
 
 commands:
   use-secrets:
