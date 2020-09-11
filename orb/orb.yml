@@ -60,10 +60,12 @@ jobs:
 
               # Fetch cluster credentials
               if [ "$CLUSTER_SECRET" != "" ] ; then
+                export HARPOCRATES_FILENAME="cluster-secret.json"
                 /harpocrates \
                   --format json \
-                  --output "<< parameters.workspace-path >>/cluster-secret.json" \
+                  --output "<< parameters.workspace-path >>" \
                   --secret "$CLUSTER_SECRET"
+                unset HARPOCRATES_FILENAME
               fi
 
               # Fetch docker credentials
