@@ -181,6 +181,7 @@ workflows:
           requires:
             - secret-injector/dump-secrets
       - docker-build:
+          context: es02-prod
           requires:
             - build-go
 
