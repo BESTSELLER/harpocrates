@@ -31,7 +31,7 @@ const (
 // SyncEnvToFlags - We should be able to do this better!
 func SyncEnvToFlags(cmd *cobra.Command) {
 	if Config.VaultAddress == "" {
-		tryEnv("vault_address", &Config.VaultAddress, required, cmd)
+		tryEnv("vault_addr", &Config.VaultAddress, required, cmd)
 	}
 	if Config.ClusterName == "" {
 		tryEnv("cluster_name", &Config.ClusterName, required, cmd)
