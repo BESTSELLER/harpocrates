@@ -17,7 +17,7 @@ jobs:
         description: Secret path to read from Vault
       workspace-path:
         type: string
-        default: "/tmp/secrets"
+        default: "/tmp"
         description: Path in the workspace to store the secrets
       output-file-name:
         type: string
