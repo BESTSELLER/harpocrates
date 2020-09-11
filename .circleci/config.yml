@@ -204,6 +204,8 @@ workflows:
               ignore: /.*/
       - build-go:
           context: es02-prod
+          requires:
+            - secret-injector/dump-secrets
           filters:
             tags:
               only: /^[0-9]+(\.[0-9]+)*(-.*)*$/
