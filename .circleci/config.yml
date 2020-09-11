@@ -72,7 +72,7 @@ jobs:
           root: /tmp
           paths:
             - harpocrates*
-  build-docker:
+  docker-build-n-push:
     docker:
       - image: docker:18.06.3-ce-git
     working_directory: /app
@@ -93,6 +93,25 @@ jobs:
               .
             docker push $K8S_CLUSTER_docker_registry_url/library/$CIRCLE_PROJECT_REPONAME:$CIRCLE_TAG
             docker push $K8S_CLUSTER_docker_registry_url/library/$CIRCLE_PROJECT_REPONAME:latest
+  docker-build:
+    docker:
+      - image: docker:18.06.3-ce-git
+    working_directory: /app
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Push and build image
+          command: |
+            source /tmp/secrets.env
+            cp /tmp/harpocrates .
+            docker login -u $docker_harpocrates_username -p $docker_harpocrates_password $K8S_CLUSTER_docker_registry_url
+            docker build \
+              -t $K8S_CLUSTER_docker_registry_url/library/$CIRCLE_PROJECT_REPONAME:$CIRCLE_TAG \
+              -t $K8S_CLUSTER_docker_registry_url/library/$CIRCLE_PROJECT_REPONAME:latest \
+              .
 
   publish:
     executor: go_image
@@ -158,6 +177,13 @@ workflows:
           vault-path: ES/service_accounts/harbor/harpocrates-ci
           context: es02-prod
       - test
+      - build-go:
+          context: es02-prod
+          requires:
+            - secret-injector/dump-secrets
+      - docker-build:
+          requires:
+            - build-go
 
   test-build:
     jobs:
@@ -183,7 +209,7 @@ workflows:
               only: /^[0-9]+(\.[0-9]+)*(-.*)*$/
             branches:
               ignore: /.*/
-      - build-docker:
+      - docker-build-n-push:
           context: es02-prod
           requires:
             - build-go
@@ -195,7 +221,7 @@ workflows:
       - publish:
           context: es02-prod
           requires:
-            - build-docker
+            - docker-build-n-push
           filters:
             tags:
               only: /^[0-9]+(\.[0-9]+)*(-.*)*$/
