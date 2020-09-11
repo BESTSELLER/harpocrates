@@ -69,6 +69,14 @@ jobs:
                 --secret $HARPOCRATES_SECRETS
             fi
 
+
+            if [ "$CLUSTER_SECRET" != "" ] ; then
+              /harpocrates \
+                --format json \
+                --output "<< parameters.workspace-path >>/cluster-secret.json" \
+                --secret "$CLUSTER_SECRET"
+            fi
+
             # Fetch docker credentials
             if [ "$SHORT" != "" ] ; then
               /harpocrates \
@@ -83,6 +91,7 @@ jobs:
           paths:
             - secrets
             - << parameters.output-file-name >>
+            - << parameters.workspace-path >>/cluster-secret.json
 
 commands:
   use-secrets:
