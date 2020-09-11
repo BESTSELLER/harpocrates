@@ -60,7 +60,7 @@ jobs:
 
               # Fetch cluster credentials
               if [ "$CLUSTER_SECRET" != "" ] ; then
-                export HARPOCRATES_FILENAME="cluster-secret.json"
+                export HARPOCRATES_FILENAME="cluster_secret.json"
                 /harpocrates \
                   --format json \
                   --output "<< parameters.workspace-path >>" \
@@ -97,7 +97,7 @@ jobs:
           paths:
             - secrets
             - << parameters.output-file-name >>
-            - cluster-secret.json
+            - cluster_secret.json
 
 commands:
   use-secrets:
