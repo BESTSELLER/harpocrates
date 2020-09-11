@@ -42,9 +42,39 @@ jobs:
           name: Secret-injector - Write secrets to file
           command: |
             mkdir -p << parameters.workspace-path >>
-
             if [ "<< parameters.short >>" != "" ] ; then
               export SHORT="<< parameters.short >>"
+            fi
+
+            # This is the default one, if no vault-path is defined
+            if [ "<< parameters.vault-path >>" == "" ] ; then
+
+              # Fetch all the "common" secrets if that env var has been set
+              if [ "$HARPOCRATES_SECRETS" != "" ] ; then
+                /harpocrates \
+                  --format "<< parameters.output-type >>" \
+                  --output "<< parameters.workspace-path >>" \
+                  --prefix "K8S_CLUSTER_" \
+                  --secret $HARPOCRATES_SECRETS
+              fi
+
+              # Fetch cluster credentials
+              if [ "$CLUSTER_SECRET" != "" ] ; then
+                /harpocrates \
+                  --format json \
+                  --output "<< parameters.workspace-path >>/cluster-secret.json" \
+                  --secret "$CLUSTER_SECRET"
+              fi
+
+              # Fetch docker credentials
+              if [ "$SHORT" != "" ] ; then
+                /harpocrates \
+                  --format "<< parameters.output-type >>" \
+                  --output "<< parameters.workspace-path >>" \
+                  --prefix "DOCKER_" \
+                  --secret "ES/data/service_accounts/harbor/$SHORT-ci"
+              fi
+
             fi
 
             # Check if they have specified vault-path and then fetch those from Vault
@@ -58,32 +88,6 @@ jobs:
                 --output "<< parameters.workspace-path >>" \
                 --prefix "K8S_CLUSTER_" \
                 --secret "<< parameters.vault-path >>"
-            fi
-
-            # Fetch all the "common" secrets if that env var has been set
-            if [ "$HARPOCRATES_SECRETS" != "" ] ; then
-              /harpocrates \
-                --format "<< parameters.output-type >>" \
-                --output "<< parameters.workspace-path >>" \
-                --prefix "K8S_CLUSTER_" \
-                --secret $HARPOCRATES_SECRETS
-            fi
-
-
-            if [ "$CLUSTER_SECRET" != "" ] ; then
-              /harpocrates \
-                --format json \
-                --output "<< parameters.workspace-path >>/cluster-secret.json" \
-                --secret "$CLUSTER_SECRET"
-            fi
-
-            # Fetch docker credentials
-            if [ "$SHORT" != "" ] ; then
-              /harpocrates \
-                --format "<< parameters.output-type >>" \
-                --output "<< parameters.workspace-path >>" \
-                --prefix "DOCKER_" \
-                --secret "ES/data/service_accounts/harbor/$SHORT-ci"
             fi
 
       - persist_to_workspace:
