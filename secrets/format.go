@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"regexp"
-	"strings"
 )
 
 // Result holds the result of all the secrets pulled from Vault
@@ -35,7 +34,7 @@ func (result Result) ToENV() string {
 	for key, val := range result {
 		leKey := fixEnvName(key)
 		fmt.Println(leKey)
-		resturnString += fmt.Sprintf("export %s='%s'\n", strings.ToUpper(leKey), val)
+		resturnString += fmt.Sprintf("export %s='%s'\n", leKey, val)
 	}
 	return resturnString
 }

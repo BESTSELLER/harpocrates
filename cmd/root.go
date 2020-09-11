@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/BESTSELLER/harpocrates/config"
 	"github.com/BESTSELLER/harpocrates/files"
@@ -51,8 +52,13 @@ var (
 			vault.Login()
 
 			vaultClient := vault.NewClient()
-			allSecrets := vaultClient.ExtractSecrets(input)
-			fileName := fmt.Sprintf("secrets.%s", config.Config.Format)
+
+			allSecrets, err := vaultClient.ExtractSecrets(input)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			fileName := config.Config.FileName
 
 			if cmd.Flags().Changed("format") && (config.Config.Format != "json" && config.Config.Format != "env") {
 				color.Red.Printf("Please a valid format of either: json or env \n\n")

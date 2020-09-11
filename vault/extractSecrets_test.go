@@ -2,9 +2,12 @@ package vault
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/BESTSELLER/harpocrates/config"
+	"github.com/BESTSELLER/harpocrates/files"
 	"github.com/BESTSELLER/harpocrates/util"
 	"github.com/hashicorp/vault/api"
 	vaulthttp "github.com/hashicorp/vault/http"
@@ -12,17 +15,21 @@ import (
 	"gotest.tools/assert"
 )
 
-const (
-	// rootVaultToken is the Vault token used for tests
-	rootVaultToken = "unittesttoken"
-)
+var testVault vaultTest
+
+// rootVaultToken is the Vault token used for tests
+var rootVaultToken = "unittesttoken"
 
 type vaultTest struct {
 	Cluster *vault.TestCluster
 	Client  *api.Client
 }
 
-// creates the test server
+func TestMain(t *testing.T) {
+	testVault = GetTestVaultServer(t)
+}
+
+// GetTestVaultServer creates the test server
 func GetTestVaultServer(t *testing.T) vaultTest {
 	t.Helper()
 
@@ -37,38 +44,30 @@ func GetTestVaultServer(t *testing.T) vaultTest {
 	vault.TestWaitActive(t, core)
 	client := cluster.Cores[0].Client
 
-	return vaultTest{
-		Cluster: cluster,
-		Client:  client,
-	}
-}
-
-// TestExtractSecretsAsExpected tests if the config is loaded as expected
-func TestExtractSecretsAsExpected(t *testing.T) {
-	// arrange
-
-	// spin up vault and put secret
-	testVault := GetTestVaultServer(t)
-	defer testVault.Cluster.Cleanup()
-
+	// put secrets
 	secretPath := fmt.Sprintf("secret/data/secret")
-	secret := map[string]interface{}{"foo": "bar"}
+	secret := map[string]interface{}{"key1": "value1", "key2": "value2", "key3": "value3"}
 
-	_, err := testVault.Client.Logical().Write(secretPath, secret)
+	_, err := client.Logical().Write(secretPath, secret)
 	if err != nil {
 		panic(err)
 	}
 
-	// define input
-	var secrets []interface{}
-	secrets = append(secrets, secretPath)
-
-	input := util.SecretJSON{
-		Format:  "env",
-		Prefix:  "TEST_",
-		Output:  "pbtest",
-		Secrets: secrets,
+	// return server
+	return vaultTest{
+		Cluster: cluster,
+		Client:  client,
 	}
+
+}
+
+// TestExtractSecretsAsExpected tests if a simple secret is extracted correct
+func TestExtractSecretsAsExpected(t *testing.T) {
+	// arrange
+
+	// define input
+	data := files.Read("../test_data/single_secret.yaml")
+	input := util.ReadInput(data)
 
 	// mock prefix
 	config.Config.Prefix = input.Prefix
@@ -79,11 +78,81 @@ func TestExtractSecretsAsExpected(t *testing.T) {
 	}
 
 	// act
-	result := vaultClient.ExtractSecrets(input)
+	result, err := vaultClient.ExtractSecrets(input)
+	if err != nil {
+		t.Error(err)
+	}
 
 	// assert
-	expected := fmt.Sprintf("%v", map[string]interface{}{input.Prefix + "foo": "bar"})
+	expected := fmt.Sprintf("%v", map[string]interface{}{input.Prefix + "key1": "value1", input.Prefix + "key2": "value2", input.Prefix + "key3": "value3"})
 	actual := fmt.Sprintf("%v", result)
+
+	assert.Equal(t, expected, actual)
+
+}
+
+// TestExtractSecretsWithPrefixAsExpected tests if a simple secret is extracted correct
+func TestExtractSecretsWithPrefixAsExpected(t *testing.T) {
+	// arrange
+
+	// define input
+	data := files.Read("../test_data/keys_with_prefix.yaml")
+	input := util.ReadInput(data)
+
+	// mock prefix
+	config.Config.Prefix = input.Prefix
+
+	var vaultClient *API
+	vaultClient = &API{
+		Client: testVault.Client,
+	}
+
+	// act
+	result, err := vaultClient.ExtractSecrets(input)
+	if err != nil {
+		t.Error(err)
+	}
+
+	// assert
+	expected := fmt.Sprintf("%v", map[string]interface{}{"PRE_key1": "value1", "FIX_key2": "value2", input.Prefix + "key3": "value3"})
+	actual := fmt.Sprintf("%v", result)
+
+	assert.Equal(t, expected, actual)
+}
+
+// TestExtractSecretsSaveAsFileAsExpected tests if a simple secret is extracted correct
+func TestExtractSecretsSaveAsFileAsExpected(t *testing.T) {
+	// arrange
+
+	// define input
+	data := files.Read("../test_data/save_as_file.yaml")
+	input := util.ReadInput(data)
+
+	// mock prefix
+	config.Config.Prefix = input.Prefix
+
+	var vaultClient *API
+	vaultClient = &API{
+		Client: testVault.Client,
+	}
+
+	// act
+	_, err := vaultClient.ExtractSecrets(input)
+	if err != nil {
+		t.Error(err)
+	}
+
+	// clean up
+	defer os.Remove("../.tmp/TEST_key1")
+
+	// assert
+	content, err := ioutil.ReadFile("../.tmp/TEST_key1")
+	if err != nil {
+		t.Errorf("could not read file: %v", err)
+	}
+
+	expected := "value1"
+	actual := string(content)
 
 	assert.Equal(t, expected, actual)
 

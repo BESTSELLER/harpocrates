@@ -40,3 +40,5 @@ harpocrates
 .secrets/*
 secret.json
 secret.yml
+.tmp
+.tmp/*

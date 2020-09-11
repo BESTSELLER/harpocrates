@@ -2,7 +2,7 @@ version: 2.1
 executors:
   go_image:
     docker:
-      - image: circleci/golang:1.15
+      - image: cimg/go:1.15
 
 orbs:
   secret-injector: bestsellerit/secret-injector@0.2.34
