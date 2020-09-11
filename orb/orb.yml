@@ -103,7 +103,7 @@ commands:
             chmod +x vault
             mv vault /usr/bin/.
             vault login -method=userpass username=$VAULT_USERNAME password=$VAULT_PASSWORD >/dev/null
-            echo 'export VAULT_TOKEN=$(cat .vault-token)' >> $BASH_ENV
+            echo 'export VAULT_TOKEN=$(cat $HOME/.vault-token)' >> $BASH_ENV
   inject:
     description: Secret-injector orb
     parameters:
