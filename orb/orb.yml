@@ -81,7 +81,8 @@ jobs:
       - persist_to_workspace:
           root: << parameters.workspace-path >>
           paths:
-            - << parameters.output-file-name >>.*
+            - secrets
+            - << parameters.output-file-name >>
 
 commands:
   use-secrets:
