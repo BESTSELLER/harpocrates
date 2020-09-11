@@ -19,7 +19,7 @@ jobs:
       - run:
           name: install gotestsum
           command: go get -u gotest.tools/gotestsum
-      - run: 
+      - run:
           name: go test
           command: |
             mkdir junit
@@ -93,7 +93,7 @@ jobs:
               .
             docker push $K8S_CLUSTER_docker_registry_url/library/$CIRCLE_PROJECT_REPONAME:$CIRCLE_TAG
             docker push $K8S_CLUSTER_docker_registry_url/library/$CIRCLE_PROJECT_REPONAME:latest
-  
+
   publish:
     executor: go_image
     steps:
@@ -146,7 +146,7 @@ jobs:
             CC_NAMESPACE=bestsellerit
             ORB_PATH=./orb/orb.yml
             ORB_NAME=secret-injector
-            
+
             ./cli/circleci orb validate $ORB_PATH
             ./cli/circleci orb publish $ORB_PATH $CC_NAMESPACE/$ORB_NAME@$CIRCLE_TAG
             ./cli/circleci orb unlist $CC_NAMESPACE/$ORB_NAME true
@@ -156,14 +156,14 @@ workflows:
     jobs:
       - secret-injector/dump-secrets:
           vault-path: ES/service_accounts/harbor/harpocrates-ci
-          # context: es03-prod
+          context: es02-prod
       - test
 
   test-build:
     jobs:
       - secret-injector/dump-secrets:
           vault-path: ES/service_accounts/harbor/harpocrates-ci
-          # context: es03-prod
+          context: es02-prod
           filters:
             tags:
               only: /^[0-9]+(\.[0-9]+)*(-.*)*$/
@@ -171,19 +171,19 @@ workflows:
               ignore: /.*/
       - test:
           filters:
-              tags:
-                only: /^[0-9]+(\.[0-9]+)*(-.*)*$/
-              branches:
-                ignore: /.*/
+            tags:
+              only: /^[0-9]+(\.[0-9]+)*(-.*)*$/
+            branches:
+              ignore: /.*/
       - build-go:
-          # context: es03-prod
+          context: es02-prod
           filters:
             tags:
               only: /^[0-9]+(\.[0-9]+)*(-.*)*$/
             branches:
               ignore: /.*/
       - build-docker:
-          # context: es03-prod
+          context: es02-prod
           requires:
             - build-go
           filters:
@@ -192,7 +192,7 @@ workflows:
             branches:
               ignore: /.*/
       - publish:
-          # context: es03-prod
+          context: es02-prod
           requires:
             - build-docker
           filters:
