@@ -33,11 +33,9 @@ jobs:
         default: ""
         description: Vault account prefix to pull, will default to an environment var called SHORT
     steps:
+      - attach_workspace:
+          at: /tmp
       - vault-login
-      - run:
-          name: Secret-injector - Install jq
-          command: |
-            apk --no-cache add --upgrade jq
       - run:
           name: Secret-injector - Write secrets to file
           command: |
