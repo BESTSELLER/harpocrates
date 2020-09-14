@@ -62,15 +62,20 @@ harpocrates -f /path/to/file.yaml
 ```
 
 ### Inline JSON
+You can specify the exact same options in inline json as in the yaml spec.
+Mostly for pogramatic use, as readability is way worse than the yaml spec.
+
 ```bash
 harpocrates '{"format":"env","output":"/secrets","prefix":"PREFIX_","secrets":["secret/data/secret/dev",{"secret/data/foo":{"keys":["APIKEY"]}}]}'
 ```
 
 ### CLI Parameters
+Third option is to specify the options as parameters in the cli.
+
 ```bash
 harpocrates --format "env" --secret "/secret/data/somesecret" --prefix "PREFIX_" --output "/secrets"
 ```
-
+There are not the same granularity as in the json and yaml specs. e.g. prefix can only exist on the top level.
 
 ## CLI and ENV Options
 
@@ -107,25 +112,8 @@ https://issuetracker.google.com/issues/148295270
 
 
 
-# old
-When using a ServiceAccount in Kubernetes, the jwt token can be retrieved by reading the file `/var/run/secrets/kubernetes.io/serviceaccount/token`
 
-And then it can be exchanged to a Vault token by posting it to `/auth/kubernetes/login`
-
-Example of a secret file:
-```yaml
-format: json
-output: path/to/dir/to/save/secret/to
-secrets:
-  - path/to/secret1
-  - path/to/secret2:
-    - key1:
-        saveAsFile: true
-    - key2
-```
-At the moment it takes a json file as input, you can convert your secret to json by doing:
-`yq read secret.yml -j`
-
+## OLD 
 Orb should read kustomize yaml from Vault
 
 
