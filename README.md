@@ -1,6 +1,11 @@
 # Harpocrates
 > Harpocrates was the god of silence, secrets and confidentiality
 
+![CircleCI](https://img.shields.io/circleci/build/github/BESTSELLER/harpocrates/master)
+![GitHub repo size](https://img.shields.io/github/repo-size/BESTSELLER/harpocrates)
+![GitHub All Releases](https://img.shields.io/github/downloads/BESTSELLER/harpocrates/total)
+![GitHub](https://img.shields.io/github/license/BESTSELLER/harpocrates)
+
 Harpocrates is a small application that can be used to pull secrets from [HashiCorp Vault](https://www.vaultproject.io/).
 It can output the secrets in different formats:
  * JSON, which is simple key-values.
@@ -32,12 +37,12 @@ In harpocrates can specify which secrets to pull in 3 different ways.
 ### YAML file
 yaml is a great options for readability and replication of configs. yaml options are: 
 
-| Option  | Required | Value                     | default |
-| ------- | -------- | ------------------------- | ------- |
-| format  | no       | one of: env, json, secret | env     |
-| output  | yes      | /path/to/output/folder    | -       |
+| Option  | Required | Value                           | default |
+| ------- | -------- | ------------------------------- | ------- |
+| format  | no       | one of: env, json, secret       | env     |
+| output  | yes      | /path/to/output/folder          | -       |
 | prefix  | no       | prefix, can be set on any level | -       |
-| secrets | yes      | an array of secret paths | -       |
+| secrets | yes      | an array of secret paths        | -       |
 
 
 Example yaml file:
