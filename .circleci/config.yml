@@ -5,7 +5,7 @@ executors:
       - image: cimg/go:1.15
 
 orbs:
-  secret-injector: bestsellerit/secret-injector@0.2.34
+  secret-injector: bestsellerit/secret-injector@0.2.48
 
 jobs:
   test:
