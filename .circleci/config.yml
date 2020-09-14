@@ -208,7 +208,6 @@ workflows:
       - secret-injector/dump-secrets:
           name: secrets-app
           vault-path: ES/data/service_accounts/harbor/harpocrates-ci
-          output: /tmp
           context: es02-prod
           requires:
             - secrets-common
