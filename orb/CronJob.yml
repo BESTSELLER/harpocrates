@@ -11,7 +11,7 @@ spec:
             - name: secret-dumper
               image: harbor.bestsellerit.com/library/harpocrates:$HARPOCRATES_VERSION
               args:
-                - -f '$SECRETS'
+                -'$SECRETS'
               volumeMounts:
                 - name: secrets
                   mountPath: /secrets

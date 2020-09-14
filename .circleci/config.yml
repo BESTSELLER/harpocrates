@@ -32,17 +32,6 @@ jobs:
             GOOS=linux \
             GOARCH=amd64 \
             go build -ldflags="-w -s"
-      # - run:
-      #     name: go test - sonar
-      #     command: |
-      #       echo -n > /tmp/report.json
-      #       go test ./... -coverprofile=coverage.out -json harpocrates >> /tmp/report.json
-      # - store_test_results:
-      #     path: /tmp/report.json
-      # - persist_to_workspace:
-      #     root: /tmp
-      #     paths:
-      #       - report.json
 
   build-go:
     executor: go_image
@@ -175,15 +164,27 @@ workflows:
       - secret-injector/dump-secrets:
           vault-path: ES/service_accounts/harbor/harpocrates-ci
           context: es02-prod
-      - test
+          filters:
+            tags:
+              ignore: /^[0-9]+(\.[0-9]+)*(-.*)*$/
+      - test:
+          filters:
+            tags:
+              ignore: /^[0-9]+(\.[0-9]+)*(-.*)*$/
       - build-go:
           context: es02-prod
           requires:
             - secret-injector/dump-secrets
+          filters:
+            tags:
+              ignore: /^[0-9]+(\.[0-9]+)*(-.*)*$/
       - docker-build:
           context: es02-prod
           requires:
             - build-go
+          filters:
+            tags:
+              ignore: /^[0-9]+(\.[0-9]+)*(-.*)*$/
 
   test-build:
     jobs:
