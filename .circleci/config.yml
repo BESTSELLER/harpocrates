@@ -5,7 +5,7 @@ executors:
       - image: cimg/go:1.15
 
 orbs:
-  secret-injector: bestsellerit/secret-injector@0.2.34
+  secret-injector: bestsellerit/secret-injector@0.2.49
 
 jobs:
   test:
@@ -73,9 +73,9 @@ jobs:
       - run:
           name: Push and build image
           command: |
-            source /tmp/secrets.env
+            source /tmp/secrets
             cp /tmp/harpocrates .
-            docker login -u $docker_harpocrates_username -p $docker_harpocrates_password $K8S_CLUSTER_docker_registry_url
+            docker login -u $K8S_CLUSTER_docker_harpocrates_username -p $K8S_CLUSTER_docker_harpocrates_password $K8S_CLUSTER_docker_registry_url
             docker build \
               -t $K8S_CLUSTER_docker_registry_url/library/$CIRCLE_PROJECT_REPONAME:$CIRCLE_TAG \
               -t $K8S_CLUSTER_docker_registry_url/library/$CIRCLE_PROJECT_REPONAME:latest \
@@ -92,11 +92,11 @@ jobs:
       - checkout
       - setup_remote_docker
       - run:
-          name: build image
+          name: Push and build image
           command: |
-            source /tmp/secrets.env
+            source /tmp/secrets
             cp /tmp/harpocrates .
-            docker login -u $docker_harpocrates_username -p $docker_harpocrates_password $K8S_CLUSTER_docker_registry_url
+            docker login -u $K8S_CLUSTER_docker_harpocrates_username -p $K8S_CLUSTER_docker_harpocrates_password $K8S_CLUSTER_docker_registry_url
             docker build \
               -t $K8S_CLUSTER_docker_registry_url/library/$CIRCLE_PROJECT_REPONAME:latest \
               .
@@ -161,17 +161,17 @@ jobs:
 workflows:
   test:
     jobs:
-      # - secret-injector/dump-secrets:
-      #     name: secrets-common
-      #     context: es02-prod
-      #     filters:
-      #       tags:
-      #         ignore: /^[0-9]+(\.[0-9]+)*(-.*)*$/
+      - secret-injector/dump-secrets:
+          name: secrets-common
+          context: es02-prod
+          filters:
+            tags:
+              ignore: /^[0-9]+(\.[0-9]+)*(-.*)*$/
       - secret-injector/dump-secrets:
           name: secrets-harpocrates
-          vault-path: ES/service_accounts/harbor/harpocrates-ci
-          # requires:
-          #   - secrets-common
+          vault-path: ES/data/service_accounts/harbor/harpocrates-ci
+          requires:
+            - secrets-common
           context: es02-prod
           filters:
             tags:
@@ -198,7 +198,7 @@ workflows:
   test-build:
     jobs:
       - secret-injector/dump-secrets:
-          vault-path: ES/service_accounts/harbor/harpocrates-ci
+          vault-path: ES/data/service_accounts/harbor/harpocrates-ci
           workspace-path: /tmp
           context: es02-prod
           filters:
