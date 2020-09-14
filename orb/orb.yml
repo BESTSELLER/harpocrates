@@ -15,15 +15,15 @@ jobs:
         type: string
         default: ""
         description: Secret path to read from Vault
-      workspace-path:
+      output:
         type: string
         default: "/tmp"
         description: Path in the workspace to store the secrets
-      output-file-name:
+      output-filename:
         type: string
         default: "secrets"
         description: Name of the secret file that will be generated. Without extension.
-      output-type:
+      format:
         type: enum
         default: "env"
         enum: ["env", "json", "secret"]
@@ -39,7 +39,7 @@ jobs:
       - run:
           name: Secret-injector - Write secrets to file
           command: |
-            mkdir -p << parameters.workspace-path >>
+            mkdir -p << parameters.output >>
             if [ "<< parameters.short >>" != "" ] ; then
               export SHORT="<< parameters.short >>"
             fi
@@ -50,8 +50,8 @@ jobs:
               # Fetch all the "common" secrets if that env var has been set
               if [ "$HARPOCRATES_SECRETS" != "" ] ; then
                 /harpocrates \
-                  --format "<< parameters.output-type >>" \
-                  --output "<< parameters.workspace-path >>" \
+                  --format "<< parameters.format >>" \
+                  --output "<< parameters.output >>" \
                   --prefix "K8S_CLUSTER_" \
                   --secret $HARPOCRATES_SECRETS
               fi
@@ -61,7 +61,7 @@ jobs:
                 export HARPOCRATES_FILENAME="cluster_secret.json"
                 /harpocrates \
                   --format json \
-                  --output "<< parameters.workspace-path >>" \
+                  --output "<< parameters.output >>" \
                   --secret "$CLUSTER_SECRET"
                 unset HARPOCRATES_FILENAME
               fi
@@ -69,8 +69,8 @@ jobs:
               # Fetch docker credentials
               if [ "$SHORT" != "" ] ; then
                 /harpocrates \
-                  --format "<< parameters.output-type >>" \
-                  --output "<< parameters.workspace-path >>" \
+                  --format "<< parameters.format >>" \
+                  --output "<< parameters.output >>" \
                   --prefix "DOCKER_" \
                   --secret "ES/data/service_accounts/harbor/$SHORT-ci"
               fi
@@ -79,21 +79,21 @@ jobs:
 
             # Check if they have specified vault-path and then fetch those from Vault
             if [ "<< parameters.vault-path >>" != "" ] ; then
-              if [ "<< parameters.output-file-name >>" != "" ] ; then
-                export HARPOCRATES_FILENAME="<< parameters.output-file-name >>"
+              if [ "<< parameters.output-filename >>" != "" ] ; then
+                export HARPOCRATES_FILENAME="<< parameters.output-filename >>"
               fi
 
               /harpocrates \
-                --format "<< parameters.output-type >>" \
-                --output "<< parameters.workspace-path >>" \
+                --format "<< parameters.format >>" \
+                --output "<< parameters.output >>" \
                 --secret "<< parameters.vault-path >>"
             fi
 
       - persist_to_workspace:
-          root: << parameters.workspace-path >>
+          root: << parameters.output >>
           paths:
             - secrets
-            - << parameters.output-file-name >>
+            - << parameters.output-filename >>
             - cluster_secret.json
 
 commands:
