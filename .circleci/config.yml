@@ -73,7 +73,7 @@ jobs:
       - run:
           name: Push and build image
           command: |
-            source /tmp/secrets.env
+            source /tmp/secrets
             cp /tmp/harpocrates .
             docker login -u $docker_harpocrates_username -p $docker_harpocrates_password $K8S_CLUSTER_docker_registry_url
             docker build \
@@ -94,7 +94,7 @@ jobs:
       - run:
           name: Push and build image
           command: |
-            source /tmp/secrets.env
+            source /tmp/secrets
             cp /tmp/harpocrates .
             docker login -u $docker_harpocrates_username -p $docker_harpocrates_password $K8S_CLUSTER_docker_registry_url
             docker build \
