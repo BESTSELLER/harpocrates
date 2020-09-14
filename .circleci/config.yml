@@ -168,7 +168,7 @@ workflows:
             tags:
               ignore: /^[0-9]+(\.[0-9]+)*(-.*)*$/
       - secret-injector/dump-secrets:
-          name: secrets-harpocrates
+          name: secrets-app
           vault-path: ES/data/service_accounts/harbor/harpocrates-ci
           requires:
             - secrets-common
@@ -183,7 +183,7 @@ workflows:
       - build-go:
           context: es02-prod
           requires:
-            - secrets-harpocrates
+            - secrets-app
           filters:
             tags:
               ignore: /^[0-9]+(\.[0-9]+)*(-.*)*$/
@@ -198,9 +198,20 @@ workflows:
   test-build:
     jobs:
       - secret-injector/dump-secrets:
+          name: secrets-common
+          context: es02-prod
+          filters:
+            tags:
+              only: /^[0-9]+(\.[0-9]+)*(-.*)*$/
+            branches:
+              ignore: /.*/
+      - secret-injector/dump-secrets:
+          name: secrets-app
           vault-path: ES/data/service_accounts/harbor/harpocrates-ci
           workspace-path: /tmp
           context: es02-prod
+          requires:
+            - secrets-common
           filters:
             tags:
               only: /^[0-9]+(\.[0-9]+)*(-.*)*$/
@@ -215,7 +226,7 @@ workflows:
       - build-go:
           context: es02-prod
           requires:
-            - secret-injector/dump-secrets
+            - secrets-app
           filters:
             tags:
               only: /^[0-9]+(\.[0-9]+)*(-.*)*$/
