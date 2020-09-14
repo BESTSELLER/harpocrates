@@ -162,7 +162,6 @@ workflows:
   test:
     jobs:
       - secret-injector/dump-secrets:
-          vault-path: ES/service_accounts/harbor/harpocrates-ci
           context: es02-prod
           filters:
             tags:
@@ -190,7 +189,6 @@ workflows:
     jobs:
       - secret-injector/dump-secrets:
           workspace-path: /tmp
-          vault-path: ES/service_accounts/harbor/harpocrates-ci
           context: es02-prod
           filters:
             tags:
