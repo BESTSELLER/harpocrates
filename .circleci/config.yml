@@ -5,7 +5,7 @@ executors:
       - image: cimg/go:1.15
 
 orbs:
-  secret-injector: bestsellerit/secret-injector@0.2.48
+  secret-injector: bestsellerit/secret-injector@0.2.34
 
 jobs:
   test:
@@ -161,17 +161,17 @@ jobs:
 workflows:
   test:
     jobs:
-      - secret-injector/dump-secrets:
-          name: secrets-common
-          context: es02-prod
-          filters:
-            tags:
-              ignore: /^[0-9]+(\.[0-9]+)*(-.*)*$/
+      # - secret-injector/dump-secrets:
+      #     name: secrets-common
+      #     context: es02-prod
+      #     filters:
+      #       tags:
+      #         ignore: /^[0-9]+(\.[0-9]+)*(-.*)*$/
       - secret-injector/dump-secrets:
           name: secrets-harpocrates
           vault-path: ES/data/service_accounts/harbor/harpocrates-ci
-          requires:
-            - secrets-common
+          # requires:
+          #   - secrets-common
           context: es02-prod
           filters:
             tags:
