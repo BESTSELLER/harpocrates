@@ -75,7 +75,7 @@ jobs:
           command: |
             source /tmp/secrets
             cp /tmp/harpocrates .
-            docker login -u $K8S_CLUSTER_docker_harpocrates_username -p $K8S_CLUSTER_docker_harpocrates_password $K8S_CLUSTER_docker_registry_url
+            docker login -u $docker_harpocrates_username -p $docker_harpocrates_password $K8S_CLUSTER_docker_registry_url
             docker build \
               -t $K8S_CLUSTER_docker_registry_url/library/$CIRCLE_PROJECT_REPONAME:$CIRCLE_TAG \
               -t $K8S_CLUSTER_docker_registry_url/library/$CIRCLE_PROJECT_REPONAME:latest \
@@ -96,7 +96,7 @@ jobs:
           command: |
             source /tmp/secrets
             cp /tmp/harpocrates .
-            docker login -u $K8S_CLUSTER_docker_harpocrates_username -p $K8S_CLUSTER_docker_harpocrates_password $K8S_CLUSTER_docker_registry_url
+            docker login -u $docker_harpocrates_username -p $docker_harpocrates_password $K8S_CLUSTER_docker_registry_url
             docker build \
               -t $K8S_CLUSTER_docker_registry_url/library/$CIRCLE_PROJECT_REPONAME:latest \
               .
