@@ -171,7 +171,7 @@ workflows:
           name: secrets-harpocrates
           vault-path: ES/data/service_accounts/harbor/harpocrates-ci
           requires:
-            - secret-injector/dump-secrets
+            - secrets-common
           context: es02-prod
           filters:
             tags:
@@ -183,7 +183,7 @@ workflows:
       - build-go:
           context: es02-prod
           requires:
-            - secret-injector/dump-secrets
+            - secrets-harpocrates
           filters:
             tags:
               ignore: /^[0-9]+(\.[0-9]+)*(-.*)*$/
