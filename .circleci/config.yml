@@ -5,7 +5,7 @@ executors:
       - image: cimg/go:1.15
 
 orbs:
-  secret-injector: bestsellerit/secret-injector@0.2.50
+  secret-injector: bestsellerit/secret-injector@0.2.51
 
 jobs:
   test:
@@ -208,7 +208,7 @@ workflows:
       - secret-injector/dump-secrets:
           name: secrets-app
           vault-path: ES/data/service_accounts/harbor/harpocrates-ci
-          workspace-path: /tmp
+          output: /tmp
           context: es02-prod
           requires:
             - secrets-common
