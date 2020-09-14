@@ -92,7 +92,7 @@ jobs:
       - checkout
       - setup_remote_docker
       - run:
-          name: Push and build image
+          name: build image
           command: |
             source /tmp/secrets.env
             cp /tmp/harpocrates .
@@ -198,7 +198,7 @@ workflows:
   test-build:
     jobs:
       - secret-injector/dump-secrets:
-          vault-path: ES/data/service_accounts/harbor/harpocrates-ci
+          vault-path: ES/service_accounts/harbor/harpocrates-ci
           workspace-path: /tmp
           context: es02-prod
           filters:
