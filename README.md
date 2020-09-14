@@ -18,6 +18,7 @@ In this scenario it uses the ServiceAccount token in `/var/run/secrets/kubernete
 
 This requires that the [Kubernetes Auth Method](https://www.vaultproject.io/docs/auth/kubernetes) is enabled in Vault.
 
+---
 ## Authentication
 The easiest way to authenticate is to use your Vault token:
 ```bash
@@ -25,7 +26,7 @@ harpocrates --vault-token "sometoken"
 ```
 This can also be specified as the environment var `VAULT_TOKEN`
 
-
+---
 ## Usage
 In harpocrates can specify which secrets to pull in 3 different ways.
 ### YAML file
@@ -77,6 +78,7 @@ harpocrates --format "env" --secret "/secret/data/somesecret" --prefix "PREFIX_"
 ```
 There are not the same granularity as in the json and yaml specs. e.g. prefix can only exist on the top level.
 
+---
 ## CLI and ENV Options
 
 | Flag          | Values                                                                                                     |                       Default                       |
@@ -90,8 +92,15 @@ There are not the same granularity as in the json and yaml specs. e.g. prefix ca
 | prefix        | prefix keys, eg. K8S_                                                                                      |                          -                          |
 | secret        | vault path /secretengine/data/some/secret                                                                  |                          -                          |
 
+---
+## Kubernetes
+Some docs here
 
+---
+## CircleCI Orb
+some docs here
 
+---
 ## Note
 We have to set the following annotation, in order for the kubernetes autoscaler to be able to scale down again.
 ```
@@ -101,6 +110,7 @@ annotations:
 https://issuetracker.google.com/issues/148295270
 
 
+---
 ## Contribution
 
 
