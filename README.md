@@ -29,18 +29,34 @@ This can also be specified as the environment var `VAULT_TOKEN`
 ## Usage
 In harpocrates can specify which secrets to pull in 3 different ways.
 ### YAML file
+yaml is a great options for readability and replication of configs. yaml options are: 
 
+| Option  | Required | Value                     | default |
+| ------- | -------- | ------------------------- | ------- |
+| format  | no       | one of: env, json, secret | env     |
+| output  | yes      | /path/to/output/folder    | -       |
+| prefix  | no       | prefix, can be set on any level | -       |
+| secrets | yes      | an array of secret paths | -       |
+
+
+Example yaml file:
 ```yaml
 format: env
 output: "/secrets"
 prefix: PREFIX_
 secrets:
-  - secret/data/secret/dev
+  - secret/data/secret/dev # Will pull all key-values from the secret path.
   - secret/data/foo:
+      prefix: TEST_ # overwrites the toplevel prefix
       keys:
-       - APIKEY
+       - APIKEY # fetches only this specific key and value from `secret/data/foo`
+       - BAR:
+           prefix: "BOTTOM_" # overwrites both secret and toplevel prefix.
+       - TOPSECRET:
+           saveToFile: true # saves ONLY the raw value to a file, which is named as the key.
 ```
 
+run harpocrates with the `-f` flag to fetch secrets from your yaml spec.
 ```bash
 harpocrates -f /path/to/file.yaml
 ```
