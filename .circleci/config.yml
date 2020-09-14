@@ -5,7 +5,7 @@ executors:
       - image: cimg/go:1.15
 
 orbs:
-  secret-injector: bestsellerit/secret-injector@0.2.51
+  secret-injector: bestsellerit/secret-injector@0.2.50
 
 jobs:
   test:
@@ -154,9 +154,9 @@ jobs:
             ORB_PATH=./orb/orb.yml
             ORB_NAME=secret-injector
 
-            ./cli/circleci orb validate $ORB_PATH
-            ./cli/circleci orb publish $ORB_PATH $CC_NAMESPACE/$ORB_NAME@$CIRCLE_TAG
-            ./cli/circleci orb unlist $CC_NAMESPACE/$ORB_NAME false
+            circleci orb validate $ORB_PATH
+            circleci orb publish $ORB_PATH $CC_NAMESPACE/$ORB_NAME@$CIRCLE_TAG
+            circleci orb unlist $CC_NAMESPACE/$ORB_NAME false
 
 workflows:
   test:
