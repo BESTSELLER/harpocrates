@@ -145,18 +145,19 @@ jobs:
       - run:
           name: Publish CircleCI orb
           command: |
-            # wget https://github.com/CircleCI-Public/circleci-cli/releases/download/v0.1.5879/circleci-cli_0.1.5879_linux_amd64.tar.gz
-            # tar -xf circleci-cli_0.1.5879_linux_amd64.tar.gz
-            # mv circleci-cli_0.1.5879_linux_amd64 cli
+            CCI_VERSION=0.1.9578
+            wget https://github.com/CircleCI-Public/circleci-cli/releases/download/v$CCI_VERSION/circleci-cli_$CCI_VERSION\_linux_amd64.tar.gz
+            tar -xf circleci-cli_$CCI_VERSION\_linux_amd64.tar.gz
+            mv circleci-cli_$CCI_VERSION\_linux_amd64 cli
 
             export CIRCLECI_CLI_TOKEN=$(vault kv get -field=circleci_token ES/harpocrates)
             CC_NAMESPACE=bestsellerit
             ORB_PATH=./orb/orb.yml
             ORB_NAME=secret-injector
 
-            circleci orb validate $ORB_PATH
-            circleci orb publish $ORB_PATH $CC_NAMESPACE/$ORB_NAME@$CIRCLE_TAG
-            circleci orb unlist $CC_NAMESPACE/$ORB_NAME false
+            ./cli/circleci orb validate $ORB_PATH
+            ./cli/circleci orb publish $ORB_PATH $CC_NAMESPACE/$ORB_NAME@$CIRCLE_TAG
+            ./cli/circleci orb unlist $CC_NAMESPACE/$ORB_NAME false
 
 workflows:
   test:
