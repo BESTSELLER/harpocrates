@@ -162,11 +162,11 @@ workflows:
   test:
     jobs:
       - secret-injector/dump-secrets:
-        name: secrets-common
-        context: es02-prod
-        filters:
-          tags:
-            ignore: /^[0-9]+(\.[0-9]+)*(-.*)*$/
+          name: secrets-common
+          context: es02-prod
+          filters:
+            tags:
+              ignore: /^[0-9]+(\.[0-9]+)*(-.*)*$/
       - secret-injector/dump-secrets:
           name: secrets-harpocrates
           vault-path: ES/data/service_accounts/harbor/harpocrates-ci
