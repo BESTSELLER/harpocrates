@@ -88,7 +88,6 @@ jobs:
               /harpocrates \
                 --format "<< parameters.output-type >>" \
                 --output "<< parameters.workspace-path >>" \
-                --prefix "K8S_CLUSTER_" \
                 --secret "<< parameters.vault-path >>"
             fi
 
