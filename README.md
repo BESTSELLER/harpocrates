@@ -68,22 +68,7 @@ yaml is a great options for readability and replication of configs. yaml options
 
 <br/>
 
-Example yaml file:
-```yaml
-format: env
-output: "/secrets"
-prefix: PREFIX_
-secrets:
-  - secret/data/secret/dev # Will pull all key-values from the secret path.
-  - secret/data/foo:
-      prefix: TEST_ # overwrites the toplevel prefix
-      keys:
-       - APIKEY # fetches only this specific key and value from `secret/data/foo`
-       - BAR:
-           prefix: "BOTTOM_" # overwrites both secret and toplevel prefix.
-       - TOPSECRET:
-           saveToFile: true # saves ONLY the raw value to a file, which is named as the key.
-```
+Example yaml file at [examples/secret.yaml](examples/secret.yaml)
 
 <br/>
 
@@ -138,50 +123,7 @@ When running `harpocrates` as an init container you have to mount a volume to pa
 Then you can either chose to source the env file or simply just read the json formatted file.
 Harpocrates will startup and export the secrets in a matter of seconds. 
 
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  annotations:
-    cluster-autoscaler.kubernetes.io/safe-to-evict: "true" # isset as the autoscaler will stop downscaling on pods with local volumes
-  labels:
-    app: test-app
-  name: test-app
-  namespace: default
-spec:
-  selector:
-    matchLabels:
-      app: test-app
-  template:
-    metadata:
-      annotations:
-        cluster-autoscaler.kubernetes.io/safe-to-evict: "true" # isset as the autoscaler will stop downscaling on pods with local volumes
-      labels:
-        app: test-app
-    spec:
-      containers:
-        - image: mytestapp
-          name: test-app
-          volumeMounts:
-            - mountPath: /secrets # mount our volume with secrets
-              name: secrets
-      initContainers: # the fun part
-        - args: # inline json is the easiest when running as init
-            - '{"format":"env","output":"/secrets","prefix":"PREFIX_","secrets":["secret/data/secret/dev",{"secret/data/foo":{"keys":["APIKEY"]}}]}'
-        env:
-          - name: VAULT_ADDR # which vault server it should connect to
-            value: https://vault.example.com
-          - name: CLUSTER_NAME # the kubernetes auth method
-            value: testcluster
-        image: harbor.bestsellerit.com/library/harpocrates
-        name: secret-dumper
-        volumeMounts: # mount the volume to export secrets
-          - mountPath: /secrets
-            name: secrets
-      volumes: # volume spec
-        - name: secrets
-          emptyDir: {}
-```
+An example can be found at [examples/deployment.yaml](examples/deployment.yaml)
 
 ---
 <br/>
