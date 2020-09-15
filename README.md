@@ -79,12 +79,47 @@ harpocrates -f /path/to/file.yaml
 
 <br/>
 
-### Inline JSON
-You can specify the exact same options in inline json as in the yaml spec.
+### Inline spec
+You can specify the exact same options in inline json/yaml as in the yaml spec.
 Mostly for programmatic use, as readability is way worse than the yaml spec.
 
 ```bash
 harpocrates '{"format":"env","output":"/secrets","prefix":"PREFIX_","secrets":["secret/data/secret/dev",{"secret/data/foo":{"keys":["APIKEY"]}}]}'
+```
+Or if you prefer you can do it like this:
+```bash
+harpocrates '{
+  "format": "env",
+  "output": "/secrets",
+  "prefix": "PREFIX_",
+  "secrets": [
+    "secret/data/secret/dev",
+    {
+      "secret/data/foo": {
+        "keys": [
+          "APIKEY"
+        ]
+      }
+    }
+  ]
+}'
+```
+
+Or as yaml
+```bash
+harpocrates 'format: env
+output: "/secrets"
+prefix: PREFIX_
+secrets:
+  - secret/data/secret/dev
+  - secret/data/foo:
+      prefix: TEST_
+      keys:
+       - APIKEY
+       - BAR:
+           prefix: "BOTTOM_"
+       - TOPSECRET:
+           saveToFile: true'
 ```
 
 <br/>
