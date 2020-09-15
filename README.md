@@ -13,13 +13,26 @@
 Harpocrates is a small application that can be used to pull secrets from [HashiCorp Vault](https://www.vaultproject.io/).
 It can output the secrets in different formats:
  * JSON, which is simple key-values.
+    ```json
+    {
+      "KEY": "value",
+      "FOO": "bar"
+    }
+    ```
  * `source` ready env file e.g.
- ```bash
- export KEY=value
- export FOO=bar
- ```
+    ```bash
+    export KEY=value
+    export FOO=bar
+    ```
  * Raw key values.
+    ```bash
+    KEY=value
+    FOO=bar
+    ```
  * Raw value in separate file.
+    ```bash
+    value
+    ```
 
 <br/><br/>
 
