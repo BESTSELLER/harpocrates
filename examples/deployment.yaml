@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "true" # isset as the autoscaler will stop downscaling on pods with local volumes
+  labels:
+    app: test-app
+  name: test-app
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: test-app
+  template:
+    metadata:
+      annotations:
+        cluster-autoscaler.kubernetes.io/safe-to-evict: "true" # isset as the autoscaler will stop downscaling on pods with local volumes
+      labels:
+        app: test-app
+    spec:
+      containers:
+        - image: mytestapp
+          name: test-app
+          volumeMounts:
+            - mountPath: /secrets # mount our volume with secrets
+              name: secrets
+      initContainers: # the fun part
+      - name: secret-dumper
+        args: # inline json is the easiest when running as init
+          - '{"format":"env","output":"/secrets","prefix":"PREFIX_","secrets":["secret/data/secret/dev",{"secret/data/foo":{"keys":["APIKEY"]}}]}'
+        env:
+          - name: VAULT_ADDR # which vault server it should connect to
+            value: https://vault.example.com
+          - name: CLUSTER_NAME # the kubernetes auth method
+            value: testcluster
+        image: harbor.bestsellerit.com/library/harpocrates
+        volumeMounts: # mount the volume to export secrets
+          - mountPath: /secrets
+            name: secrets
+      volumes: # volume spec
+        - name: secrets
+          emptyDir: {}

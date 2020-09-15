@@ -4,8 +4,7 @@ description: Secret-injector orb
 executors:
   secret_image:
     docker:
-      - image: circleci/circleci-cli:alpine
-
+      - image: harbor.bestsellerit.com/library/harpocrates:$HARPOCRATES_VERSION
 
 jobs:
   dump-secrets:
@@ -16,15 +15,15 @@ jobs:
         type: string
         default: ""
         description: Secret path to read from Vault
-      workspace-path:
+      output:
         type: string
-        default: "/tmp/secrets"
+        default: "/tmp"
         description: Path in the workspace to store the secrets
-      output-file-name:
+      output-filename:
         type: string
         default: "secrets"
         description: Name of the secret file that will be generated. Without extension.
-      output-type:
+      format:
         type: enum
         default: "env"
         enum: ["env", "json", "secret"]
@@ -34,54 +33,68 @@ jobs:
         default: ""
         description: Vault account prefix to pull, will default to an environment var called SHORT
     steps:
+      - attach_workspace:
+          at: /tmp
       - vault-login
-      - run:
-          name: Secret-injector - Install jq
-          command: |
-            apk --no-cache add --upgrade jq
       - run:
           name: Secret-injector - Write secrets to file
           command: |
-            mkdir -p << parameters.workspace-path >>
-
+            mkdir -p << parameters.output >>
             if [ "<< parameters.short >>" != "" ] ; then
               export SHORT="<< parameters.short >>"
             fi
 
+            # This is the default one, if no vault-path is defined
+            if [ "<< parameters.vault-path >>" == "" ] ; then
+
+              # Fetch all the "common" secrets if that env var has been set
+              if [ "$HARPOCRATES_SECRETS" != "" ] ; then
+                /harpocrates \
+                  --format "<< parameters.format >>" \
+                  --output "<< parameters.output >>" \
+                  --prefix "K8S_CLUSTER_" \
+                  --secret $HARPOCRATES_SECRETS
+              fi
+
+              # Fetch cluster credentials
+              if [ "$CLUSTER_SECRET" != "" ] ; then
+                export HARPOCRATES_FILENAME="cluster_secret.json"
+                /harpocrates \
+                  --format json \
+                  --output "<< parameters.output >>" \
+                  --secret "$CLUSTER_SECRET"
+                unset HARPOCRATES_FILENAME
+              fi
+
+              # Fetch docker credentials
+              if [ "$SHORT" != "" ] ; then
+                /harpocrates \
+                  --format "<< parameters.format >>" \
+                  --output "<< parameters.output >>" \
+                  --prefix "DOCKER_" \
+                  --secret "ES/data/service_accounts/harbor/$SHORT-ci"
+              fi
+
+            fi
+
+            # Check if they have specified vault-path and then fetch those from Vault
             if [ "<< parameters.vault-path >>" != "" ] ; then
-              if [ "<< parameters.output-type >>" = "json" ] ; then
-                echo "Type is set to 'json'"
-                vault kv get -format=json -field=data << parameters.vault-path >> >> << parameters.workspace-path >>/<< parameters.output-file-name >>.json
+              if [ "<< parameters.output-filename >>" != "" ] ; then
+                export HARPOCRATES_FILENAME="<< parameters.output-filename >>"
               fi
 
-              if [ "<< parameters.output-type >>" = "env" ] ; then
-                echo "Type is set to 'env'"
-                vault kv get -format=json << parameters.vault-path >> | jq -r ".data .data | to_entries | map({(\"export \" + .key):  (\"'\" + .value + \"'\" )}) | add | to_entries|map(\"\(.key)=\(.value|tostring)\") | .[]" >> << parameters.workspace-path >>/<< parameters.output-file-name >>.env
-              fi
-
-              if [ "<< parameters.output-type >>" = "secret" ] ; then
-                echo "Type is set to 'secret'"
-                vault kv get -format=json << parameters.vault-path >> | jq -r ".data .data | to_entries | map({(.key):  (.value)}) | add | to_entries|map(\"\(.key)=\(.value|tostring)\") | .[]" >> << parameters.workspace-path >>/<< parameters.output-file-name >>.secret
-              fi
-            fi
-
-            if [ "$VAULT_COMMON_SECRETS" != "" ] ; then
-              vault kv get -format=json $VAULT_COMMON_SECRETS | jq -r ".data .data | to_entries | map({(\"export K8S_CLUSTER_\" + .key):  (\"'\" + .value + \"'\" )}) | add | to_entries|map(\"\(.key)=\(.value|tostring)\") | .[]" >> << parameters.workspace-path >>/<< parameters.output-file-name >>.env
-            fi
-            if [ "$VAULT_CLUSTER_SECRETS" != "" ] ; then
-              vault kv get -format=json $VAULT_CLUSTER_SECRETS | jq -r ".data .data | to_entries | map({(\"export K8S_CLUSTER_\" + .key):  (\"'\" + .value + \"'\" )}) | add | to_entries|map(\"\(.key)=\(.value|tostring)\") | .[]" >> << parameters.workspace-path >>/<< parameters.output-file-name >>.env
-            fi
-            if [ "$VAULT_CONTEXT_SECRETS" != "" ] ; then
-              vault kv get -format=json $VAULT_CONTEXT_SECRETS | jq -r ".data .data | to_entries | map({(\"export K8S_CLUSTER_\" + .key):  (\"'\" + .value + \"'\" )}) | add | to_entries|map(\"\(.key)=\(.value|tostring)\") | .[]" >> << parameters.workspace-path >>/<< parameters.output-file-name >>.env
-            fi
-            if [ "$SHORT" != "" ] ; then
-              vault kv get -format=json ES/service_accounts/harbor/$SHORT-ci | jq -r ".data .data | to_entries | map({(\"export DOCKER_\" + .key):  (\"'\" + .value + \"'\" )}) | add | to_entries|map(\"\(.key)=\(.value|tostring)\") | .[]" >> << parameters.workspace-path >>/<< parameters.output-file-name >>.env
+              /harpocrates \
+                --format "<< parameters.format >>" \
+                --output "<< parameters.output >>" \
+                --secret "<< parameters.vault-path >>"
             fi
 
       - persist_to_workspace:
-          root: << parameters.workspace-path >>
+          root: << parameters.output >>
           paths:
-            - << parameters.output-file-name >>.*
+            - secrets
+            - << parameters.output-filename >>
+            - cluster_secret.json
 
 commands:
   use-secrets:
@@ -103,6 +116,7 @@ commands:
             chmod +x vault
             mv vault /usr/bin/.
             vault login -method=userpass username=$VAULT_USERNAME password=$VAULT_PASSWORD >/dev/null
+            echo 'export VAULT_TOKEN=$(cat $HOME/.vault-token)' >> $BASH_ENV
   inject:
     description: Secret-injector orb
     parameters:
@@ -135,7 +149,7 @@ commands:
             if [ -f ${BASH_ENV} ]; then
               source ${BASH_ENV}
             fi
-            
+
             if [ -f "/tmp/secrets.env" ]; then
               for f in /tmp/*.env; do source $f; done
             fi

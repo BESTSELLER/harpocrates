@@ -2,20 +2,32 @@ package files
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
 )
 
-// WriteFile will write some string data to a file
-func WriteFile(dirPath string, fileName string, content string) {
-	fileName = fixFileName(fileName)
-	path := filepath.Join(dirPath, fileName)
+// Read will read the the content of a file and return it as a string.
+func Read(filePath string) string {
+	data, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		fmt.Printf("Unable to read the file at path '%s': %v\n", filePath, err)
+		os.Exit(1)
+	}
 
-	if _, err := os.Stat(dirPath); os.IsNotExist(err) {
-		err = os.MkdirAll(dirPath, 0700)
+	return fmt.Sprint(string(data))
+}
+
+// Write will write some string data to a file
+func Write(output string, fileName string, content string) {
+	fileName = fixFileName(fileName)
+	path := filepath.Join(output, fileName)
+
+	if _, err := os.Stat(output); os.IsNotExist(err) {
+		err = os.MkdirAll(output, 0700)
 		if err != nil {
-			fmt.Printf("Unable to create dir at path '%s': %v\n", dirPath, err)
+			fmt.Printf("Unable to create dir at path '%s': %v\n", output, err)
 			os.Exit(1)
 		}
 	}

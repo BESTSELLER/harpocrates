@@ -1,6 +1,9 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 
-set -- /harpocrates "$@"
+if [ "${1:0:1}" = '-' ] || [ "${1:0:1}" = "{" ]
+then
+  set -- /harpocrates "$@"
+fi
 
 exec "$@"
