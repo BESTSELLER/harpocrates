@@ -42,7 +42,7 @@ This can also be specified as the environment var `VAULT_TOKEN`
 <br/>
 
 ## Usage
-In harpocrates can specify which secrets to pull in 3 different ways.
+In harpocrates you can specify which secrets to pull in 3 different ways.
 ### YAML file
 yaml is a great options for readability and replication of configs. yaml options are: 
 
@@ -83,7 +83,7 @@ harpocrates -f /path/to/file.yaml
 
 ### Inline JSON
 You can specify the exact same options in inline json as in the yaml spec.
-Mostly for pogramatic use, as readability is way worse than the yaml spec.
+Mostly for programmatic use, as readability is way worse than the yaml spec.
 
 ```bash
 harpocrates '{"format":"env","output":"/secrets","prefix":"PREFIX_","secrets":["secret/data/secret/dev",{"secret/data/foo":{"keys":["APIKEY"]}}]}'
