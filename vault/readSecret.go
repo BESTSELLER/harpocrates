@@ -19,8 +19,6 @@ func (client *API) ReadSecret(path string) (map[string]interface{}, error) {
 	secretData := secretValues.Data["data"]
 
 	if secretData == nil {
-		// Why do we print this ??
-		fmt.Println("secretValues", secretValues)
 		secretData = secretValues.Data
 	}
 
