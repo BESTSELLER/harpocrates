@@ -60,8 +60,8 @@ var (
 
 			fileName := config.Config.FileName
 
-			if cmd.Flags().Changed("format") && (config.Config.Format != "json" && config.Config.Format != "env") {
-				color.Red.Printf("Please a valid format of either: json or env \n\n")
+			if cmd.Flags().Changed("format") && (config.Config.Format != "json" && config.Config.Format != "env" && config.Config.Format != "secret") {
+				color.Red.Printf("Please a valid format of either: json, env or secret \n\n")
 				cmd.Help()
 				return
 			}
@@ -72,6 +72,10 @@ var (
 
 			if config.Config.Format == "env" {
 				files.Write(config.Config.Output, fileName, allSecrets.ToENV())
+			}
+
+			if config.Config.Format == "secret" {
+				files.Write(config.Config.Output, fileName, allSecrets.ToK8sSecret())
 			}
 
 			color.Green.Printf("Secrets written to file: %s/%s\n", config.Config.Output, fileName)

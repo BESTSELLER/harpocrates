@@ -25,18 +25,27 @@ func (result Result) ToJSON() string {
 	return string(jsonString)
 }
 
-// ToENV will format a map[string]string to a env file
-//
-// export KEY='value'
-func (result Result) ToENV() string {
+func (result Result) toKV(prefix string) string {
 	var resturnString string
 
 	for key, val := range result {
 		leKey := fixEnvName(key)
 		fmt.Println(leKey)
-		resturnString += fmt.Sprintf("export %s='%s'\n", leKey, val)
+		resturnString += fmt.Sprintf("%s%s='%s'\n", prefix, leKey, val)
 	}
 	return resturnString
+}
+
+// ToENV will format a map[string]string to a env file
+//
+// export KEY='value'
+func (result Result) ToENV() string {
+	return result.toKV("export ")
+}
+
+// ToK8sSecret exports secrets as raw key values
+func (result Result) ToK8sSecret() string {
+	return result.toKV("")
 }
 
 // fixEnvName replaces all unsported env characters with "_"
