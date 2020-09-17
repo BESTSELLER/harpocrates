@@ -76,7 +76,7 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON) (secrets.Result, e
 				return nil, err
 			}
 			for aa, bb := range secretValue {
-				result.Add(aa, fmt.Sprintf("%s", bb), currentPrefix)
+				result.Add(aa, bb, currentPrefix)
 			}
 		}
 	}

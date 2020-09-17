@@ -11,7 +11,7 @@ import (
 type Result map[string]interface{}
 
 // Add will add a new secret to the Result
-func (result Result) Add(key string, value string, prefix string) {
+func (result Result) Add(key string, value interface{}, prefix string) {
 	result[fmt.Sprintf("%s%s", prefix, key)] = value
 }
 
