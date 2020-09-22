@@ -58,14 +58,14 @@ jobs:
             source /tmp/secrets
             export SONAR_SCANNER_OPTS="-Xmx2048m"
             eval /tmp/sonar-scanner-4.4.0.2170-linux/bin/sonar-scanner \
-              -Dsonar.projectKey="BESTSELLER_"$CIRCLE_PROJECT_REPONAME \
+              -Dsonar.projectKey=$K8S_CLUSTER_SONAR_KEY_GH"_"$CIRCLE_PROJECT_REPONAME \
               -Dsonar.projectName=$CIRCLE_PROJECT_REPONAME \
-              -Dsonar.organization=bestseller \
+              -Dsonar.organization=$K8S_CLUSTER_SONAR_ORG_GH \
               -Dsonar.sources=. \
               -Dsonar.test.inclusions=**/**_test.go \
               -Dsonar.sources.inclusions=**/**.go \
               -Dsonar.host.url=$K8S_CLUSTER_SONAR_HOST \
-              -Dsonar.login=$SONAR_TOKEN \
+              -Dsonar.login=$K8S_CLUSTER_SONAR_LOGIN_GH \
               -Dsonar.links.scm=$CIRCLE_REPOSITORY_URL \
               -Dsonar.go.coverage.reportPaths=coverage.out
 
