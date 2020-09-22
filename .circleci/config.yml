@@ -45,6 +45,10 @@ jobs:
             cd /tmp/
             unzip sonar-scanner-cli-4.3.0.2102-linux.zip
       - run:
+          name: go get
+          command: |
+            go get ./...
+      - run:
           name: go test - sonar
           command: |
             go test ./... -coverprofile=coverage.out
@@ -210,6 +214,13 @@ workflows:
             tags:
               ignore: /^[0-9]+(\.[0-9]+)*(-.*)*$/
       - test:
+          filters:
+            tags:
+              ignore: /^[0-9]+(\.[0-9]+)*(-.*)*$/
+      - test-sonar:
+          context: es02-prod
+          requires:
+            - secrets-app
           filters:
             tags:
               ignore: /^[0-9]+(\.[0-9]+)*(-.*)*$/
