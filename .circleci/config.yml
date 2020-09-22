@@ -65,7 +65,7 @@ jobs:
               -Dsonar.test.inclusions=**/**_test.go \
               -Dsonar.sources.inclusions=**/**.go \
               -Dsonar.host.url=$K8S_CLUSTER_SONAR_HOST \
-              -Dsonar.login=$K8S_CLUSTER_SONAR_LOGIN \
+              -Dsonar.login=$SONAR_TOKEN \
               -Dsonar.links.scm=$CIRCLE_REPOSITORY_URL \
               -Dsonar.go.coverage.reportPaths=coverage.out
 
