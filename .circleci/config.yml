@@ -32,6 +32,38 @@ jobs:
             GOOS=linux \
             GOARCH=amd64 \
             go build -ldflags="-w -s"
+  test-sonar:
+    executor: go_image
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - checkout
+      - run:
+          name: Install Sonarqube scanner
+          command: |
+            wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.3.0.2102-linux.zip -P /tmp/
+            cd /tmp/
+            unzip sonar-scanner-cli-4.3.0.2102-linux.zip
+      - run:
+          name: go test - sonar
+          command: |
+            go test ./... -coverprofile=coverage.out
+      - run:
+          name: Run SonarCloud Scanner
+          command: |
+            source /tmp/secrets
+            export SONAR_SCANNER_OPTS="-Xmx2048m"
+            eval /tmp/sonar-scanner-4.3.0.2102-linux/bin/sonar-scanner \
+              -Dsonar.projectKey="bestseller_"$CIRCLE_PROJECT_REPONAME \
+              -Dsonar.projectName=$CIRCLE_PROJECT_REPONAME \
+              -Dsonar.organization=bestseller \
+              -Dsonar.sources=. \
+              -Dsonar.test.inclusions=**/**_test.go \
+              -Dsonar.sources.inclusions=**/**.go \
+              -Dsonar.host.url=$K8S_CLUSTER_SONAR_HOST \
+              -Dsonar.login=$K8S_CLUSTER_SONAR_LOGIN \
+              -Dsonar.links.scm=$CIRCLE_REPOSITORY_URL \
+              -Dsonar.go.coverage.reportPaths=coverage.out
 
   build-go:
     executor: go_image
