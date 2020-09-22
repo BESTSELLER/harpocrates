@@ -218,13 +218,13 @@ workflows:
           filters:
             tags:
               ignore: /^[0-9]+(\.[0-9]+)*(-.*)*$/
-      # - test-sonar:
-      #     context: es02-prod
-      #     requires:
-      #       - secrets-app
-      #     filters:
-      #       tags:
-      #         ignore: /^[0-9]+(\.[0-9]+)*(-.*)*$/
+      - test-sonar:
+          context: es02-prod
+          requires:
+            - secrets-app
+          filters:
+            tags:
+              ignore: /^[0-9]+(\.[0-9]+)*(-.*)*$/
       - build-go:
           context: es02-prod
           requires:
