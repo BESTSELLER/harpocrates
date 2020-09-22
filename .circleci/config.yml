@@ -41,9 +41,9 @@ jobs:
       - run:
           name: Install Sonarqube scanner
           command: |
-            wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.3.0.2102-linux.zip -P /tmp/
+            wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.4.0.2170-linux.zip -P /tmp/
             cd /tmp/
-            unzip sonar-scanner-cli-4.3.0.2102-linux.zip
+            unzip sonar-scanner-cli-4.4.0.2170-linux.zip
       - run:
           name: go get
           command: |
@@ -57,9 +57,10 @@ jobs:
           command: |
             source /tmp/secrets
             export SONAR_SCANNER_OPTS="-Xmx2048m"
-            eval /tmp/sonar-scanner-4.3.0.2102-linux/bin/sonar-scanner \
+            eval /tmp/sonar-scanner-4.4.0.2170-linux/bin/sonar-scanner \
               -Dsonar.projectKey="bestseller_"$CIRCLE_PROJECT_REPONAME \
               -Dsonar.projectName=$CIRCLE_PROJECT_REPONAME \
+              -Dsonar.branch=$CIRCLE_BRANCH \
               -Dsonar.organization=bestseller \
               -Dsonar.sources=. \
               -Dsonar.test.inclusions=**/**_test.go \
