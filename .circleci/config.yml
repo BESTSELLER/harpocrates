@@ -60,7 +60,7 @@ jobs:
             eval /tmp/sonar-scanner-4.4.0.2170-linux/bin/sonar-scanner \
               -Dsonar.projectKey="BESTSELLER_"$CIRCLE_PROJECT_REPONAME \
               -Dsonar.projectName=$CIRCLE_PROJECT_REPONAME \
-              -Dsonar.organization=BESTSELLER \
+              -Dsonar.organization=bestseller \
               -Dsonar.sources=. \
               -Dsonar.test.inclusions=**/**_test.go \
               -Dsonar.sources.inclusions=**/**.go \
