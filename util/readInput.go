@@ -65,7 +65,10 @@ MoveOn:
 	}
 
 	config.Config.Prefix = secretJSON.Prefix
-	config.Config.UpperCase = *secretJSON.UpperCase
+
+	if secretJSON.UpperCase != nil {
+		config.Config.UpperCase = *secretJSON.UpperCase
+	}
 
 	return secretJSON
 }
