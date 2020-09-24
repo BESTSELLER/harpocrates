@@ -15,6 +15,7 @@ type GlobalConfig struct {
 	TokenPath    string `required:"false"`
 	VaultToken   string `required:"false"`
 	Prefix       string `required:"false"`
+	UpperCase    bool   `required:"false"`
 	Format       string `required:"false"`
 	Output       string `required:"false"`
 	FileName     string `required:"false"`

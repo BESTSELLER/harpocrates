@@ -5,14 +5,15 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strings"
 )
 
 // Result holds the result of all the secrets pulled from Vault
 type Result map[string]interface{}
 
 // Add will add a new secret to the Result
-func (result Result) Add(key string, value interface{}, prefix string) {
-	result[fmt.Sprintf("%s%s", prefix, key)] = value
+func (result Result) Add(key string, value interface{}, prefix string, upperCase bool) {
+	result[ToUpperOrNotToUpper(fmt.Sprintf("%s%s", prefix, key), &upperCase)] = value
 }
 
 // ToJSON will format a map[string]interface{} to json
@@ -54,4 +55,10 @@ func fixEnvName(currentName string) string {
 	envVar := reg.ReplaceAllString(currentName, "_")
 
 	return envVar
+}
+func ToUpperOrNotToUpper(something string, currentUpper *bool) string {
+	if *currentUpper {
+		return strings.ToUpper(something)
+	}
+	return something
 }

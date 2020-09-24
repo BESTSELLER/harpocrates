@@ -11,19 +11,22 @@ import (
 
 // SecretJSON holds the information about which secrets to fetch and how to save them again
 type SecretJSON struct {
-	Format  string        `json:"format,omitempty"   yaml:"format,omitempty"`
-	Output  string        `json:"output,omitempty"   yaml:"output,omitempty"`
-	Prefix  string        `json:"prefix,omitempty"   yaml:"prefix,omitempty"`
-	Secrets []interface{} `json:"secrets,omitempty"  yaml:"secrets,omitempty"`
+	Format    string        `json:"format,omitempty"      yaml:"format,omitempty"`
+	Output    string        `json:"output,omitempty"      yaml:"output,omitempty"`
+	Prefix    string        `json:"prefix,omitempty"      yaml:"prefix,omitempty"`
+	UpperCase *bool         `json:"uppercase,omitempty"   yaml:"uppercase,omitempty"`
+	Secrets   []interface{} `json:"secrets,omitempty"     yaml:"secrets,omitempty"`
 }
 
 type Secret struct {
-	Prefix string        `json:"prefix,omitempty"   yaml:"prefix,omitempty"`
-	Keys   []interface{} `json:"keys,omitempty"     yaml:"keys,omitempty"`
+	Prefix    string        `json:"prefix,omitempty"      yaml:"prefix,omitempty"`
+	UpperCase *bool         `json:"uppercase,omitempty"   yaml:"uppercase,omitempty"`
+	Keys      []interface{} `json:"keys,omitempty"        yaml:"keys,omitempty"`
 }
 
 type SecretKeys struct {
 	Prefix     string `json:"prefix,omitempty"         yaml:"prefix,omitempty" mapstructure:"prefix,omitempty"`
+	UpperCase  *bool  `json:"uppercase,omitempty"      yaml:"uppercase,omitempty" mapstructure:"uppercase,omitempty"`
 	SaveAsFile *bool  `json:"saveAsFile,omitempty"     yaml:"saveAsFile,omitempty"`
 }
 
@@ -62,6 +65,7 @@ MoveOn:
 	}
 
 	config.Config.Prefix = secretJSON.Prefix
+	config.Config.UpperCase = *secretJSON.UpperCase
 
 	return secretJSON
 }
