@@ -29,7 +29,7 @@ It can output the secrets in different formats:
     KEY=value
     FOO=bar
     ```
- * Raw value in separate file.
+ * Raw value in a separate file.
     ```bash
     value
     ```
@@ -126,12 +126,12 @@ secrets:
 <br/>
 
 ### CLI Parameters
-Third option is to specify the options as parameters in the cli.
+The third option is to specify the options as parameters in the cli.
 
 ```bash
 harpocrates --format "env" --secret "/secret/data/somesecret" --prefix "PREFIX_" --output "/secrets"
 ```
-There are not the same granularity as in the json and yaml specs. e.g. prefix can only exist on the top level.
+There is not the same granularity as in the json and yaml specs. e.g. prefix can only exist on the top level.
 
 ---
 <br/>
