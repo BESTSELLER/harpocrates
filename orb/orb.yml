@@ -109,7 +109,7 @@ commands:
           at: /tmp
       - run:
           name: Secret-injector - Adding secrets to BASH_ENV
-          command: cat "<< parameters.file >>" >> $BASH_ENV; done
+          command: cat "<< parameters.file >>" >> $BASH_ENV
   vault-login:
     steps:
       - run:
