@@ -8,7 +8,7 @@ executors:
 
 jobs:
   dump-secrets:
-    description: Read secret from Vault and write to /secrets/secret.env
+    description: Read secret from Vault and write to /secrets/secrets
     executor: secret_image
     parameters:
       vault-path:
@@ -27,7 +27,7 @@ jobs:
         type: enum
         default: "env"
         enum: ["env", "json", "secret"]
-        description: Type of output you want to store the secrets as
+        description: Type of output you want to store the secrets as (will not change the file extension)
       short:
         type: string
         default: ""
@@ -98,13 +98,18 @@ jobs:
 
 commands:
   use-secrets:
-    description: Will add the secrets to BASH_ENV
+    description: Will add the secrets to BASH_ENV, defaults to /tmp/secrets
+    parameters:
+      file:
+        type: string
+        default: "/tmp/secrets"
+        description: Filepath to source (defaults to /tmp/secrets)
     steps:
       - attach_workspace:
           at: /tmp
       - run:
           name: Secret-injector - Adding secrets to BASH_ENV
-          command: for f in /tmp/*.env; do cat $f >> $BASH_ENV; done
+          command: cat "<< parameters.file >>" >> $BASH_ENV; done
   vault-login:
     steps:
       - run:
