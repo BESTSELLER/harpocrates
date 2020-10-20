@@ -103,7 +103,7 @@ commands:
       file:
         type: string
         default: "/tmp/secrets"
-        description: filepath to source (defaults to /tmp/secrets)
+        description: Filepath to source (defaults to /tmp/secrets)
     steps:
       - attach_workspace:
           at: /tmp
