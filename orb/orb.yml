@@ -155,8 +155,8 @@ commands:
               source ${BASH_ENV}
             fi
 
-            if [ -f "/tmp/secrets.env" ]; then
-              for f in /tmp/*.env; do source $f; done
+            if [ -f "/tmp/secrets" ]; then
+              source /tmp/secrets
             fi
 
             export DEPLOYMENT_TYPE=<< parameters.deploy-type >>
