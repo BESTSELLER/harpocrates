@@ -256,53 +256,30 @@ workflows:
     jobs:
       - secret-injector/dump-secrets:
           name: secrets-common
-          context: es02-prod
-          filters:
-            tags:
-              only: /^[0-9]+(\.[0-9]+)*(-.*)*$/
-            branches:
-              ignore: /.*/
+          <<: *common_context
+          <<: *release_filter
       - secret-injector/dump-secrets:
           name: secrets-app
           vault-path: ES/data/service_accounts/harbor/harpocrates-ci
-          context: es02-prod
           requires:
             - secrets-common
-          filters:
-            tags:
-              only: /^[0-9]+(\.[0-9]+)*(-.*)*$/
-            branches:
-              ignore: /.*/
+          <<: *common_context
+          <<: *release_filter
       - test:
-          filters:
-            tags:
-              only: /^[0-9]+(\.[0-9]+)*(-.*)*$/
-            branches:
-              ignore: /.*/
+          <<: *common_context
+          <<: *release_filter
       - build-go:
-          context: es02-prod
           requires:
             - secrets-app
-          filters:
-            tags:
-              only: /^[0-9]+(\.[0-9]+)*(-.*)*$/
-            branches:
-              ignore: /.*/
+          <<: *common_context
+          <<: *release_filter
       - docker-build-n-push:
-          context: es02-prod
           requires:
             - build-go
-          filters:
-            tags:
-              only: /^[0-9]+(\.[0-9]+)*(-.*)*$/
-            branches:
-              ignore: /.*/
+          <<: *common_context
+          <<: *release_filter
       - publish:
-          context: es02-prod
           requires:
             - docker-build-n-push
-          filters:
-            tags:
-              only: /^[0-9]+(\.[0-9]+)*(-.*)*$/
-            branches:
-              ignore: /.*/
+          <<: *common_context
+          <<: *release_filter
