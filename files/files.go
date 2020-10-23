@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+
+	"github.com/BESTSELLER/harpocrates/config"
 )
 
 // Read will read the the content of a file and return it as a string.
@@ -42,8 +44,21 @@ func Write(output string, fileName string, content string) {
 
 	if _, err = f.WriteString(content); err != nil {
 		fmt.Printf("Unable to write to file '%s': %v\n", path, err)
-		f.Close()
 		os.Exit(1)
+	}
+
+	// set permissions on file and folder
+	if config.Config.Owner != -1 {
+
+		if err = os.Chown(output, config.Config.Owner, -1); err != nil {
+			fmt.Printf("Unable to set permissions to folder '%s': %v\n", path, err)
+			os.Exit(1)
+		}
+
+		if err = f.Chown(config.Config.Owner, -1); err != nil {
+			fmt.Printf("Unable to set permissions to file '%s': %v\n", path, err)
+			os.Exit(1)
+		}
 	}
 }
 

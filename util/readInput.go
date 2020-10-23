@@ -13,6 +13,7 @@ import (
 type SecretJSON struct {
 	Format    string        `json:"format,omitempty"      yaml:"format,omitempty"`
 	Output    string        `json:"output,omitempty"      yaml:"output,omitempty"`
+	Owner     *int          `json:"owner,omitempty"      yaml:"owner,omitempty"`
 	Prefix    string        `json:"prefix,omitempty"      yaml:"prefix,omitempty"`
 	UpperCase *bool         `json:"uppercase,omitempty"   yaml:"uppercase,omitempty"`
 	Secrets   []interface{} `json:"secrets,omitempty"     yaml:"secrets,omitempty"`
@@ -58,6 +59,12 @@ MoveOn:
 		secretJSON.Output = "/secrets"
 	}
 	config.Config.Output = secretJSON.Output
+
+	if secretJSON.Owner == nil {
+		value := -1
+		secretJSON.Owner = &value
+	}
+	config.Config.Owner = *secretJSON.Owner
 
 	if len(secretJSON.Secrets) == 0 {
 		fmt.Println("No secrets provided")
