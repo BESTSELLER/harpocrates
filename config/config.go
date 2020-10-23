@@ -19,6 +19,7 @@ type GlobalConfig struct {
 	Format       string `required:"false"`
 	Output       string `required:"false"`
 	FileName     string `required:"false"`
+	Owner        int    `required:"false"`
 }
 
 // Config stores the Global Configuration.
