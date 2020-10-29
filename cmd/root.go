@@ -66,16 +66,18 @@ var (
 				return
 			}
 
-			if config.Config.Format == "json" {
-				files.Write(config.Config.Output, fileName, allSecrets.ToJSON())
-			}
+			for k, v := range allSecrets {
+				if k == "json" {
+					files.Write(config.Config.Output, fileName, v.ToJSON())
+				}
 
-			if config.Config.Format == "env" {
-				files.Write(config.Config.Output, fileName, allSecrets.ToENV())
-			}
+				if k == "env" {
+					files.Write(config.Config.Output, fileName, v.ToENV())
+				}
 
-			if config.Config.Format == "secret" {
-				files.Write(config.Config.Output, fileName, allSecrets.ToK8sSecret())
+				if k == "secret" {
+					files.Write(config.Config.Output, fileName, v.ToK8sSecret())
+				}
 			}
 
 			color.Green.Printf("Secrets written to file: %s/%s\n", config.Config.Output, fileName)

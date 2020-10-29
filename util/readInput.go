@@ -13,7 +13,7 @@ import (
 type SecretJSON struct {
 	Format    string        `json:"format,omitempty"      yaml:"format,omitempty"`
 	Output    string        `json:"output,omitempty"      yaml:"output,omitempty"`
-	Owner     *int          `json:"owner,omitempty"      yaml:"owner,omitempty"`
+	Owner     *int          `json:"owner,omitempty"       yaml:"owner,omitempty"`
 	Prefix    string        `json:"prefix,omitempty"      yaml:"prefix,omitempty"`
 	UpperCase *bool         `json:"uppercase,omitempty"   yaml:"uppercase,omitempty"`
 	Secrets   []interface{} `json:"secrets,omitempty"     yaml:"secrets,omitempty"`
@@ -21,13 +21,14 @@ type SecretJSON struct {
 
 type Secret struct {
 	Prefix    string        `json:"prefix,omitempty"      yaml:"prefix,omitempty"`
+	Format    string        `json:"format,omitempty"      yaml:"format,omitempty"      mapstructure:"format,omitempty"`
 	UpperCase *bool         `json:"uppercase,omitempty"   yaml:"uppercase,omitempty"`
 	Keys      []interface{} `json:"keys,omitempty"        yaml:"keys,omitempty"`
 }
 
 type SecretKeys struct {
-	Prefix     string `json:"prefix,omitempty"         yaml:"prefix,omitempty" mapstructure:"prefix,omitempty"`
-	UpperCase  *bool  `json:"uppercase,omitempty"      yaml:"uppercase,omitempty" mapstructure:"uppercase,omitempty"`
+	Prefix     string `json:"prefix,omitempty"         yaml:"prefix,omitempty"      mapstructure:"prefix,omitempty"`
+	UpperCase  *bool  `json:"uppercase,omitempty"      yaml:"uppercase,omitempty"   mapstructure:"uppercase,omitempty"`
 	SaveAsFile *bool  `json:"saveAsFile,omitempty"     yaml:"saveAsFile,omitempty"`
 }
 
