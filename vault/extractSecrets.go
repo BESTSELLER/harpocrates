@@ -10,9 +10,14 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
+type Outputs struct {
+	Format   string `json:"format,omitempty"    yaml:"format,omitempty"`
+	Filename string `json:"filename,omitempty"  yaml:"filename,omitempty"`
+}
+
 // ExtractSecrets will loop through al those damn interfaces
-func (vaultClient *API) ExtractSecrets(input util.SecretJSON) (map[string]secrets.Result, error) {
-	var finalResult = make(map[string]secrets.Result)
+func (vaultClient *API) ExtractSecrets(input util.SecretJSON) (map[Outputs]secrets.Result, error) {
+	var finalResult = make(map[Outputs]secrets.Result)
 	var result = make(secrets.Result)
 	var currentPrefix = config.Config.Prefix
 	var currentUpperCase = config.Config.UpperCase
@@ -34,8 +39,6 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON) (map[string]secret
 				setUpper(d.UpperCase, &currentUpperCase)
 
 				if d.Format != "" {
-					fmt.Println("Format is set to", d.Format)
-
 					secretValue, err := vaultClient.ReadSecret(fmt.Sprintf("%s", c))
 					if err != nil {
 						return nil, err
@@ -44,7 +47,8 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON) (map[string]secret
 					for k, v := range secretValue {
 						thisResult.Add(k, v, currentPrefix, currentUpperCase)
 					}
-					finalResult[d.Format] = thisResult
+
+					finalResult[Outputs{Format: d.Format, Filename: d.FileName}] = thisResult
 					continue
 				}
 
@@ -101,7 +105,7 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON) (map[string]secret
 		}
 	}
 
-	finalResult[config.Config.Format] = result
+	finalResult[Outputs{Format: config.Config.Format, Filename: ""}] = result
 	return finalResult, nil
 }
 

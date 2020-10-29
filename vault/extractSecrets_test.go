@@ -82,7 +82,10 @@ func TestExtractSecretsWithFormatAsExpected(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	for _, v := range result {
+	for k, v := range result {
+		fmt.Println("k", k)
+		fmt.Println("v", v)
+
 		// assert
 		expected := fmt.Sprintf("%v", map[string]interface{}{input.Prefix + "key1": "value1", input.Prefix + "key2": "value2", input.Prefix + "key3": "value3"})
 		actual := fmt.Sprintf("%v", v)

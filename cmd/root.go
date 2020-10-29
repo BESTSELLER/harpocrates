@@ -67,15 +67,19 @@ var (
 			}
 
 			for k, v := range allSecrets {
-				if k == "json" {
+				if k.Filename != "" {
+					fileName = k.Filename
+				}
+
+				if k.Format == "json" {
 					files.Write(config.Config.Output, fileName, v.ToJSON())
 				}
 
-				if k == "env" {
+				if k.Format == "env" {
 					files.Write(config.Config.Output, fileName, v.ToENV())
 				}
 
-				if k == "secret" {
+				if k.Filename == "secret" {
 					files.Write(config.Config.Output, fileName, v.ToK8sSecret())
 				}
 			}

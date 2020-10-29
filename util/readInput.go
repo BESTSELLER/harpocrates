@@ -22,6 +22,7 @@ type SecretJSON struct {
 type Secret struct {
 	Prefix    string        `json:"prefix,omitempty"      yaml:"prefix,omitempty"`
 	Format    string        `json:"format,omitempty"      yaml:"format,omitempty"      mapstructure:"format,omitempty"`
+	FileName  string        `json:"filename,omitempty"    yaml:"filename,omitempty"    mapstructure:"filename,omitempty"`
 	UpperCase *bool         `json:"uppercase,omitempty"   yaml:"uppercase,omitempty"`
 	Keys      []interface{} `json:"keys,omitempty"        yaml:"keys,omitempty"`
 }
