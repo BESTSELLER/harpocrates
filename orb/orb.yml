@@ -134,6 +134,10 @@ commands:
       secret-file:
         description: Path to your secret file
         type: string
+      container-name:
+        description: Name of the container to inject secrets into
+        type: string
+        default: ""
       deploy-type:
         type: enum
         default: "Deployment"
@@ -159,6 +163,12 @@ commands:
               source /tmp/secrets
             fi
 
+            if [ -z "<< parameters.container-name >>"]; then
+                export CONTAINER_NAME=<< parameters.app-name >>
+            else
+                export CONTAINER_NAME=<< parameters.container-name >>
+            fi
+        
             export DEPLOYMENT_TYPE=<< parameters.deploy-type >>
             export DEPLOY_FILE=<< parameters.deploy-file >>
             export APP_NAME=<< parameters.app-name >>
