@@ -32,63 +32,19 @@ jobs:
         type: string
         default: ""
         description: Vault account prefix to pull, will default to an environment var called SHORT
+    environment:
+        VAULT_PATH: <<parameters.vault-path>>
+        OUTPUT: <<parameters.output>>
+        OUTPUT_FILENAME: <<parameters.output-filename>>
+        FORMAT: <<parameters.format>>
+        SHORT: <<parameters.short>>
     steps:
       - attach_workspace:
           at: /tmp
       - vault-login
       - run:
           name: Secret-injector - Write secrets to file
-          command: |
-            mkdir -p << parameters.output >>
-            if [ "<< parameters.short >>" != "" ] ; then
-              export SHORT="<< parameters.short >>"
-            fi
-
-            # This is the default one, if no vault-path is defined
-            if [ "<< parameters.vault-path >>" == "" ] ; then
-
-              # Fetch all the "common" secrets if that env var has been set
-              if [ "$HARPOCRATES_SECRETS" != "" ] ; then
-                /harpocrates \
-                  --format "<< parameters.format >>" \
-                  --output "<< parameters.output >>" \
-                  --prefix "K8S_CLUSTER_" \
-                  --secret $HARPOCRATES_SECRETS
-              fi
-
-              # Fetch cluster credentials
-              if [ "$CLUSTER_SECRET" != "" ] ; then
-                export HARPOCRATES_FILENAME="cluster_secret.json"
-                /harpocrates \
-                  --format json \
-                  --output "<< parameters.output >>" \
-                  --secret "$CLUSTER_SECRET"
-                unset HARPOCRATES_FILENAME
-              fi
-
-              # Fetch docker credentials
-              if [ "$SHORT" != "" ] ; then
-                /harpocrates \
-                  --format "<< parameters.format >>" \
-                  --output "<< parameters.output >>" \
-                  --prefix "DOCKER_" \
-                  --secret "ES/data/service_accounts/harbor/$SHORT-ci"
-              fi
-
-            fi
-
-            # Check if they have specified vault-path and then fetch those from Vault
-            if [ "<< parameters.vault-path >>" != "" ] ; then
-              if [ "<< parameters.output-filename >>" != "" ] ; then
-                export HARPOCRATES_FILENAME="<< parameters.output-filename >>"
-              fi
-
-              /harpocrates \
-                --format "<< parameters.format >>" \
-                --output "<< parameters.output >>" \
-                --secret "<< parameters.vault-path >>"
-            fi
-
+          command: <<include(scripts/dump-secrets.sh)>>
       - persist_to_workspace:
           root: << parameters.output >>
           paths:
@@ -104,24 +60,20 @@ commands:
         type: string
         default: "/tmp/secrets"
         description: Filepath to source (defaults to /tmp/secrets)
+    environment:
+        FILE: <<parameters.file>
     steps:
       - attach_workspace:
           at: /tmp
       - run:
           name: Secret-injector - Adding secrets to BASH_ENV
-          command: cat "<< parameters.file >>" >> $BASH_ENV
+          command: <<include(scripts/use-secrets.sh)>>
   vault-login:
     steps:
       - run:
           name: Secret-injector - Install Vault and login
-          command: |
-            VERSION=1.2.3
-            wget -O ./vault_$VERSION\_linux_amd64.zip https://releases.hashicorp.com/vault/$VERSION/vault_$VERSION\_linux_amd64.zip
-            unzip -o vault_$VERSION\_linux_amd64.zip
-            chmod +x vault
-            mv vault /usr/bin/.
-            vault login -method=userpass username=$VAULT_USERNAME password=$VAULT_PASSWORD >/dev/null
-            echo 'export VAULT_TOKEN=$(cat $HOME/.vault-token)' >> $BASH_ENV
+          command: <<include(scripts/vault-login.sh)>>
+
   inject:
     description: Secret-injector orb
     parameters:
@@ -142,6 +94,12 @@ commands:
         type: enum
         default: "Deployment"
         enum: ["Deployment", "StatefulSet", "CronJob"]
+    environment:
+        APP_NAME: <<parameters.app-name>
+        DEPLOY_FILE: <<parameters.deploy-file>>
+        SECRET_FILE: <<parameters.secret-file>>
+        CONTAINER_NAME: <<parameters.container-name>>
+        DEPLOY_TYPE: <<parameters.deploy-type>>
     steps:
       - attach_workspace:
           at: /tmp
@@ -154,35 +112,4 @@ commands:
       - vault-login
       - run:
           name: Secret-injector - kubectl kustomize
-          command: |
-            if [ -f ${BASH_ENV} ]; then
-              source ${BASH_ENV}
-            fi
-
-            if [ -f "/tmp/secrets" ]; then
-              source /tmp/secrets
-            fi
-
-            if [ -z "<< parameters.container-name >>"]; then
-                export CONTAINER_NAME=<< parameters.app-name >>
-            else
-                export CONTAINER_NAME=<< parameters.container-name >>
-            fi
-        
-            export DEPLOYMENT_TYPE=<< parameters.deploy-type >>
-            export DEPLOY_FILE=<< parameters.deploy-file >>
-            export APP_NAME=<< parameters.app-name >>
-            export SECRET_FILE=<< parameters.secret-file >>
-            export SECRETS=$(yq read $SECRET_FILE -j)
-
-            curl -s -H "Accept:application/vnd.github.v3.raw" -o $DEPLOYMENT_TYPE.yml -L https://github.com/BESTSELLER/harpocrates/releases/download/$HARPOCRATES_VERSION/$DEPLOYMENT_TYPE.yml
-            curl -s -H "Accept:application/vnd.github.v3.raw" -o kustomization.yml -L https://github.com/BESTSELLER/harpocrates/releases/download/$HARPOCRATES_VERSION/kustomization.yml
-
-            envsubst < ./kustomization.yml > ./kustomization_var.yml
-            mv ./kustomization_var.yml ./kustomization.yml
-
-            envsubst < ./$DEPLOYMENT_TYPE.yml > ./$DEPLOYMENT_TYPE_var.yml
-            mv ./$DEPLOYMENT_TYPE_var.yml ./$DEPLOYMENT_TYPE.yml
-
-            kubectl kustomize . > new.yml
-            mv new.yml $DEPLOY_FILE
+          command: <<include(scripts/inject-secrets.sh)>>
