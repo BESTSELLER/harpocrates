@@ -11,13 +11,14 @@ import (
 )
 
 type Outputs struct {
-	Format   string `json:"format,omitempty"    yaml:"format,omitempty"`
-	Filename string `json:"filename,omitempty"  yaml:"filename,omitempty"`
+	Format   string         `json:"format,omitempty"    yaml:"format,omitempty"`
+	Filename string         `json:"filename,omitempty"  yaml:"filename,omitempty"`
+	Result   secrets.Result `json:"result,omitempty"    yaml:"result,omitempty"`
 }
 
 // ExtractSecrets will loop through al those damn interfaces
-func (vaultClient *API) ExtractSecrets(input util.SecretJSON) (map[Outputs]secrets.Result, error) {
-	var finalResult = make(map[Outputs]secrets.Result)
+func (vaultClient *API) ExtractSecrets(input util.SecretJSON) ([]Outputs, error) {
+	var finalResult []Outputs
 	var result = make(secrets.Result)
 	var currentPrefix = config.Config.Prefix
 	var currentUpperCase = config.Config.UpperCase
@@ -48,7 +49,7 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON) (map[Outputs]secre
 						thisResult.Add(k, v, currentPrefix, currentUpperCase)
 					}
 
-					finalResult[Outputs{Format: d.Format, Filename: d.FileName}] = thisResult
+					finalResult = append(finalResult, Outputs{Format: d.Format, Filename: d.FileName, Result: thisResult})
 					continue
 				}
 
@@ -105,7 +106,7 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON) (map[Outputs]secre
 		}
 	}
 
-	finalResult[Outputs{Format: config.Config.Format, Filename: ""}] = result
+	finalResult = append(finalResult, Outputs{Format: config.Config.Format, Filename: "", Result: result})
 	return finalResult, nil
 }
 

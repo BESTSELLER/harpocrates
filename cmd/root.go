@@ -58,33 +58,32 @@ var (
 				log.Fatal(err)
 			}
 
-			fileName := config.Config.FileName
-
 			if cmd.Flags().Changed("format") && (config.Config.Format != "json" && config.Config.Format != "env" && config.Config.Format != "secret") {
 				color.Red.Printf("Please a valid format of either: json, env or secret \n\n")
 				cmd.Help()
 				return
 			}
 
-			for k, v := range allSecrets {
-				if k.Filename != "" {
-					fileName = k.Filename
+			for _, v := range allSecrets {
+				fileName := config.Config.FileName
+				if v.Filename != "" {
+					fileName = v.Filename
 				}
 
-				if k.Format == "json" {
-					files.Write(config.Config.Output, fileName, v.ToJSON())
+				if v.Format == "json" {
+					files.Write(config.Config.Output, fileName, v.Result.ToJSON())
 				}
 
-				if k.Format == "env" {
-					files.Write(config.Config.Output, fileName, v.ToENV())
+				if v.Format == "env" {
+					files.Write(config.Config.Output, fileName, v.Result.ToENV())
 				}
 
-				if k.Filename == "secret" {
-					files.Write(config.Config.Output, fileName, v.ToK8sSecret())
+				if v.Filename == "secret" {
+					files.Write(config.Config.Output, fileName, v.Result.ToK8sSecret())
 				}
+
+				color.Green.Printf("Secrets written to file: %s/%s\n", config.Config.Output, fileName)
 			}
-
-			color.Green.Printf("Secrets written to file: %s/%s\n", config.Config.Output, fileName)
 		},
 		Use:   "harpocrates",
 		Short: fmt.Sprintf("%sThis application will fetch secrets from Hashicorp Vault", color.Blue.Sprintf("\"Harpocrates was the god of silence, secrets and confidentiality\"\n")),

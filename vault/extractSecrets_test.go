@@ -82,13 +82,11 @@ func TestExtractSecretsWithFormatAsExpected(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	for k, v := range result {
-		fmt.Println("k", k)
-		fmt.Println("v", v)
+	for _, v := range result {
 
 		// assert
 		expected := fmt.Sprintf("%v", map[string]interface{}{input.Prefix + "key1": "value1", input.Prefix + "key2": "value2", input.Prefix + "key3": "value3"})
-		actual := fmt.Sprintf("%v", v)
+		actual := fmt.Sprintf("%v", v.Result)
 
 		assert.Equal(t, expected, actual)
 	}
@@ -119,7 +117,7 @@ func TestExtractSecretsAsExpected(t *testing.T) {
 	for _, v := range result {
 		// assert
 		expected := fmt.Sprintf("%v", map[string]interface{}{input.Prefix + "key1": "value1", input.Prefix + "key2": "value2", input.Prefix + "key3": "value3"})
-		actual := fmt.Sprintf("%v", v)
+		actual := fmt.Sprintf("%v", v.Result)
 
 		assert.Equal(t, expected, actual)
 	}
@@ -151,7 +149,7 @@ func TestExtractSecretsWithPrefixAsExpected(t *testing.T) {
 	for _, v := range result {
 		// assert
 		expected := fmt.Sprintf("%v", map[string]interface{}{"PRE_key1": "value1", "FIX_key2": "value2", input.Prefix + "key3": "value3"})
-		actual := fmt.Sprintf("%v", v)
+		actual := fmt.Sprintf("%v", v.Result)
 
 		assert.Equal(t, expected, actual)
 	}

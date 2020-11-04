@@ -11,11 +11,14 @@
       "mode": "auto",
       "program": "${workspaceFolder}/main.go",
       "env": {
-        "HARPOCRATES_CLUSTER_NAME": "es02-prod",
-        "HARPOCRATES_VAULT_ADDRESS": "https://vault.bestsellerit.com",
-        "HARPOCRATES_TOKEN_PATH": "/Users/lasse.gaardsholt/es02-prod.token"
+        "CLUSTER_NAME": "es02-prod",
+        "VAULT_ADDRESS": "https://vault.bestsellerit.com",
+        "TOKEN_PATH": "/Users/lasse.gaardsholt/es02-prod.token"
       },
-      "args": ["-f", "./secret.yml"]
+      "args": [
+        "-f",
+        "./secret.yml"
+      ]
       // "args": [
       //   "--secret",
       //   "ES/data/cci-api/prod",
