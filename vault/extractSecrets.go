@@ -10,8 +10,15 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
+type Outputs struct {
+	Format   string         `json:"format,omitempty"    yaml:"format,omitempty"`
+	Filename string         `json:"filename,omitempty"  yaml:"filename,omitempty"`
+	Result   secrets.Result `json:"result,omitempty"    yaml:"result,omitempty"`
+}
+
 // ExtractSecrets will loop through al those damn interfaces
-func (vaultClient *API) ExtractSecrets(input util.SecretJSON) (secrets.Result, error) {
+func (vaultClient *API) ExtractSecrets(input util.SecretJSON) ([]Outputs, error) {
+	var finalResult []Outputs
 	var result = make(secrets.Result)
 	var currentPrefix = config.Config.Prefix
 	var currentUpperCase = config.Config.UpperCase
@@ -32,8 +39,21 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON) (secrets.Result, e
 				setPrefix(d.Prefix, &currentPrefix)
 				setUpper(d.UpperCase, &currentUpperCase)
 
-				for _, f := range d.Keys {
+				if d.Format != "" {
+					secretValue, err := vaultClient.ReadSecret(fmt.Sprintf("%s", c))
+					if err != nil {
+						return nil, err
+					}
+					var thisResult = make(secrets.Result)
+					for k, v := range secretValue {
+						thisResult.Add(k, v, currentPrefix, currentUpperCase)
+					}
 
+					finalResult = append(finalResult, Outputs{Format: d.Format, Filename: d.FileName, Result: thisResult})
+					continue
+				}
+
+				for _, f := range d.Keys {
 					// If the key is just a secret path, then it will read that from Vault, otherwise:
 					if fmt.Sprintf("%T", f) != "string" {
 						bb := map[string]util.SecretKeys{}
@@ -85,7 +105,9 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON) (secrets.Result, e
 			}
 		}
 	}
-	return result, nil
+
+	finalResult = append(finalResult, Outputs{Format: config.Config.Format, Filename: "", Result: result})
+	return finalResult, nil
 }
 
 func setPrefix(potentialPrefix string, currentPrefix *string) {

@@ -61,6 +61,38 @@ func GetTestVaultServer(t *testing.T) vaultTest {
 
 }
 
+// TestExtractSecretsWithFormatAsExpected tests if a two secrets one with a format is extracted correct
+func TestExtractSecretsWithFormatAsExpected(t *testing.T) {
+	// arrange
+
+	// define input
+	data := files.Read("../test_data/two_secrets_with_format.yaml")
+	input := util.ReadInput(data)
+
+	// mock prefix
+	config.Config.Prefix = input.Prefix
+
+	var vaultClient *API
+	vaultClient = &API{
+		Client: testVault.Client,
+	}
+
+	// act
+	result, err := vaultClient.ExtractSecrets(input)
+	if err != nil {
+		t.Error(err)
+	}
+	for _, v := range result {
+
+		// assert
+		expected := fmt.Sprintf("%v", map[string]interface{}{input.Prefix + "key1": "value1", input.Prefix + "key2": "value2", input.Prefix + "key3": "value3"})
+		actual := fmt.Sprintf("%v", v.Result)
+
+		assert.Equal(t, expected, actual)
+	}
+
+}
+
 // TestExtractSecretsAsExpected tests if a simple secret is extracted correct
 func TestExtractSecretsAsExpected(t *testing.T) {
 	// arrange
@@ -82,12 +114,13 @@ func TestExtractSecretsAsExpected(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+	for _, v := range result {
+		// assert
+		expected := fmt.Sprintf("%v", map[string]interface{}{input.Prefix + "key1": "value1", input.Prefix + "key2": "value2", input.Prefix + "key3": "value3"})
+		actual := fmt.Sprintf("%v", v.Result)
 
-	// assert
-	expected := fmt.Sprintf("%v", map[string]interface{}{input.Prefix + "key1": "value1", input.Prefix + "key2": "value2", input.Prefix + "key3": "value3"})
-	actual := fmt.Sprintf("%v", result)
-
-	assert.Equal(t, expected, actual)
+		assert.Equal(t, expected, actual)
+	}
 
 }
 
@@ -113,11 +146,14 @@ func TestExtractSecretsWithPrefixAsExpected(t *testing.T) {
 		t.Error(err)
 	}
 
-	// assert
-	expected := fmt.Sprintf("%v", map[string]interface{}{"PRE_key1": "value1", "FIX_key2": "value2", input.Prefix + "key3": "value3"})
-	actual := fmt.Sprintf("%v", result)
+	for _, v := range result {
+		// assert
+		expected := fmt.Sprintf("%v", map[string]interface{}{"PRE_key1": "value1", "FIX_key2": "value2", input.Prefix + "key3": "value3"})
+		actual := fmt.Sprintf("%v", v.Result)
 
-	assert.Equal(t, expected, actual)
+		assert.Equal(t, expected, actual)
+	}
+
 }
 
 // TestExtractSecretsSaveAsFileAsExpected tests if a simple secret is extracted correct
