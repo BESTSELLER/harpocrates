@@ -199,8 +199,12 @@ jobs:
             ORB_NAME=secret-injector
 
             ./cli/circleci orb validate $ORB_PATH
-            ./cli/circleci orb publish $ORB_PATH $CC_NAMESPACE/$ORB_NAME@$CIRCLE_TAG
-            ./cli/circleci orb unlist $CC_NAMESPACE/$ORB_NAME false
+
+            if [[ $CIRCLE_TAG == *"dev"* ]]; then
+              ./cli/circleci orb publish $ORB_PATH $CC_NAMESPACE/$ORB_NAME@dev:@$CIRCLE_TAG
+            else
+              ./cli/circleci orb publish $ORB_PATH $CC_NAMESPACE/$ORB_NAME@$CIRCLE_TAG
+            fi
 
 test_filter: &test_filter
   filters:
