@@ -201,7 +201,7 @@ jobs:
             ./cli/circleci orb validate $ORB_PATH
 
             if [[ $CIRCLE_TAG == *"dev"* ]]; then
-              ./cli/circleci orb publish $ORB_PATH $CC_NAMESPACE/$ORB_NAME@dev:@$CIRCLE_TAG
+              ./cli/circleci orb publish $ORB_PATH $CC_NAMESPACE/$ORB_NAME@dev:$CIRCLE_TAG
             else
               ./cli/circleci orb publish $ORB_PATH $CC_NAMESPACE/$ORB_NAME@$CIRCLE_TAG
             fi
