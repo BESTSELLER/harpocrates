@@ -121,7 +121,7 @@ secrets:
        - BAR:
            prefix: "BOTTOM_"
        - TOPSECRET:
-           saveToFile: true'
+           saveAsFile: true'
 ```
 
 <br/>
