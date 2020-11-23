@@ -78,7 +78,7 @@ var (
 					files.Write(config.Config.Output, fileName, v.Result.ToENV())
 				}
 
-				if v.Filename == "secret" {
+				if v.Format == "secret" {
 					files.Write(config.Config.Output, fileName, v.Result.ToK8sSecret())
 				}
 
