@@ -32,7 +32,7 @@ func (result Result) toKV(prefix string) string {
 	for key, val := range result {
 		leKey := fixEnvName(key)
 		fmt.Println(leKey)
-		resturnString += fmt.Sprintf("%s%s='%s'\n", prefix, leKey, val)
+		resturnString += fmt.Sprintf("%s%s=%s\n", prefix, leKey, val)
 	}
 	return resturnString
 }
