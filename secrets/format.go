@@ -37,6 +37,17 @@ func (result Result) toKV(prefix string) string {
 	return resturnString
 }
 
+func (result Result) toSecretKV() string {
+	var resturnString string
+
+	for key, val := range result {
+		leKey := fixEnvName(key)
+		fmt.Println(leKey)
+		resturnString += fmt.Sprintf("%s=%s\n", leKey, val)
+	}
+	return resturnString
+}
+
 // ToENV will format a map[string]string to a env file
 //
 // export KEY='value'
@@ -46,7 +57,7 @@ func (result Result) ToENV() string {
 
 // ToK8sSecret exports secrets as raw key values
 func (result Result) ToK8sSecret() string {
-	return result.toKV("")
+	return result.toSecretKV()
 }
 
 // fixEnvName replaces all unsported env characters with "_"
