@@ -25,6 +25,7 @@ type Secret struct {
 	FileName  string        `json:"filename,omitempty"    yaml:"filename,omitempty"    mapstructure:"filename,omitempty"`
 	UpperCase *bool         `json:"uppercase,omitempty"   yaml:"uppercase,omitempty"`
 	Keys      []interface{} `json:"keys,omitempty"        yaml:"keys,omitempty"`
+	Owner     *int          `json:"owner,omitempty"       yaml:"owner,omitempty"`
 }
 
 type SecretKeys struct {

@@ -22,7 +22,7 @@ func Read(filePath string) string {
 }
 
 // Write will write some string data to a file
-func Write(output string, fileName string, content string) {
+func Write(output string, fileName string, content string, owner *int) {
 	fileName = fixFileName(fileName)
 	path := filepath.Join(output, fileName)
 
@@ -48,17 +48,28 @@ func Write(output string, fileName string, content string) {
 	}
 
 	// set permissions on file and folder
+	fmt.Println("owner", owner)
+	if owner != nil {
+		fmt.Println("owner is set")
+		setPermissions(f, path, output, *owner)
+		return
+	}
 	if config.Config.Owner != -1 {
+		fmt.Println("config.Config.Owner is set")
+		setPermissions(f, path, output, config.Config.Owner)
+		return
+	}
+}
 
-		if err = os.Chown(output, config.Config.Owner, -1); err != nil {
-			fmt.Printf("Unable to set permissions to folder '%s': %v\n", path, err)
-			os.Exit(1)
-		}
+func setPermissions(f *os.File, path string, output string, owner int) {
+	if err := os.Chown(output, owner, -1); err != nil {
+		fmt.Printf("Unable to set permissions to folder '%s': %v\n", path, err)
+		os.Exit(1)
+	}
 
-		if err = f.Chown(config.Config.Owner, -1); err != nil {
-			fmt.Printf("Unable to set permissions to file '%s': %v\n", path, err)
-			os.Exit(1)
-		}
+	if err := f.Chown(owner, -1); err != nil {
+		fmt.Printf("Unable to set permissions to file '%s': %v\n", path, err)
+		os.Exit(1)
 	}
 }
 
