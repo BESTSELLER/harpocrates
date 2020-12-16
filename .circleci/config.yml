@@ -50,9 +50,9 @@ jobs:
       - run:
           name: Install Sonarqube scanner
           command: |
-            wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.4.0.2170-linux.zip -P /tmp/
+            wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.5.0.2216-linux.zip -P /tmp/
             cd /tmp/
-            unzip sonar-scanner-cli-4.4.0.2170-linux.zip
+            unzip sonar-scanner-cli-4.5.0.2216-linux.zip
       - run:
           name: go get
           command: |
