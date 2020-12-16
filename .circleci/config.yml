@@ -66,7 +66,7 @@ jobs:
           command: |
             source /tmp/secrets
             export SONAR_SCANNER_OPTS="-Xmx2048m"
-            eval /tmp/sonar-scanner-4.4.0.2170-linux/bin/sonar-scanner \
+            eval /tmp/sonar-scanner-4.5.0.2216-linux/bin/sonar-scanner \
               -Dsonar.projectKey=$K8S_CLUSTER_SONAR_KEY_GH"_"$CIRCLE_PROJECT_REPONAME \
               -Dsonar.projectName=$CIRCLE_PROJECT_REPONAME \
               -Dsonar.organization=$K8S_CLUSTER_SONAR_ORG_GH \
