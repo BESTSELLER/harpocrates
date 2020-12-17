@@ -48,14 +48,11 @@ func Write(output string, fileName string, content string, owner *int) {
 	}
 
 	// set permissions on file and folder
-	fmt.Println("owner", owner)
 	if owner != nil {
-		fmt.Println("owner is set")
 		setPermissions(f, path, output, *owner)
 		return
 	}
 	if config.Config.Owner != -1 {
-		fmt.Println("config.Config.Owner is set")
 		setPermissions(f, path, output, config.Config.Owner)
 		return
 	}
