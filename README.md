@@ -121,7 +121,11 @@ secrets:
        - BAR:
            prefix: "BOTTOM_"
        - TOPSECRET:
-           saveAsFile: true'
+           saveAsFile: true
+  - secret/data/bar:
+      format: json
+      filename: something.json
+      owner: 29'
 ```
 
 <br/>
