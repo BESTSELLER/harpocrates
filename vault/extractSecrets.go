@@ -14,6 +14,7 @@ type Outputs struct {
 	Format   string         `json:"format,omitempty"    yaml:"format,omitempty"`
 	Filename string         `json:"filename,omitempty"  yaml:"filename,omitempty"`
 	Result   secrets.Result `json:"result,omitempty"    yaml:"result,omitempty"`
+	Owner    *int           `json:"owner,omitempty"     yaml:"owner,omitempty"`
 }
 
 // ExtractSecrets will loop through al those damn interfaces
@@ -49,7 +50,7 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON) ([]Outputs, error)
 						thisResult.Add(k, v, currentPrefix, currentUpperCase)
 					}
 
-					finalResult = append(finalResult, Outputs{Format: d.Format, Filename: d.FileName, Result: thisResult})
+					finalResult = append(finalResult, Outputs{Format: d.Format, Filename: d.FileName, Result: thisResult, Owner: d.Owner})
 					continue
 				}
 
@@ -70,7 +71,7 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON) ([]Outputs, error)
 								}
 								if *i.SaveAsFile {
 									fmt.Println("Creating file...", h)
-									files.Write(input.Output, secrets.ToUpperOrNotToUpper(fmt.Sprintf("%s%s", currentPrefix, h), &currentUpperCase), secretValue)
+									files.Write(input.Output, secrets.ToUpperOrNotToUpper(fmt.Sprintf("%s%s", currentPrefix, h), &currentUpperCase), secretValue, nil)
 								} else {
 									result.Add(h, secretValue, currentPrefix, currentUpperCase)
 								}

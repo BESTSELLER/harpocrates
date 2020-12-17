@@ -71,15 +71,15 @@ var (
 				}
 
 				if v.Format == "json" {
-					files.Write(config.Config.Output, fileName, v.Result.ToJSON())
+					files.Write(config.Config.Output, fileName, v.Result.ToJSON(), v.Owner)
 				}
 
 				if v.Format == "env" {
-					files.Write(config.Config.Output, fileName, v.Result.ToENV())
+					files.Write(config.Config.Output, fileName, v.Result.ToENV(), v.Owner)
 				}
 
 				if v.Format == "secret" {
-					files.Write(config.Config.Output, fileName, v.Result.ToK8sSecret())
+					files.Write(config.Config.Output, fileName, v.Result.ToK8sSecret(), v.Owner)
 				}
 
 				color.Green.Printf("Secrets written to file: %s/%s\n", config.Config.Output, fileName)
