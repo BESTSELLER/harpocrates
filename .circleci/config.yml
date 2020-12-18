@@ -153,7 +153,7 @@ jobs:
       - run:
           name: Install Vault and login
           command: |
-            VERSION=1.2.3
+            VERSION=1.6.1
             wget https://releases.hashicorp.com/vault/$VERSION/vault_$VERSION\_linux_amd64.zip
             sudo unzip -o vault_$VERSION\_linux_amd64.zip -d /usr/bin/
             sudo chmod +x /usr/bin/vault
