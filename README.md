@@ -59,14 +59,14 @@ In harpocrates you can specify which secrets to pull in 3 different ways.
 ### YAML file
 yaml is a great options for readability and replication of configs. yaml options are: 
 
-| Option    | Required | Value                           | default      |
-| --------- | -------- | ------------------------------- | ------------ |
-| format    | no       | one of: env, json, secret       | env          |
-| output    | yes      | /path/to/output/folder          | -            |
-| owner     | no       | UID of the user e.g 0           | current user |
-| prefix    | no       | prefix, can be set on any level | -            |
-| uppercase | no       | will uppercase prefix and key   | false        |
-| secrets   | yes      | an array of secret paths        | -            |
+| Option    | Required | Value                                                        | default      |
+| --------- | -------- | ------------------------------------------------------------ | ------------ |
+| format    | no       | one of: env, json, secret                                    | env          |
+| output    | yes      | /path/to/output/folder                                       | -            |
+| owner     | no       | UID of the user e.g 0, can be set on "root" and secret level | current user |
+| prefix    | no       | prefix, can be set on any level                              | -            |
+| uppercase | no       | will uppercase prefix and key                                | false        |
+| secrets   | yes      | an array of secret paths                                     | -            |
 
 <br/>
 
