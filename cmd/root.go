@@ -8,8 +8,8 @@ import (
 	"github.com/BESTSELLER/harpocrates/files"
 	"github.com/BESTSELLER/harpocrates/util"
 	"github.com/BESTSELLER/harpocrates/vault"
+	"github.com/gookit/color"
 	"github.com/spf13/cobra"
-	"gopkg.in/gookit/color.v1"
 )
 
 var (
