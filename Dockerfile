@@ -1,5 +1,4 @@
 FROM golang:1.16 AS builder
-RUN apk update && apk add --no-cache git
 WORKDIR $GOPATH/src/harpocrates
 COPY . .
 RUN GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o /tmp/harpocrates
