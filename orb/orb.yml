@@ -115,7 +115,7 @@ commands:
       - run:
           name: Secret-injector - Install Vault and login
           command: |
-            VERSION=1.2.3
+            VERSION=1.6.3
             wget -O ./vault_$VERSION\_linux_amd64.zip https://releases.hashicorp.com/vault/$VERSION/vault_$VERSION\_linux_amd64.zip
             unzip -o vault_$VERSION\_linux_amd64.zip
             chmod +x vault
