@@ -173,7 +173,7 @@ commands:
             fi
 
             if [ "<< parameters.namespace >>" != "" ]; then
-              yq write Deployment.yml metadata.namespace << parameters.namespace >>"
+              yq write Deployment.yml metadata.namespace << parameters.namespace >>
             fi
         
             export DEPLOYMENT_TYPE=<< parameters.deploy-type >>
