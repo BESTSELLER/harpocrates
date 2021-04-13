@@ -171,10 +171,6 @@ commands:
             else
                 export CONTAINER_NAME=<< parameters.container-name >>
             fi
-
-            if [ "<< parameters.namespace >>" != "" ]; then
-              yq write Deployment.yml metadata.namespace << parameters.namespace >>
-            fi
         
             export DEPLOYMENT_TYPE=<< parameters.deploy-type >>
             export DEPLOY_FILE=<< parameters.deploy-file >>
@@ -184,6 +180,10 @@ commands:
 
             curl -s -H "Accept:application/vnd.github.v3.raw" -o $DEPLOYMENT_TYPE.yml -L https://github.com/BESTSELLER/harpocrates/releases/download/$HARPOCRATES_VERSION/$DEPLOYMENT_TYPE.yml
             curl -s -H "Accept:application/vnd.github.v3.raw" -o kustomization.yml -L https://github.com/BESTSELLER/harpocrates/releases/download/$HARPOCRATES_VERSION/kustomization.yml
+
+            if [ "<< parameters.namespace >>" != "" ]; then
+              yq write $DEPLOYMENT_TYPE.yml metadata.namespace << parameters.namespace >>
+            fi
 
             envsubst < ./kustomization.yml > ./kustomization_var.yml
             mv ./kustomization_var.yml ./kustomization.yml
