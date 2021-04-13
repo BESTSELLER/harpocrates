@@ -172,7 +172,7 @@ commands:
                 export CONTAINER_NAME=<< parameters.container-name >>
             fi
 
-            if [ -z "<< parameters.namespace >>" ]; then
+            if [ "<< parameters.namespace >>" != "" ]; then
               yq write Deployment.yml metadata.namespace << parameters.namespace >>"
             fi
         
