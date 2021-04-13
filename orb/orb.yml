@@ -163,7 +163,7 @@ commands:
               source /tmp/secrets
             fi
 
-            if [ -z "<< parameters.container-name >>"]; then
+            if [ -z "<< parameters.container-name >>" ]; then
                 export CONTAINER_NAME=<< parameters.app-name >>
             else
                 export CONTAINER_NAME=<< parameters.container-name >>
