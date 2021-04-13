@@ -182,7 +182,7 @@ commands:
             curl -s -H "Accept:application/vnd.github.v3.raw" -o kustomization.yml -L https://github.com/BESTSELLER/harpocrates/releases/download/$HARPOCRATES_VERSION/kustomization.yml
 
             if [ "<< parameters.namespace >>" != "" ]; then
-              yq write $DEPLOYMENT_TYPE.yml metadata.namespace << parameters.namespace >>
+              yq write $DEPLOYMENT_TYPE.yml metadata.namespace << parameters.namespace >>  --inplace
             fi
 
             envsubst < ./kustomization.yml > ./kustomization_var.yml
