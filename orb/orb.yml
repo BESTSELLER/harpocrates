@@ -142,6 +142,9 @@ commands:
         type: enum
         default: "Deployment"
         enum: ["Deployment", "StatefulSet", "CronJob"]
+      namespace:
+        type: string
+        default: ""
     steps:
       - attach_workspace:
           at: /tmp
@@ -168,6 +171,10 @@ commands:
             else
                 export CONTAINER_NAME=<< parameters.container-name >>
             fi
+
+            if [ -z "<< parameters.namespace >>" ]; then
+              yq write Deployment.yml metadata.namespace << parameters.namespace >>"
+            fi
         
             export DEPLOYMENT_TYPE=<< parameters.deploy-type >>
             export DEPLOY_FILE=<< parameters.deploy-file >>
@@ -181,8 +188,8 @@ commands:
             envsubst < ./kustomization.yml > ./kustomization_var.yml
             mv ./kustomization_var.yml ./kustomization.yml
 
-            envsubst < ./$DEPLOYMENT_TYPE.yml > ./$DEPLOYMENT_TYPE_var.yml
-            mv ./$DEPLOYMENT_TYPE_var.yml ./$DEPLOYMENT_TYPE.yml
+            envsubst < ./$DEPLOYMENT_TYPE.yml > ./$DEPLOYMENT_TYPE\_var.yml
+            mv ./$DEPLOYMENT_TYPE\_var.yml ./$DEPLOYMENT_TYPE.yml
 
             kubectl kustomize . > new.yml
             mv new.yml $DEPLOY_FILE
