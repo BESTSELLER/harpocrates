@@ -2,7 +2,7 @@ version: 2.1
 executors:
   go_image:
     docker:
-      - image: cimg/go:1.15
+      - image: cimg/go:1.16
         auth:
           username: $DOCKERHUB_USER
           password: $DOCKERHUB_PASS
@@ -14,7 +14,7 @@ executors:
           password: $DOCKERHUB_PASS
 
 orbs:
-  secret-injector: bestsellerit/secret-injector@1.3.5
+  secret-injector: bestsellerit/secret-injector@1.3.11
 
 jobs:
   test:
