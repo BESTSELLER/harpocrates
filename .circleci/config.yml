@@ -14,7 +14,7 @@ executors:
           password: $DOCKERHUB_PASS
 
 orbs:
-  secret-injector: bestsellerit/secret-injector@1.3.5
+  secret-injector: bestsellerit/secret-injector@1.3.11
 
 jobs:
   test:
