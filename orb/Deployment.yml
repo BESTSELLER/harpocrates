@@ -25,7 +25,7 @@ spec:
             - name: AUTH_NAME
               value: $CLUSTER_NAME
             - name: ROLE_NAME
-              value: "$CLUSTER_NAME-$NAMESPACE"
+              value: "$ROLE_NAME"
           securityContext:
             privileged: false
             allowPrivilegeEscalation: false
