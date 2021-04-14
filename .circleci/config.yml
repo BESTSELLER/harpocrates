@@ -27,7 +27,9 @@ jobs:
             go get ./...
       - run:
           name: install gotestsum
-          command: go get -u gotest.tools/gotestsum
+          command: |
+            go get -u gotest.tools/gotestsum
+            go get gotest.tools/assert@v2.2.0+incompatible
       - run:
           name: go test
           command: |
