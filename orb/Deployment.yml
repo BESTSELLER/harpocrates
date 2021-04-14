@@ -24,6 +24,10 @@ spec:
               value: $VAULT_ADDR
             - name: CLUSTER_NAME
               value: $CLUSTER_NAME
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+
 
       containers:
         - name: $CONTAINER_NAME
