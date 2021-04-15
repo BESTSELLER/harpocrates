@@ -11,7 +11,8 @@ import (
 // GlobalConfig defines the structure of the global configuration parameters
 type GlobalConfig struct {
 	VaultAddress string `required:"false"`
-	ClusterName  string `required:"false"`
+	AuthName     string `required:"false"`
+	RoleName     string `required:"false"`
 	TokenPath    string `required:"false"`
 	VaultToken   string `required:"false"`
 	Prefix       string `required:"false"`
@@ -35,8 +36,11 @@ func SyncEnvToFlags(cmd *cobra.Command) {
 	if Config.VaultAddress == "" {
 		tryEnv("vault_addr", &Config.VaultAddress, required, cmd)
 	}
-	if Config.ClusterName == "" {
-		tryEnv("cluster_name", &Config.ClusterName, required, cmd)
+	if Config.AuthName == "" {
+		tryEnv("auth_name", &Config.AuthName, required, cmd)
+	}
+	if Config.RoleName == "" {
+		tryEnv("role_name", &Config.RoleName, required, cmd)
 	}
 	if Config.TokenPath == "" {
 		tryEnv("token_path", &Config.TokenPath, notRequired, cmd)

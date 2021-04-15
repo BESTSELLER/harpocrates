@@ -146,7 +146,8 @@ There is not the same granularity as in the json and yaml specs. e.g. prefix can
 | Flag          | Env Var              | Values                                                                                                     |                       Default                       |
 | ------------- | -------------------- | ---------------------------------------------------------------------------------------------------------- | :-------------------------------------------------: |
 | vault-address | VAULT_ADDR           | https://vaulturl                                                                                           |                          -                          |
-| cluster-name  | CLUSTER_NAME         | string                                                                                                     |                          -                          |
+| auth-name     | AUTH_NAME            | Vault auth name, used at login                                                                             |                          -                          |
+| role-name     | ROLE_NAME            | Vault role name, used at login                                                                             |                          -                          |
 | token-path    | TOKEN_PATH           | /path/to/token, uses clustername and path to login and exchange a vault token which is used in vault_token | /var/run/secrets/kubernetes.io/serviceaccount/token |
 | vault-token   | VAULT_TOKEN          | token as a string. If empty token_path will be queried                                                     |                          -                          |
 | format        | -                    | env, json or secret                                                                                        |                         env                         |

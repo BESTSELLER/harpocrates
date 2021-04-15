@@ -101,7 +101,8 @@ func init() {
 	// Setup flags
 	rootCmd.PersistentFlags().StringVarP(&secretFile, "file", "f", "", "that contains the configuration to apply")
 	rootCmd.PersistentFlags().StringVar(&config.Config.VaultAddress, "vault-address", "", "url to vault e.g. https://vault.example.com")
-	rootCmd.PersistentFlags().StringVar(&config.Config.ClusterName, "cluster-name", "", "k8s auth method name, use when running as a k8s pod")
+	rootCmd.PersistentFlags().StringVar(&config.Config.AuthName, "auth-name", "", "k8s auth method name, use when running as a k8s pod")
+	rootCmd.PersistentFlags().StringVar(&config.Config.RoleName, "role-name", "", "k8s auth role name, use when running as a k8s pod")
 	rootCmd.PersistentFlags().StringVar(&config.Config.TokenPath, "token-path", "", "/path/to/token/file")
 	rootCmd.PersistentFlags().StringVar(&config.Config.VaultToken, "vault-token", "", "vault token in clear text")
 

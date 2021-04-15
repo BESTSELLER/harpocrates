@@ -143,6 +143,15 @@ commands:
         default: "Deployment"
         enum: ["Deployment", "StatefulSet", "CronJob"]
       namespace:
+        description: Namespace of the deploy-type
+        type: string
+        default: ""
+      auth-name:
+        description: Vault auth method
+        type: string
+        default: ""
+      role-name:
+        description: Vault role name, defaults to the value of auth-name
         type: string
         default: ""
     steps:
@@ -176,6 +185,18 @@ commands:
               export NAMESPACE="<< parameters.namespace >>"
             else
               export NAMESPACE="default"
+            fi
+
+            if [ "<< parameters.auth-name >>" != "" ]; then
+              export AUTH_NAME="<< parameters.auth-name >>"
+            else
+              export AUTH_NAME="$CLUSTER_NAME"
+            fi
+
+            if [ "<< parameters.role-name >>" != "" ]; then
+              export ROLE_NAME="<< parameters.role-name >>"
+            else
+              export ROLE_NAME="$AUTH_NAME"
             fi
         
             export DEPLOYMENT_TYPE=<< parameters.deploy-type >>

@@ -53,10 +53,10 @@ func Login() {
 		return
 	}
 
-	url := config.Config.VaultAddress + "/v1/auth/" + config.Config.ClusterName + "/login"
+	url := config.Config.VaultAddress + "/v1/auth/" + config.Config.AuthName + "/login"
 
 	b := new(bytes.Buffer)
-	err := json.NewEncoder(b).Encode(JWTPayLoad{Jwt: token.Read(), Role: config.Config.ClusterName})
+	err := json.NewEncoder(b).Encode(JWTPayLoad{Jwt: token.Read(), Role: config.Config.RoleName})
 	if err != nil {
 		fmt.Printf("Unable to prepare jwt token: %v\n", err)
 		os.Exit(1)
