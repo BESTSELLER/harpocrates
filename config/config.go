@@ -40,10 +40,7 @@ func SyncEnvToFlags(cmd *cobra.Command) {
 		tryEnv("auth_name", &Config.AuthName, required, cmd)
 	}
 	if Config.RoleName == "" {
-		tryEnv("role_name", &Config.RoleName, notRequired, cmd)
-		if Config.RoleName == "" {
-			Config.RoleName = Config.AuthName
-		}
+		tryEnv("role_name", &Config.RoleName, required, cmd)
 	}
 	if Config.TokenPath == "" {
 		tryEnv("token_path", &Config.TokenPath, notRequired, cmd)
