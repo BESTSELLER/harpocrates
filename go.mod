@@ -9,7 +9,7 @@ require (
 	github.com/gookit/color v1.4.2
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-retryablehttp v0.6.8 // indirect
-	github.com/hashicorp/vault v1.7.0
+	github.com/hashicorp/vault v1.7.1
 	github.com/hashicorp/vault/api v1.1.0
 	github.com/mitchellh/mapstructure v1.4.1
 	github.com/pierrec/lz4 v2.6.0+incompatible // indirect
