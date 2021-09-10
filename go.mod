@@ -13,6 +13,7 @@ require (
 	github.com/hashicorp/vault/api v1.1.0
 	github.com/mitchellh/mapstructure v1.4.1
 	github.com/pierrec/lz4 v2.6.1+incompatible // indirect
+	github.com/sirupsen/logrus v1.6.0 // indirect
 	github.com/spf13/cobra v1.1.3
 	golang.org/x/crypto v0.0.0-20210513164829-c07d793c2f9a // indirect
 	golang.org/x/net v0.0.0-20210525063256-abc453219eb5 // indirect

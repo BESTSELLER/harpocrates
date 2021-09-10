@@ -2,13 +2,13 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/BESTSELLER/harpocrates/config"
 	"github.com/BESTSELLER/harpocrates/files"
 	"github.com/BESTSELLER/harpocrates/util"
 	"github.com/BESTSELLER/harpocrates/vault"
 	"github.com/gookit/color"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -117,4 +117,5 @@ func init() {
 
 func initConfig() {
 	config.SyncEnvToFlags(rootCmd)
+	log.SetFormatter(&log.JSONFormatter{})
 }
