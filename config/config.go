@@ -21,6 +21,7 @@ type GlobalConfig struct {
 	Output       string `required:"false"`
 	FileName     string `required:"false"`
 	Owner        int    `required:"false"`
+	LogLevel     string `required:"false"`
 }
 
 // Config stores the Global Configuration.
@@ -56,7 +57,9 @@ func SyncEnvToFlags(cmd *cobra.Command) {
 		if Config.Format == "" {
 			Config.Format = "env"
 		}
-
+	}
+	if Config.LogLevel == "" {
+		tryEnv("log_level", &Config.LogLevel, notRequired, cmd)
 	}
 	if Config.FileName == "" {
 		tryEnv("HARPOCRATES_FILENAME", &Config.FileName, notRequired, cmd)

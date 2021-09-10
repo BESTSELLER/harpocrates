@@ -2,13 +2,15 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/BESTSELLER/harpocrates/config"
 	"github.com/BESTSELLER/harpocrates/files"
 	"github.com/BESTSELLER/harpocrates/util"
 	"github.com/BESTSELLER/harpocrates/vault"
 	"github.com/gookit/color"
-	log "github.com/sirupsen/logrus"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -55,7 +57,7 @@ var (
 
 			allSecrets, err := vaultClient.ExtractSecrets(input)
 			if err != nil {
-				log.Fatal(err)
+				log.Fatal().Err(err)
 			}
 
 			if cmd.Flags().Changed("format") && (config.Config.Format != "json" && config.Config.Format != "env" && config.Config.Format != "secret") {
@@ -111,11 +113,27 @@ func init() {
 	rootCmd.PersistentFlags().IntVar(&config.Config.Owner, "owner", -1, "UID of the owner that the secret files will be created e.g. 2")
 	rootCmd.PersistentFlags().StringVar(&config.Config.Prefix, "prefix", "", "key prefix e.g TEST_ will produce TEST_key=secret")
 	rootCmd.PersistentFlags().BoolVar(&config.Config.UpperCase, "uppercase", false, "will convert key to UPPERCASE")
+	rootCmd.PersistentFlags().StringVar(&config.Config.LogLevel, "log-level", "", "LogLevel, default is warn")
 	secret = rootCmd.PersistentFlags().StringSlice("secret", []string{}, "vault path to secret, supports array of secrets e.g. SECRETENGINE/data/test/dev,SECRETENGINE/data/test/prod")
 
 }
 
 func initConfig() {
 	config.SyncEnvToFlags(rootCmd)
-	log.SetFormatter(&log.JSONFormatter{})
+	SetupLogLevel()
+}
+
+//SetupLogLevel sets the global loglevel
+func SetupLogLevel() {
+	// default is info
+	switch strings.ToLower(config.Config.LogLevel) {
+	case "debug":
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+		break
+	case "info":
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
+		break
+	default:
+		zerolog.SetGlobalLevel(zerolog.WarnLevel)
+	}
 }
