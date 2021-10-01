@@ -11,9 +11,10 @@
       "mode": "auto",
       "program": "${workspaceFolder}/main.go",
       "env": {
-        "CLUSTER_NAME": "es02-prod",
         "VAULT_ADDRESS": "https://vault.bestsellerit.com",
-        "TOKEN_PATH": "/Users/lasse.gaardsholt/es02-prod.token"
+        "TOKEN_PATH": "/Users/lasse.gaardsholt/olympus-jdy.token",
+        "ROLE_NAME": "olympus01-prod-jdy",
+        "AUTH_NAME": "olympus01-prod"
       },
       "args": [
         "-f",

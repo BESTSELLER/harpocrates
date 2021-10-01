@@ -6,8 +6,8 @@ import (
 	"strings"
 )
 
-const keyNotFound = "The key '%s' was not found in the path '%s'\n"
-const secretNotFound = "The secret '%s' was not found \n"
+const keyNotFound = "The key '%s' was not found in the path '%s'"
+const secretNotFound = "The secret '%s' was not found"
 
 // ReadSecret from Vault
 func (client *API) ReadSecret(path string) (map[string]interface{}, error) {

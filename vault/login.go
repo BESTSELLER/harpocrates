@@ -9,6 +9,7 @@ import (
 
 	"github.com/BESTSELLER/harpocrates/config"
 	"github.com/BESTSELLER/harpocrates/token"
+	"github.com/rs/zerolog/log"
 )
 
 // VaultLoginResult contains the result after logging in.
@@ -58,7 +59,7 @@ func Login() {
 	b := new(bytes.Buffer)
 	err := json.NewEncoder(b).Encode(JWTPayLoad{Jwt: token.Read(), Role: config.Config.RoleName})
 	if err != nil {
-		fmt.Printf("Unable to prepare jwt token: %v\n", err)
+		log.Fatal().Err(err).Msg("Unable to prepare jwt token")
 		os.Exit(1)
 	}
 
@@ -66,19 +67,19 @@ func Login() {
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		fmt.Printf("Unable to make login call to Vault: %v\n", err)
+		log.Fatal().Err(err).Msg("Unable to make login call to Vault")
 		os.Exit(1)
 	}
 
 	returnPayload := VaultLoginResult{}
 	err = json.NewDecoder(res.Body).Decode(&returnPayload)
 	if err != nil {
-		fmt.Printf("Unexpected response from Vault: %v\n", err)
+		log.Fatal().Err(err).Msg("Unexpected response from Vault")
 		os.Exit(1)
 	}
 
 	if len(returnPayload.Errors) != 0 {
-		fmt.Printf("API call to Vault failed with the following message: %v\n", returnPayload.Errors)
+		log.Fatal().Err(fmt.Errorf("%s", returnPayload.Errors)).Msg("API call to Vault failed")
 		os.Exit(1)
 	}
 

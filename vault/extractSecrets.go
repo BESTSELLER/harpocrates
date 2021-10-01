@@ -70,7 +70,6 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON) ([]Outputs, error)
 									return nil, err
 								}
 								if *i.SaveAsFile {
-									fmt.Println("Creating file...", h)
 									files.Write(input.Output, secrets.ToUpperOrNotToUpper(fmt.Sprintf("%s%s", currentPrefix, h), &currentUpperCase), secretValue, nil)
 								} else {
 									result.Add(h, secretValue, currentPrefix, currentUpperCase)

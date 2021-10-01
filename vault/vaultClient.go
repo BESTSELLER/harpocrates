@@ -1,11 +1,11 @@
 package vault
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/BESTSELLER/harpocrates/config"
 	api "github.com/hashicorp/vault/api"
+	"github.com/rs/zerolog/log"
 )
 
 // API is the struct for the vault/api client
@@ -19,7 +19,7 @@ func NewClient() *API {
 		Address: config.Config.VaultAddress,
 	})
 	if err != nil {
-		fmt.Printf("Unable to create Vault client: %v\n", err)
+		log.Fatal().Err(err).Msg("Unable to create Vault client")
 		os.Exit(1)
 	}
 	client.SetToken(config.Config.VaultToken)

@@ -6,6 +6,8 @@ import (
 	"os"
 	"regexp"
 	"strings"
+
+	"github.com/rs/zerolog/log"
 )
 
 // Result holds the result of all the secrets pulled from Vault
@@ -20,7 +22,7 @@ func (result Result) Add(key string, value interface{}, prefix string, upperCase
 func (result Result) ToJSON() string {
 	jsonString, err := json.Marshal(result)
 	if err != nil {
-		fmt.Printf("Unable to convert result to json: %s\n", err)
+		log.Fatal().Err(err).Msg("Unable to convert result to json")
 		os.Exit(1)
 	}
 	return string(jsonString)

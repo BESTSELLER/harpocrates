@@ -57,7 +57,7 @@ var (
 
 			allSecrets, err := vaultClient.ExtractSecrets(input)
 			if err != nil {
-				log.Fatal().Err(err)
+				log.Fatal().Err(err).Msgf("%s", err)
 			}
 
 			if cmd.Flags().Changed("format") && (config.Config.Format != "json" && config.Config.Format != "env" && config.Config.Format != "secret") {
