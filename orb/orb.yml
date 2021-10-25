@@ -34,8 +34,8 @@ jobs:
         description: Vault account prefix to pull, will default to an environment var called SHORT
       prefix:
         type: string
-        default: K8S_CLUSTER_
-        description: Prefix to be used for secrets - this will not be used if specifying `vault-path`
+        default: ""
+        description: Prefix to be used for secrets
     steps:
       - attach_workspace:
           at: /tmp
@@ -53,10 +53,16 @@ jobs:
 
               # Fetch all the "common" secrets if that env var has been set
               if [ "$HARPOCRATES_SECRETS" != "" ] ; then
+                prefix=""
+                if [ "<< parameters.prefix >>" == "" ] ; then 
+                  prefix="K8S_CLUSTER_"
+                else
+                  prefix="<< parameters.prefix >>"                 
+                fi
                 /harpocrates \
                   --format "<< parameters.format >>" \
                   --output "<< parameters.output >>" \
-                  --prefix "<< parameters.prefix >>" \
+                  --prefix $prefix \
                   --secret $HARPOCRATES_SECRETS
               fi
 
