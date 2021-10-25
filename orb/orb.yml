@@ -90,7 +90,8 @@ jobs:
               /harpocrates \
                 --format "<< parameters.format >>" \
                 --output "<< parameters.output >>" \
-                --secret "<< parameters.vault-path >>"
+                --prefix "<< parameters.prefix >>" \
+                --secret "<< parameters.vault-path >>" 
             fi
 
       - persist_to_workspace:
