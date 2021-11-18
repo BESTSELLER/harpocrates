@@ -3,7 +3,7 @@ module github.com/BESTSELLER/harpocrates
 go 1.17
 
 require (
-	github.com/gookit/color v1.4.2
+	github.com/gookit/color v1.5.0
 	github.com/hashicorp/vault v1.7.2
 	github.com/hashicorp/vault/api v1.1.0
 	github.com/mitchellh/mapstructure v1.4.1
@@ -133,7 +133,7 @@ require (
 	github.com/sirupsen/logrus v1.6.0 // indirect
 	github.com/softlayer/softlayer-go v0.0.0-20180806151055-260589d94c7d // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/stretchr/testify v1.6.1 // indirect
+	github.com/stretchr/testify v1.7.0 // indirect
 	github.com/tencentcloud/tencentcloud-sdk-go v3.0.171+incompatible // indirect
 	github.com/tv42/httpunix v0.0.0-20150427012821-b75d8614f926 // indirect
 	github.com/vmware/govmomi v0.18.0 // indirect
