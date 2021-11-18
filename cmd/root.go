@@ -29,7 +29,7 @@ var (
 				input = util.ReadInput(data)
 			} else if len(*secret) > 0 { // Parameters is being used
 				if config.Config.Output == "" {
-					color.Red.Println("Output is required!")
+					log.Error().Msg("Output is required!")
 					cmd.Usage()
 					return
 				}
@@ -61,7 +61,7 @@ var (
 			}
 
 			if cmd.Flags().Changed("format") && (config.Config.Format != "json" && config.Config.Format != "env" && config.Config.Format != "secret") {
-				color.Red.Printf("Please a valid format of either: json, env or secret \n\n")
+				log.Error().Msg("Please a valid format of either: json, env or secret")
 				cmd.Help()
 				return
 			}
@@ -84,7 +84,7 @@ var (
 					files.Write(config.Config.Output, fileName, v.Result.ToK8sSecret(), v.Owner)
 				}
 
-				color.Green.Printf("Secrets written to file: %s/%s\n", config.Config.Output, fileName)
+				log.Debug().Msgf("Secrets written to file: %s/%s\n", config.Config.Output, fileName)
 			}
 		},
 		Use:   "harpocrates",
