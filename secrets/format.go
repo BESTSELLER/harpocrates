@@ -20,6 +20,7 @@ func (result Result) Add(key string, value interface{}, prefix string, upperCase
 
 // ToJSON will format a map[string]interface{} to json
 func (result Result) ToJSON() string {
+	log.Debug().Msg("Exporting as JSON")
 	jsonString, err := json.Marshal(result)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Unable to convert result to json")
@@ -33,7 +34,7 @@ func (result Result) toKV(prefix string) string {
 
 	for key, val := range result {
 		leKey := fixEnvName(key)
-		fmt.Println(leKey)
+		log.Info().Msgf("Exporting key: %s", leKey)
 		resturnString += fmt.Sprintf("%s%s='%s'\n", prefix, leKey, val)
 	}
 	return resturnString
@@ -44,7 +45,7 @@ func (result Result) toSecretKV() string {
 
 	for key, val := range result {
 		leKey := fixEnvName(key)
-		fmt.Println(leKey)
+		log.Info().Msgf("Exporting key: %s", leKey)
 		resturnString += fmt.Sprintf("%s=%s\n", leKey, val)
 	}
 	return resturnString
@@ -54,11 +55,13 @@ func (result Result) toSecretKV() string {
 //
 // export KEY='value'
 func (result Result) ToENV() string {
+	log.Debug().Msg("Exporting as env values")
 	return result.toKV("export ")
 }
 
 // ToK8sSecret exports secrets as raw key values
 func (result Result) ToK8sSecret() string {
+	log.Debug().Msg("Exporting as raw key values")
 	return result.toSecretKV()
 }
 

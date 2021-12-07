@@ -84,7 +84,7 @@ var (
 					files.Write(config.Config.Output, fileName, v.Result.ToK8sSecret(), v.Owner)
 				}
 
-				log.Debug().Msgf("Secrets written to file: %s/%s\n", config.Config.Output, fileName)
+				log.Debug().Msgf("Secrets written to file: %s/%s", config.Config.Output, fileName)
 			}
 		},
 		Use:   "harpocrates",
@@ -133,7 +133,13 @@ func SetupLogLevel() {
 	case "info":
 		zerolog.SetGlobalLevel(zerolog.InfoLevel)
 		break
-	default:
+	case "warn":
 		zerolog.SetGlobalLevel(zerolog.WarnLevel)
+		break
+	case "error":
+		zerolog.SetGlobalLevel(zerolog.ErrorLevel)
+		break
+	default:
+		zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	}
 }
