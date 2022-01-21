@@ -1,0 +1,19 @@
+format: env
+output: ../.tmp/
+owner: 123
+prefix: TEST_
+uppercase: true
+secrets:
+  - secret/data/secret
+  - secret/data/secret:
+      prefix: TEST2_
+      format: json
+      filename: test2.json
+      uppercase: false
+      owner: 111
+      keys:
+        - key1
+        - key2:
+            prefix: FIX_
+            uppercase: false
+            saveAsFile: true

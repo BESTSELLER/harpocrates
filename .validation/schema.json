@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "format": {
+      "type": "string"
+    },
+    "output": {
+      "type": "string"
+    },
+    "owner": {
+      "type": "integer"
+    },
+    "prefix": {
+      "type": "string"
+    },
+    "uppercase": {
+      "type": "boolean"
+    },
+    "secrets": {
+      "type": "array",
+      "items": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "object",
+          "patternProperties": {
+            ".*": {
+              "type": "object",
+              "properties": {
+                "owner": {
+                  "type": "integer"
+                },
+                "format": {
+                  "type": "string",
+                  "enum": [
+                    "json",
+                    "env",
+                    "secret"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  "required": [
+    "format",
+    "output",
+    "owner",
+    "prefix",
+    "uppercase",
+    "secrets"
+  ]
+}
