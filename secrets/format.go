@@ -46,7 +46,7 @@ func (result Result) toSecretKV() string {
 	for key, val := range result {
 		leKey := fixEnvName(key)
 		log.Info().Msgf("Exporting key: %s", leKey)
-		resturnString += fmt.Sprintf("%s=%s\n", leKey, val)
+		resturnString += fmt.Sprintf("%s='%s'\n", leKey, val)
 	}
 	return resturnString
 }
