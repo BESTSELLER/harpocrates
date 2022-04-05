@@ -106,6 +106,106 @@ jobs:
             - secrets
             - << parameters.output-filename >>
             - cluster_secret.json
+            
+  dump-secrets2:
+    description: Read secret from Vault and write to /secrets/secrets
+    executor: secret_image
+    parameters:
+      secret_ci-path:
+        type: string
+        default: ./secret_ci.yml
+        description: Path to file with secret dump information. Defaults to ./secret_ci.yml
+      output:
+        type: string
+        default: "/tmp"
+        description: Path in the workspace to store the secrets
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - run:
+          name: Dump-secrets - Download & install yq
+          command: |
+            VERSION=v4.23.1
+            wget -O /usr/bin/yq https://github.com/mikefarah/yq/releases/download/$VERSION/yq_linux_amd64
+            chmod +x /usr/bin/yq
+      - vault-login
+      - run:
+          name: Secret-injector - Write secrets to file
+          command: |
+            mkdir -p << parameters.output >>
+
+            # Loop through the secret yaml
+            readarray secrets < <(yq e -o=j -I=0 '.secret_template[]' "<< parameters.secret_ci-path >>" )
+
+            
+            for sec in "${secrets[@]}"; do
+              short=$(echo "$sec" | yq e '.short' -)
+              vaultpath=$(echo "$sec" | yq e '.vault-path' -)
+              prefix=$(echo "$sec" | yq e '.prefix' -)
+              format=$(echo "$sec" | yq e '.format // "env"' -)
+              outputFilename=$(echo "$sec" | yq e '.output-filename // "secrets"' -)
+              if [ "$short" != "null" ]; then
+                export SHORT="$short"
+              fi
+
+              # Default one, if no vault-path is set
+              if [ "$vaultpath" == "null" ]; then
+                # Fetch all the common secrets
+                if [ "$HARPOCRATES_SECRETS" != "" ]; then
+                  pfix=""
+                  if [ "$prefix" == "null" ]; then
+                    pfix="K8S_CLUSTER_"
+                  else
+                    pfix="$prefix"
+                  fi
+                  /harpocrates \
+                    --format "$format" \
+                    --output "<< parameters.output >>" \
+                    --prefix "$pfix" \
+                    --secret "$HARPOCRATES_SECRETS"
+                fi
+                # Fetch cluster credentials
+                if [ "$CLUSTER_SECRET" != "" ]; then
+                  export HARPOCRATES_FILENAME="cluster_secret.json"
+                  /harpocrates \
+                    --format json \
+                    --output "<< parameters.output >>" \
+                    --secret "$CLUSTER_SECRET"
+                  unset HARPOCRATES_FILENAME
+                fi
+
+                # Fetch docker credentials
+                if [ "$SHORT" != "" ]; then
+                  /harpocrates \
+                    --format "$format" \
+                    --output "<< parameters.output >>" \
+                    --prefix "DOCKER_" \
+                    --secret "ES/data/service_accounts/harbor/$SHORT-ci"
+                fi
+
+              fi
+
+              # Check if they have specified vault-path and then fetch those from Vault
+              if [ "$vaultpath" != "null" ]; then
+                if [ "$outputFilename" != "null" ]; then
+                  export HARPOCRATES_FILENAME="$outputFilename"
+                fi
+
+                /harpocrates \
+                  --format "$format" \
+                  --output "<< parameters.output >>" \
+                  --prefix "$prefix" \
+                  --secret "$vaultpath"
+              fi
+
+            done
+
+      - persist_to_workspace:
+          root: << parameters.output >>
+          paths:
+            - secrets
+            - << parameters.output-filename >>
+            - cluster_secret.json
 
 commands:
   use-secrets:
