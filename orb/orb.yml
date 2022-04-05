@@ -204,7 +204,7 @@ jobs:
           root: << parameters.output >>
           paths:
             - secrets
-            - << parameters.output-filename >>
+            - '*'
             - cluster_secret.json
 
 commands:
