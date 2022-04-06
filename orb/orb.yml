@@ -107,6 +107,9 @@ jobs:
             - << parameters.output-filename >>
             - cluster_secret.json
             
+  
+
+commands:
   dump-secrets2:
     description: Read secret from Vault and write to /secrets/secrets
     executor: secret_image
@@ -206,8 +209,7 @@ jobs:
             - secrets
             - '*'
             - cluster_secret.json
-
-commands:
+            
   use-secrets:
     description: Will add the secrets to BASH_ENV, defaults to /tmp/secrets
     parameters:
