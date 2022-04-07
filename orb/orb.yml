@@ -161,13 +161,14 @@ jobs:
               fi
               
               if [[ "$format" == "env" || "$format" == "json" || "$format" == "secret" ]] ; then
-              echo valid
+              echo "The format is correct"
               else
-              echo invalid
+              echo "The format is incorrect only env, json and secret is allowed"
               exit 1
               fi
+
               name=$(echo "$sec" | yq e '.name' -)
-              echo "Now going through $name"
+              echo "Now getting secrets from $name"
 
               # Default one, if no vault-path is set
               if [ "$vaultpath" == "null" ]; then
