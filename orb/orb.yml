@@ -108,13 +108,16 @@ jobs:
             - cluster_secret.json
             
   dump-secrets2:
-    description: Read secret from Vault and write to /secrets/secrets
+    description: >
+      Read secret from Vault, using a yml file and write to /secrets/secrets. 
+      Compared to dump-secrets the following have been moved to the .yml file.
+      vault-path, output-filename, format, short and prefix
     executor: secret_image
     parameters:
       secret_ci-path:
         type: string
         default: ./secret_ci.yml
-        description: Path to file with secret dump information. Defaults to ./secret_ci.yml
+        description: Path to file with secret information. Defaults to ./secret_ci.yml
       output:
         type: string
         default: "/tmp"
@@ -144,7 +147,7 @@ jobs:
             mkdir -p << parameters.output >>
 
             # Loop through the secret yaml
-            readarray secrets < <(yq e -o=j -I=0 '.secret_template[]' "<< parameters.secret_ci-path >>" )
+            readarray secrets < <(yq e -o=j -I=0 '.secrets[]' "<< parameters.secret_ci-path >>" )
 
             
             for sec in "${secrets[@]}"; do
@@ -155,6 +158,14 @@ jobs:
               outputFilename=$(echo "$sec" | yq e '.output-filename // "secrets"' -)
               if [ "$short" != "null" ]; then
                 export SHORT="$short"
+              fi
+              
+              shopt -s extglob
+              if [[ $x == @(env|json|secret) ]]; then
+                  echo is valid
+              else
+                  echo not valid
+                  exit 1
               fi
               name=$(echo "$sec" | yq e '.name' -)
               echo "Now going through $name"
