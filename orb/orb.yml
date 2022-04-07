@@ -164,7 +164,7 @@ jobs:
                 # Fetch all the common secrets
                 if [ "$HARPOCRATES_SECRETS" != "" ]; then
                   pfix=""
-                  if [ "$prefix" == "null" ]; then
+                  if [ "$prefix" == "" ]; then
                     pfix="K8S_CLUSTER_"
                   else
                     pfix="$prefix"
