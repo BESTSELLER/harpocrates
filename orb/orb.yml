@@ -150,7 +150,7 @@ jobs:
             for sec in "${secrets[@]}"; do
               short=$(echo "$sec" | yq e '.short' -)
               vaultpath=$(echo "$sec" | yq e '.vault-path' -)
-              prefix=$(echo "$sec" | yq e '.prefix' // "" -)
+              prefix=$(echo "$sec" | yq e '.prefix // ""' -)
               format=$(echo "$sec" | yq e '.format // "env"' -)
               outputFilename=$(echo "$sec" | yq e '.output-filename // "secrets"' -)
               if [ "$short" != "null" ]; then
