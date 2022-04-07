@@ -148,7 +148,10 @@ jobs:
 
             # Loop through the secret yaml
             readarray secrets < <(yq e -o=j -I=0 '.secrets[]' "<< parameters.secret_ci-path >>" )
-            echo "${secrets[@]}"
+            if [ "${#secrets[@]}" -eq 0 ]; then
+              echo "Couldn't find any secrets, did you specify the right path or did you forget the first line in the .yml has to be secrets:"
+              exit 1
+            fi
 
             
             for sec in "${secrets[@]}"; do
