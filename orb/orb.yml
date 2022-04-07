@@ -160,6 +160,12 @@ jobs:
                 export SHORT="$short"
               fi
               
+              if [[ "$format" == "env" || "$format" == "json" || "$format" == "secret" ]] ; then
+              echo valid
+              else
+              echo invalid
+              exit 1
+              fi
               name=$(echo "$sec" | yq e '.name' -)
               echo "Now going through $name"
 
