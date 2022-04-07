@@ -199,6 +199,7 @@ jobs:
               # Check if they have specified vault-path and then fetch those from Vault
               if [ "$vaultpath" != "null" ]; then
                 if [ "$outputFilename" != "null" ]; then
+                  echo "Output file name is $outputFilename, Setting HARPOCRATES_FILENAME"
                   export HARPOCRATES_FILENAME="$outputFilename"
                 fi
 
