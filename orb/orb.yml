@@ -161,7 +161,7 @@ jobs:
               fi
               
               shopt -s extglob
-              if [[ $x == @(env|json|secret) ]]; then
+              if [[ $format == @(env|json|secret) ]]; then
                   echo is valid
               else
                   echo not valid
