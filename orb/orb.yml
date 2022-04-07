@@ -148,6 +148,7 @@ jobs:
 
             # Loop through the secret yaml
             readarray secrets < <(yq e -o=j -I=0 '.secrets[]' "<< parameters.secret_ci-path >>" )
+            echo "${secrets[@]}"
 
             
             for sec in "${secrets[@]}"; do
