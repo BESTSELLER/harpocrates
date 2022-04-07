@@ -148,6 +148,8 @@ jobs:
               if [ "$short" != "null" ]; then
                 export SHORT="$short"
               fi
+              name=$(echo "$sec" | yq e '.name' -)
+              echo "Now going through $name"
 
               # Default one, if no vault-path is set
               if [ "$vaultpath" == "null" ]; then
