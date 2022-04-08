@@ -117,6 +117,10 @@ jobs:
       secret-file:
         description: Path to your secret file
         type: string
+      output:
+        type: string
+        default: "/tmp"
+        description: Path in the workspace to store the secrets
     steps:
       - checkout
       - attach_workspace:
@@ -165,7 +169,6 @@ jobs:
           paths:
             - secrets
             - '*'
-            - cluster_secret.json
 
 commands:
   use-secrets:
