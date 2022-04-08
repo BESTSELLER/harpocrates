@@ -150,7 +150,7 @@ jobs:
             fi
 
             if [ "$CLUSTER_SECRET" != "" ] ; then
-            yq e '.secrets += [ { env(CLUSTER_SECRET): {"prefix": "K8S_CLUSTER_", "format": "json", "filename": "cluster_secret.json"}}]' -i << parameters.secret-file >>   
+            yq e '.secrets += [ { env(CLUSTER_SECRET): {"prefix": "K8S_CLUSTER_", "format": "json", "fileName": "cluster_secret.json"}}]' -i << parameters.secret-file >>   
             fi
 
             if [ "$SHORT" != "" ] ; then
