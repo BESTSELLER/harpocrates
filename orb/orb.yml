@@ -114,14 +114,9 @@ jobs:
       vault-path, output-filename, format, short and prefix
     executor: secret_image
     parameters:
-      secret_ci-path:
+      secret-file:
+        description: Path to your secret file
         type: string
-        default: ./secret_ci.yml
-        description: Path to file with secret information. Defaults to ./secret_ci.yml
-      output:
-        type: string
-        default: "/tmp"
-        description: Path in the workspace to store the secrets
     steps:
       - checkout
       - attach_workspace:
@@ -144,87 +139,26 @@ jobs:
 
             # Use the error status of the first failure, rather than that of the last item in a pipeline.
             set -o pipefail
-            mkdir -p << parameters.output >>
 
-            # Loop through the secret yaml
-            readarray secrets < <(yq e -o=j -I=0 '.secrets[]' "<< parameters.secret_ci-path >>" )
-            if [ "${#secrets[@]}" -eq 0 ]; then
-              echo "Couldn't find any secrets, did you specify the right path or did you forget the first line in the .yml has to be secrets:"
-              exit 1
+            # Update secret file with common secrets
+            if [ "$HARPOCRATES_SECRETS" != "" ] ; then
+            yq e '.secrets += [ { env(HARPOCRATES_SECRETS): {"prefix": "K8S_CLUSTER_"}}]' -i << parameters.secret-file >>
             fi
 
-            
-            for sec in "${secrets[@]}"; do
-              short=$(echo "$sec" | yq e '.short' -)
-              vaultpath=$(echo "$sec" | yq e '.vault-path' -)
-              prefix=$(echo "$sec" | yq e '.prefix // ""' -)
-              format=$(echo "$sec" | yq e '.format // "env"' -)
-              outputFilename=$(echo "$sec" | yq e '.output-filename // "secrets"' -)
-              if [ "$short" != "null" ]; then
-                export SHORT="$short"
-              fi
-              
-              if [[ "$format" == "env" || "$format" == "json" || "$format" == "secret" ]] ; then
-              echo "The format is correct"
-              else
-              echo "The format is incorrect only env, json and secret is allowed"
-              exit 1
-              fi
+            if [ "$CLUSTER_SECRET" != "" ] ; then
+            yq e '.secrets += [ { env(CLUSTER_SECRET): {"prefix": "K8S_CLUSTER_", "format": "json", "filename": "cluster_secret.json"}}]' -i << parameters.secret-file >>   
+            fi
 
-              name=$(echo "$sec" | yq e '.name' -)
-              echo "Now getting secrets from $name"
+            if [ "$SHORT" != "" ] ; then
+             export PATH="ES/data/service_accounts/harbor/$SHORT-ci"
+             yq e '.secrets += [ { env(PATH): {"prefix": "DOCKER_"}}]' -i << parameters.secret-file >>
+            fi   
 
-              # Default one, if no vault-path is set
-              if [ "$vaultpath" == "null" ]; then
-                # Fetch all the common secrets
-                if [ "$HARPOCRATES_SECRETS" != "" ]; then
-                  pfix=""
-                  if [ "$prefix" == "" ]; then
-                    pfix="K8S_CLUSTER_"
-                  else
-                    pfix="$prefix"
-                  fi
-                  /harpocrates \
-                    --format "$format" \
-                    --output "<< parameters.output >>" \
-                    --prefix "$pfix" \
-                    --secret "$HARPOCRATES_SECRETS"
-                fi
-                # Fetch cluster credentials
-                if [ "$CLUSTER_SECRET" != "" ]; then
-                  export HARPOCRATES_FILENAME="cluster_secret.json"
-                  /harpocrates \
-                    --format json \
-                    --output "<< parameters.output >>" \
-                    --secret "$CLUSTER_SECRET"
-                  unset HARPOCRATES_FILENAME
-                fi
+            export SECRET_FILE=<< parameters.secret-file >>
+            export SECRETS=$(yq read $SECRET_FILE -j)
 
-                # Fetch docker credentials
-                if [ "$SHORT" != "" ]; then
-                  /harpocrates \
-                    --format "$format" \
-                    --output "<< parameters.output >>" \
-                    --prefix "DOCKER_" \
-                    --secret "ES/data/service_accounts/harbor/$SHORT-ci"
-                fi
-
-              fi
-
-              # Check if they have specified vault-path and then fetch those from Vault
-              if [ "$vaultpath" != "null" ]; then
-                if [ "$outputFilename" != "null" ]; then
-                  export HARPOCRATES_FILENAME="$outputFilename"
-                fi
-
-                /harpocrates \
-                  --format "$format" \
-                  --output "<< parameters.output >>" \
-                  --prefix "$prefix" \
-                  --secret "$vaultpath"
-              fi
-
-            done
+            /harpocrates \
+                -f "$SECRETS"
 
       - persist_to_workspace:
           root: << parameters.output >>
