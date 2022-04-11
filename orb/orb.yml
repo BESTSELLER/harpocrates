@@ -148,13 +148,15 @@ jobs:
 
             # Update secret file with common secrets
             if [ "$HARPOCRATES_SECRETS" != "" ] ; then
-            yq e '.secrets += [ { env(HARPOCRATES_SECRETS): {"prefix": "K8S_CLUSTER_"}}]' -i << parameters.secret-file >>
-            echo "Update secrets file with common secrets"
-            yq e << parameters.secret-file >>
+              echo "$HARPOCRATES_SECRETS"
+              yq e '.secrets += [ { env(HARPOCRATES_SECRETS): {"prefix": "K8S_CLUSTER_"}}]' -i << parameters.secret-file >>
+              echo "Update secrets file with common secrets"
+              yq e << parameters.secret-file >>
             fi
 
 
             if [ "$CLUSTER_SECRET" != "" ] ; then
+              echo "$CLUSTER_SECRET"
               yq e '.secrets += [ { env(CLUSTER_SECRET): {"prefix": "K8S_CLUSTER_", "format": "json", "fileName": "cluster_secret.json"}}]' -i << parameters.secret-file >>   
               echo "Added cluster secrets to secretsfile"
               yq e << parameters.secret-file >>
