@@ -143,23 +143,32 @@ jobs:
 
             # Use the error status of the first failure, rather than that of the last item in a pipeline.
             set -o pipefail
+            echo "Orginial secrets file"
+            yq e << parameters.secret-file >>
 
             # Update secret file with common secrets
             if [ "$HARPOCRATES_SECRETS" != "" ] ; then
             yq e '.secrets += [ { env(HARPOCRATES_SECRETS): {"prefix": "K8S_CLUSTER_"}}]' -i << parameters.secret-file >>
+            echo "Update secrets file with common secrets"
+            yq e << parameters.secret-file >>
             fi
 
+
             if [ "$CLUSTER_SECRET" != "" ] ; then
-            yq e '.secrets += [ { env(CLUSTER_SECRET): {"prefix": "K8S_CLUSTER_", "format": "json", "fileName": "cluster_secret.json"}}]' -i << parameters.secret-file >>   
+              yq e '.secrets += [ { env(CLUSTER_SECRET): {"prefix": "K8S_CLUSTER_", "format": "json", "fileName": "cluster_secret.json"}}]' -i << parameters.secret-file >>   
+              echo "Added cluster secrets to secretsfile"
+              yq e << parameters.secret-file >>
             fi
 
             if [ "$SHORT" != "" ] ; then
-             export PATH="ES/data/service_accounts/harbor/$SHORT-ci"
-             yq e '.secrets += [ { env(PATH): {"prefix": "DOCKER_"}}]' -i << parameters.secret-file >>
+              export PATH="ES/data/service_accounts/harbor/$SHORT-ci"
+              yq e '.secrets += [ { env(PATH): {"prefix": "DOCKER_"}}]' -i << parameters.secret-file >>
+              echo "Added DOCKER secrets"
+              yq e << parameters.secret-file >>
             fi   
 
             export SECRET_FILE=<< parameters.secret-file >>
-            export SECRETS=$(yq read $SECRET_FILE -j)
+            export SECRETS=$(yq e -j $SECRET_FILE )
 
             /harpocrates \
                 -f "$SECRETS"
