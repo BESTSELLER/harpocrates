@@ -169,7 +169,8 @@ jobs:
             fi   
 
             export SECRET_FILE=<< parameters.secret-file >>
-            export SECRETS=$(yq e -j $SECRET_FILE )
+            export SECRETS=$(yq e -o=json $SECRET_FILE )
+            echo $SECRETS
 
             /harpocrates \
                 -f "$SECRETS"
