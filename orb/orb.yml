@@ -146,6 +146,10 @@ jobs:
             echo "Orginial secrets file"
             yq e << parameters.secret-file >>
 
+            # Insert output path
+            export OUTPUT= << parameters.output >>
+            yq e '.output = env(OUTPUT)' -i  << parameters.secret-file >> 
+
             # Update secret file with common secrets
             if [ "$HARPOCRATES_SECRETS" != "" ] ; then
               yq e '.secrets += [ { env(HARPOCRATES_SECRETS): {"prefix": "K8S_CLUSTER_"}}]' -i << parameters.secret-file >>
