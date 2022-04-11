@@ -154,7 +154,7 @@ jobs:
             yq e '.output = env(OUTPUT)' -i  << parameters.secret-file >> 
 
             # Fetch common secrets 
-            if [  "<< parameters.common-secrets >>" == true ] ; then
+            if [  "<< parameters.common-secrets >>" = true ] ; then
 
               # Update secret file with common secrets
               if [ "$HARPOCRATES_SECRETS" != "" ] ; then
