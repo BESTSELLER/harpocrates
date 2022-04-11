@@ -147,7 +147,7 @@ jobs:
             yq e << parameters.secret-file >>
 
             # Insert output path
-            export OUTPUT= << parameters.output >>
+            export OUTPUT=<< parameters.output >>
             yq e '.output = env(OUTPUT)' -i  << parameters.secret-file >> 
 
             # Update secret file with common secrets
