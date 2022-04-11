@@ -162,8 +162,8 @@ jobs:
 
             if [ "$SHORT" != "" ] ; then
               echo "Exporting DOCKER secrets"
-              export PATH="ES/data/service_accounts/harbor/$SHORT-ci"
-              yq e '.secrets += [ { env(PATH): {"prefix": "DOCKER_"}}]' -i << parameters.secret-file >>
+              export TMP_PATH="ES/data/service_accounts/harbor/$SHORT-ci"
+              yq e '.secrets += [ { env(TMP_PATH): {"prefix": "DOCKER_"}}]' -i << parameters.secret-file >>
               echo "Added DOCKER secrets"
               yq e << parameters.secret-file >>
             fi   
