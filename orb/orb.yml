@@ -178,7 +178,6 @@ jobs:
       - persist_to_workspace:
           root: << parameters.output >>
           paths:
-            - secrets
             - '*'
 
 commands:
