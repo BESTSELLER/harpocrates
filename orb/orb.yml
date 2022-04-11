@@ -107,11 +107,12 @@ jobs:
             - << parameters.output-filename >>
             - cluster_secret.json
             
-  dump-secrets2:
+  dump-secrets-yaml:
     description: >
-      Read secret from Vault, using a yml file and write to /secrets/secrets. 
-      Compared to dump-secrets the following have been moved to the .yml file.
-      vault-path, output-filename, format, short and prefix
+      Read secret from Vault, and write to designated output file. 
+      This utilises an yaml template file to determine the secrets being fetched.
+      Compared to dump-secrets this can fetch multiple secrets at once.
+      The structure of the yaml file is shown here. https://github.com/BESTSELLER/harpocrates/blob/master/examples/secret.yaml
     executor: secret_image
     parameters:
       secret-file:
@@ -121,6 +122,10 @@ jobs:
         type: string
         default: "/tmp"
         description: Path in the workspace to store the secrets
+      common-secrets:
+        type: boolean
+        default: true
+        description: Should the orb fetch the secrets common to BESTSELLER.
     steps:
       - checkout
       - attach_workspace:
@@ -143,36 +148,30 @@ jobs:
 
             # Use the error status of the first failure, rather than that of the last item in a pipeline.
             set -o pipefail
-            echo "Orginial secrets file"
-            yq e << parameters.secret-file >>
 
             # Insert output path
             export OUTPUT=<< parameters.output >>
             yq e '.output = env(OUTPUT)' -i  << parameters.secret-file >> 
 
-            # Update secret file with common secrets
-            if [ "$HARPOCRATES_SECRETS" != "" ] ; then
-              yq e '.secrets += [ { env(HARPOCRATES_SECRETS): {"prefix": "K8S_CLUSTER_"}}]' -i << parameters.secret-file >>
-              echo "Update secrets file with common secrets"
-              yq e << parameters.secret-file >>
-            fi
+            # Fetch common secrets 
+            if [  "<< parameters.common-secrets >>" == true ] ; then
+
+              # Update secret file with common secrets
+              if [ "$HARPOCRATES_SECRETS" != "" ] ; then
+                yq e '.secrets += [ { env(HARPOCRATES_SECRETS): {"prefix": "K8S_CLUSTER_"}}]' -i << parameters.secret-file >>
+              fi
 
 
-            if [ "$CLUSTER_SECRET" != "" ] ; then
-              yq e '.secrets += [ { env(CLUSTER_SECRET): {"prefix": "K8S_CLUSTER_", "format": "json", "fileName": "cluster_secret.json"}}]' -i << parameters.secret-file >>   
-              echo "Added cluster secrets to secretsfile"
-              yq e << parameters.secret-file >>
-            fi
+              if [ "$CLUSTER_SECRET" != "" ] ; then
+                yq e '.secrets += [ { env(CLUSTER_SECRET): {"prefix": "K8S_CLUSTER_", "format": "json", "fileName": "cluster_secret.json"}}]' -i << parameters.secret-file >>   
+              fi
 
-            if [ "$SHORT" != "" ] ; then
-              echo "Exporting DOCKER secrets"
-              export TMP_PATH="ES/data/service_accounts/harbor/$SHORT-ci"
-              yq e '.secrets += [ { env(TMP_PATH): {"prefix": "DOCKER_"}}]' -i << parameters.secret-file >>
-              echo "Added DOCKER secrets"
-              yq e << parameters.secret-file >>
+              if [ "$SHORT" != "" ] ; then
+                export TMP_PATH="ES/data/service_accounts/harbor/$SHORT-ci"
+                yq e '.secrets += [ { env(TMP_PATH): {"prefix": "DOCKER_"}}]' -i << parameters.secret-file >>
+              fi
+
             fi
-            echo "Final secret file"
-            yq e << parameters.secret-file >>   
 
             /harpocrates \
                 -f << parameters.secret-file >>
