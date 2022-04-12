@@ -158,7 +158,7 @@ jobs:
 
               # Update secret file with common secrets
               if [ "$HARPOCRATES_SECRETS" != "" ]; then
-                IFS=',' read -ra SECRET_PATH <<<"$HARPOCRATES_SECRETS"
+                IFS=',' read -ra SECRET_PATH \<<<"$HARPOCRATES_SECRETS"
                 for i in "${SECRET_PATH[@]}"; do
                   export TMP_PATHS="$i"
                   yq e '.secrets += [ { env(TMP_PATHS): {"prefix": "K8S_CLUSTER_"}}]' -i  << parameters.secret-file >>
