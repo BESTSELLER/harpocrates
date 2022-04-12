@@ -157,10 +157,13 @@ jobs:
             if [  << parameters.common-secrets >> = true ] ; then
 
               # Update secret file with common secrets
-              if [ "$HARPOCRATES_SECRETS" != "" ] ; then
-                yq e '.secrets += [ { env(HARPOCRATES_SECRETS): {"prefix": "K8S_CLUSTER_"}}]' -i << parameters.secret-file >>
+              if [ "$HARPOCRATES_SECRETS" != "" ]; then
+                IFS=',' read -ra SECRET_PATH <<<"$HARPOCRATES_SECRETS"
+                for i in "${SECRET_PATH[@]}"; do
+                  export TMP_PATHS="$i"
+                  yq e '.secrets += [ { env(TMP_PATHS): {"prefix": "K8S_CLUSTER_"}}]' -i  << parameters.secret-file >>
+                done
               fi
-
 
               if [ "$CLUSTER_SECRET" != "" ] ; then
                 yq e '.secrets += [ { env(CLUSTER_SECRET): {"prefix": "K8S_CLUSTER_", "format": "json", "fileName": "cluster_secret.json"}}]' -i << parameters.secret-file >>   
