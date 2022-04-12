@@ -40,9 +40,8 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON) ([]Outputs, error)
 			for c, d := range aa {
 				setPrefix(d.Prefix, &currentPrefix)
 				setUpper(d.UpperCase, &currentUpperCase)
-				setFormat(d.Format, &currentFormat)
 
-				if currentFormat != "" {
+				if d.Format != "" {
 					secretValue, err := vaultClient.ReadSecret(fmt.Sprintf("%s", c))
 					if err != nil {
 						return nil, err
