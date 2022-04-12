@@ -154,13 +154,16 @@ jobs:
             yq e '.output = env(OUTPUT)' -i  << parameters.secret-file >> 
 
             # Fetch common secrets 
-            if [  "<< parameters.common-secrets >>" == true ] ; then
+            if [  << parameters.common-secrets >> = true ] ; then
 
               # Update secret file with common secrets
-              if [ "$HARPOCRATES_SECRETS" != "" ] ; then
-                yq e '.secrets += [ { env(HARPOCRATES_SECRETS): {"prefix": "K8S_CLUSTER_"}}]' -i << parameters.secret-file >>
+              if [ "$HARPOCRATES_SECRETS" != "" ]; then
+                IFS=',' read -ra SECRET_PATH \<<<"$HARPOCRATES_SECRETS"
+                for i in "${SECRET_PATH[@]}"; do
+                  export TMP_PATHS="$i"
+                  yq e '.secrets += [ { env(TMP_PATHS): {"prefix": "K8S_CLUSTER_"}}]' -i  << parameters.secret-file >>
+                done
               fi
-
 
               if [ "$CLUSTER_SECRET" != "" ] ; then
                 yq e '.secrets += [ { env(CLUSTER_SECRET): {"prefix": "K8S_CLUSTER_", "format": "json", "fileName": "cluster_secret.json"}}]' -i << parameters.secret-file >>   
@@ -170,7 +173,6 @@ jobs:
                 export TMP_PATH="ES/data/service_accounts/harbor/$SHORT-ci"
                 yq e '.secrets += [ { env(TMP_PATH): {"prefix": "DOCKER_"}}]' -i << parameters.secret-file >>
               fi
-
             fi
 
             /harpocrates \
@@ -179,7 +181,6 @@ jobs:
       - persist_to_workspace:
           root: << parameters.output >>
           paths:
-            - secrets
             - '*'
 
 commands:

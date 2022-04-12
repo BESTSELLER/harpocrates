@@ -23,6 +23,7 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON) ([]Outputs, error)
 	var result = make(secrets.Result)
 	var currentPrefix = config.Config.Prefix
 	var currentUpperCase = config.Config.UpperCase
+	var currentFormat = config.Config.Format
 
 	for _, a := range input.Secrets {
 
@@ -39,8 +40,9 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON) ([]Outputs, error)
 			for c, d := range aa {
 				setPrefix(d.Prefix, &currentPrefix)
 				setUpper(d.UpperCase, &currentUpperCase)
+				setFormat(d.Format, &currentFormat)
 
-				if d.Format != "" {
+				if len(d.Keys) == 0 {
 					secretValue, err := vaultClient.ReadSecret(fmt.Sprintf("%s", c))
 					if err != nil {
 						return nil, err
@@ -50,7 +52,7 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON) ([]Outputs, error)
 						thisResult.Add(k, v, currentPrefix, currentUpperCase)
 					}
 
-					finalResult = append(finalResult, Outputs{Format: d.Format, Filename: d.FileName, Result: thisResult, Owner: d.Owner})
+					finalResult = append(finalResult, Outputs{Format: currentFormat, Filename: d.FileName, Result: thisResult, Owner: d.Owner})
 					continue
 				}
 
@@ -63,6 +65,7 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON) ([]Outputs, error)
 						for h, i := range bb {
 							setPrefix(i.Prefix, &currentPrefix)
 							setUpper(d.UpperCase, &currentUpperCase)
+							setFormat(d.Format, &currentFormat)
 
 							if i.SaveAsFile != nil {
 								secretValue, err := vaultClient.ReadSecretKey(fmt.Sprintf("%s", c), h)
@@ -83,6 +86,7 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON) ([]Outputs, error)
 							}
 							setPrefix(d.Prefix, &currentPrefix)
 							setUpper(d.UpperCase, &currentUpperCase)
+							setFormat(d.Format, &currentFormat)
 						}
 					} else {
 						secretValue, err := vaultClient.ReadSecretKey(fmt.Sprintf("%s", c), fmt.Sprintf("%s", f))
@@ -94,6 +98,7 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON) ([]Outputs, error)
 				}
 				setPrefix(config.Config.Prefix, &currentPrefix)
 				setUpper(d.UpperCase, &currentUpperCase)
+				setFormat(config.Config.Format, &currentFormat)
 			}
 		} else {
 			secretValue, err := vaultClient.ReadSecret(fmt.Sprintf("%s", a))
@@ -106,7 +111,7 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON) ([]Outputs, error)
 		}
 	}
 
-	finalResult = append(finalResult, Outputs{Format: config.Config.Format, Filename: "", Result: result})
+	finalResult = append(finalResult, Outputs{Format: currentFormat, Filename: "", Result: result})
 	return finalResult, nil
 }
 
@@ -122,5 +127,12 @@ func setUpper(potentialUpper *bool, currentUpper *bool) {
 		*currentUpper = *potentialUpper
 	} else {
 		*currentUpper = config.Config.UpperCase
+	}
+}
+func setFormat(potentialFormat string, currentFormat *string) {
+	if potentialFormat != "" {
+		*currentFormat = potentialFormat
+	} else {
+		*currentFormat = config.Config.Format
 	}
 }
