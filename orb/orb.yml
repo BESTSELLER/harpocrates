@@ -122,6 +122,11 @@ jobs:
         type: string
         default: "/tmp"
         description: Path in the workspace to store the secrets
+      vault-ending:
+        type: string
+        default: ""
+        description: > 
+          If $VAULT_ENDING is present in yaml, this will be replaced by this string.
       common-secrets:
         type: boolean
         default: true
@@ -131,7 +136,18 @@ jobs:
       - attach_workspace:
           at: /tmp
       - run:
-          name: Dump-secrets - Download & install yq
+          name: Install envsubt
+          command: |
+            apk update
+            apk add gettext
+      - run:
+          name: replace strings
+          command: |
+            export VAULT_ENDING=<< parameters.vault-ending >>
+
+            envsubst < << parameters.secret-file >> > ./secrets_var.yaml && mv ./secrets_var.yaml << parameters.secret-file >>            
+      - run:
+          name: Download & install yq
           command: |
             VERSION=v4.23.1
             wget -O /usr/bin/yq https://github.com/mikefarah/yq/releases/download/$VERSION/yq_linux_amd64
