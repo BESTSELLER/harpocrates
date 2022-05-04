@@ -1,7 +1,7 @@
-FROM golang:1.17.7-alpine AS builder
+FROM golang:1.18.1-alpine AS builder
 WORKDIR $GOPATH/src/harpocrates
 COPY . .
-RUN GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o /tmp/harpocrates
+RUN GOOS=linux GOARCH=amd64 go build -buildvcs=false -ldflags="-w -s" -o /tmp/harpocrates
 
 FROM alpine
 RUN apk add --no-cache bash
