@@ -2,7 +2,7 @@ version: 2.1
 executors:
   go_image:
     docker:
-      - image: cimg/go:1.17
+      - image: cimg/go:1.18
         auth:
           username: $DOCKERHUB_USER
           password: $DOCKERHUB_PASS
@@ -28,8 +28,8 @@ jobs:
       - run:
           name: install gotestsum
           command: |
-            go get -u gotest.tools/gotestsum
-            go get gotest.tools/assert@v2.2.0+incompatible
+            go install gotest.tools/gotestsum@latest
+            # go get gotest.tools/assert@v2.2.0+incompatible
       - run:
           name: go test
           command: |
