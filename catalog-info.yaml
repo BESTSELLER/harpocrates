@@ -11,7 +11,7 @@ metadata:
   annotations:
     github.com/project-slug: BESTSELLER/harpocrates
     circleci.com/project-slug: github/BESTSELLER/harpocrates
-    goharbor.io/repository-slug: es/harpocrates
+    google.com/artifact-slug: es-docker/harpocrates
 spec:
   type: service
   lifecycle: production
