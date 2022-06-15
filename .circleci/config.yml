@@ -152,7 +152,7 @@ workflows:
           <<: *common_context
           <<: *test_filter
       - cci-common/build_n_push_docker:
-          name: docker-build-n-push
+          name: docker-build
           repo: public-docker
           tag: test4
           dry_run: true
