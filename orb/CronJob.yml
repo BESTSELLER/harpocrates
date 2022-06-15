@@ -1,4 +1,4 @@
-apiVersion: batch/v1beta1
+apiVersion: batch/v1
 kind: CronJob
 metadata:
   name: $APP_NAME
@@ -12,7 +12,7 @@ spec:
             - name: secret-dumper
               image: harbor.bestsellerit.com/library/harpocrates:$HARPOCRATES_VERSION
               args:
-                - '$SECRETS'
+                - "$SECRETS"
               volumeMounts:
                 - name: secrets
                   mountPath: /secrets
@@ -26,7 +26,6 @@ spec:
               securityContext:
                 privileged: false
                 allowPrivilegeEscalation: false
-
 
           containers:
             - name: $CONTAINER_NAME
