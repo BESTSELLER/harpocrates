@@ -147,7 +147,7 @@ workflows:
       - cci-common/build_n_push_docker:
           name: docker-build
           repo: public-docker
-          tag: test4
+          tag: $CIRCLE_SHA1
           dry_run: true
           requires:
             - build-go
@@ -176,7 +176,7 @@ workflows:
       - cci-common/build_n_push_docker:
           name: docker-build-n-push
           repo: public-docker
-          tag: test4
+          tag: $CIRCLE_TAG
           push_latest: true
           requires:
             - build-go
