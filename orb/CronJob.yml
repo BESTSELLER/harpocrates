@@ -10,9 +10,9 @@ spec:
         spec:
           initContainers:
             - name: secret-dumper
-              image: harbor.bestsellerit.com/library/harpocrates:$HARPOCRATES_VERSION
+              image: europe-docker.pkg.dev/artifacts-pub-prod-b57f/public-docker/harpocrates:$HARPOCRATES_VERSION
               args:
-                - '$SECRETS'
+                - "$SECRETS"
               volumeMounts:
                 - name: secrets
                   mountPath: /secrets
@@ -26,7 +26,6 @@ spec:
               securityContext:
                 privileged: false
                 allowPrivilegeEscalation: false
-
 
           containers:
             - name: $CONTAINER_NAME
