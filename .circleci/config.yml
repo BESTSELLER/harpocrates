@@ -1,4 +1,5 @@
 version: 2.1
+
 executors:
   go_image:
     docker:
@@ -15,6 +16,7 @@ executors:
 
 orbs:
   secret-injector: bestsellerit/secret-injector@1.6.5
+  cci-common: bestsellerit/cci-common:1.2.5
 
 jobs:
   test:
@@ -289,3 +291,35 @@ workflows:
             - docker-build-n-push
           <<: *common_context
           <<: *release_filter
+
+  test-build-release:
+    jobs:
+      - secret-injector/dump-secrets:
+          <<: *common_context
+          filters:
+            branches:
+              - artifact-registry
+      - cci-common/go_test_unit:
+          <<: *common_context
+          filters:
+            branches:
+              - artifact-registry
+      - build-go:
+          requires:
+            - secret-injector/dump-secrets
+          <<: *common_context
+          filters:
+            branches:
+              - artifact-registry
+      - cci-common/build_n_push_docker:
+          name: docker-build-n-push
+          repo: public-docker
+          dry_run: false
+          # tag: $CIRCLE_TAG
+          tag: test
+          push_latest: true
+          <<: *common_context
+          filters:
+            branches:
+              - artifact-registry
+          requires: build-go
