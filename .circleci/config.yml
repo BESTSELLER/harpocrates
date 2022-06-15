@@ -222,6 +222,13 @@ release_filter: &release_filter
     branches:
       ignore: /.*/
 
+test_release_filter: &test_release_filter
+  filters:
+    tags:
+      ignore: /^[0-9]+(\.[0-9]+)*(-.*)*$/
+    branches:
+      only: artifact-registry
+
 common_context: &common_context
   context:
     - es02-prod
@@ -234,17 +241,10 @@ workflows:
           name: secrets-common
           <<: *common_context
           <<: *test_filter
-      - secret-injector/dump-secrets:
-          name: secrets-app
-          vault-path: ES/data/service_accounts/harbor/harpocrates-ci
-          requires:
-            - secrets-common
+      - cci-common/go_test_unit:
           <<: *common_context
           <<: *test_filter
-      - test:
-          <<: *common_context
-          <<: *test_filter
-      - test-sonar:
+      - cci-common/go_test_sonar:
           requires:
             - secrets-app
           <<: *common_context
@@ -260,70 +260,29 @@ workflows:
           <<: *common_context
           <<: *test_filter
 
-  test-build:
-    jobs:
-      - secret-injector/dump-secrets:
-          name: secrets-common
-          <<: *common_context
-          <<: *release_filter
-      - secret-injector/dump-secrets:
-          name: secrets-app
-          vault-path: ES/data/service_accounts/harbor/harpocrates-ci
-          requires:
-            - secrets-common
-          <<: *common_context
-          <<: *release_filter
-      - test:
-          <<: *common_context
-          <<: *release_filter
-      - build-go:
-          requires:
-            - secrets-app
-          <<: *common_context
-          <<: *release_filter
-      - docker-build-n-push:
-          requires:
-            - build-go
-          <<: *common_context
-          <<: *release_filter
-      - publish:
-          requires:
-            - docker-build-n-push
-          <<: *common_context
-          <<: *release_filter
-
   test-build-release:
     jobs:
       - secret-injector/dump-secrets:
-          filters:
-            branches:
-              only:
-                - artifact-registry
+          <<: *test_release_filter
           <<: *common_context
       - cci-common/go_test_unit:
-          filters:
-            branches:
-              only:
-                - artifact-registry
+          <<: *test_release_filter
           <<: *common_context
       - build-go:
           requires:
             - secret-injector/dump-secrets
+          <<: *test_release_filter
           <<: *common_context
-          filters:
-            branches:
-              only:
-                - artifact-registry
       - cci-common/build_n_push_docker:
+          pre-steps:
+            - run:
+                command: cp /tmp/harpocrates .
           name: docker-build-n-push
           repo: public-docker
           dry_run: false
-          tag: test
+          tag: test2
           push_latest: true
+          <<: *test_release_filter
           <<: *common_context
-          filters:
-            branches:
-              only:
-                - artifact-registry
           requires:
             - build-go
