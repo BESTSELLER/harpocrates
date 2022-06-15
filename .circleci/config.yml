@@ -119,17 +119,15 @@ jobs:
       - checkout
       - setup_remote_docker
       - run:
-          name: Push and build image
-          command: |
-            source /tmp/secrets
-            cp /tmp/harpocrates .
-            docker login -u $docker_harpocrates_username -p $docker_harpocrates_password $K8S_CLUSTER_artifact_registry_url/$K8S_CLUSTER_artifact_registry_project
-            docker build \
-              -t $K8S_CLUSTER_artifact_registry_url/$K8S_CLUSTER_artifact_registry_project/public-docker/$CIRCLE_PROJECT_REPONAME:$CIRCLE_TAG \
-              -t $K8S_CLUSTER_artifact_registry_url/$K8S_CLUSTER_artifact_registry_project/public-docker/$CIRCLE_PROJECT_REPONAME:latest \
-              .
-            docker push $K8S_CLUSTER_artifact_registry_url/$K8S_CLUSTER_artifact_registry_project/public-docker/$CIRCLE_PROJECT_REPONAME:$CIRCLE_TAG
-            docker push $K8S_CLUSTER_artifact_registry_url/$K8S_CLUSTER_artifact_registry_project/public-docker/$CIRCLE_PROJECT_REPONAME:latest
+          name: Copy /tmp/harpocrates files
+          command: cp /tmp/harpocrates .
+      - cci-common/build_n_push_docker:
+          name: docker-build-n-push
+          repo: public-docker
+          dry_run: false
+          tag: test3
+          push_latest: true
+
   docker-build:
     executor: docker
     working_directory: /app
@@ -276,15 +274,7 @@ workflows:
             - secret-injector/dump-secrets
           <<: *test_release_filter
           <<: *common_context
-      - cci-common/build_n_push_docker:
-          pre-steps:
-            - run:
-                command: cp /tmp/harpocrates .
-          name: docker-build-n-push
-          repo: public-docker
-          dry_run: false
-          tag: test2
-          push_latest: true
+      - build-n-push-docker:
           <<: *test_release_filter
           <<: *common_context
           requires:
