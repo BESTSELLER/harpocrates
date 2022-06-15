@@ -184,6 +184,7 @@ workflows:
           name: docker-build-n-push
           repo: public-docker
           tag: test4
+          push_latest: true
           requires:
             - build-go
           <<: *test_release_filter
