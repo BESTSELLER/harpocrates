@@ -4,7 +4,7 @@ description: Secret-injector orb
 executors:
   secret_image:
     docker:
-      - image: harbor.bestsellerit.com/library/harpocrates:$HARPOCRATES_VERSION
+      - image: europe-docker.pkg.dev/artifacts-pub-prod-b57f/public-docker/harpocrates:$HARPOCRATES_VERSION
 
 jobs:
   dump-secrets:
@@ -106,7 +106,7 @@ jobs:
             - secrets
             - << parameters.output-filename >>
             - cluster_secret.json
-            
+
   dump-secrets-yaml:
     description: >
       Read secret from Vault, and write to designated output file. 
@@ -139,7 +139,7 @@ jobs:
           name: replace strings
           command: |
 
-            envsubst < << parameters.secret-file >> > ./secrets_var.yaml && mv ./secrets_var.yaml << parameters.secret-file >>            
+            envsubst < << parameters.secret-file >> > ./secrets_var.yaml && mv ./secrets_var.yaml << parameters.secret-file >>
       - run:
           name: Download & install yq
           command: |
@@ -191,7 +191,7 @@ jobs:
       - persist_to_workspace:
           root: << parameters.output >>
           paths:
-            - '*'
+            - "*"
 
 commands:
   use-secrets:
@@ -295,7 +295,7 @@ commands:
             else
               export ROLE_NAME="$AUTH_NAME"
             fi
-        
+
             export DEPLOYMENT_TYPE=<< parameters.deploy-type >>
             export DEPLOY_FILE=<< parameters.deploy-file >>
             export APP_NAME=<< parameters.app-name >>
