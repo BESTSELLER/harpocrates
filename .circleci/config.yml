@@ -325,4 +325,5 @@ workflows:
             branches:
               only:
                 - artifact-registry
-          requires: build-go
+          requires:
+            - build-go
