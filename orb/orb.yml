@@ -312,7 +312,7 @@ commands:
             mv ./$DEPLOYMENT_TYPE\_var.yml ./$DEPLOYMENT_TYPE.yml
 
             # workaround due to: https://github.com/kubernetes-sigs/kustomize/issues/4062
-            KUBE_VERSION=$(kubectl version -o yaml | yq .clientVersion.minor)
+            KUBE_VERSION=$(kubectl version -o yaml | yq eval .clientVersion.minor -)
             DEPLOYMENT_TYPE=CronJob
             if [[ $KUBE_VERSION == 22 && $DEPLOYMENT_TYPE == "CronJob" ]]; then
               wget https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv4.5.5/kustomize_v4.5.5_linux_amd64.tar.gz
