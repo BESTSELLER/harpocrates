@@ -184,6 +184,6 @@ workflows:
           <<: *common_context
       - publish:
           requires:
-            - cci-common/build_n_push_docker
+            - docker-build-n-push
           <<: *release_filter
           <<: *common_context
