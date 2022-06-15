@@ -318,7 +318,7 @@ commands:
               chmod +x kustomize
 
               ./kustomize build > new.yml
-            fi
+            else
               kubectl kustomize . > new.yml
             fi
 
