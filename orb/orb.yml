@@ -6,6 +6,14 @@ executors:
     docker:
       - image: europe-docker.pkg.dev/artifacts-pub-prod-b57f/public-docker/harpocrates:$HARPOCRATES_VERSION
 
+download_yq: &download_yq
+  - run:
+      name: Download & install yq
+      command: |
+        VERSION=v4.25.2
+        wget -O /usr/bin/yq https://github.com/mikefarah/yq/releases/download/$VERSION/yq_linux_amd64
+        chmod +x /usr/bin/yq
+
 jobs:
   dump-secrets:
     description: Read secret from Vault and write to /secrets/secrets
@@ -140,12 +148,7 @@ jobs:
           command: |
 
             envsubst < << parameters.secret-file >> > ./secrets_var.yaml && mv ./secrets_var.yaml << parameters.secret-file >>
-      - run:
-          name: Download & install yq
-          command: |
-            VERSION=v4.25.2
-            wget -O /usr/bin/yq https://github.com/mikefarah/yq/releases/download/$VERSION/yq_linux_amd64
-            chmod +x /usr/bin/yq
+      <<: *download_yq
       - vault-login
       - run:
           name: Secret-injector - Write secrets to file
@@ -254,12 +257,7 @@ commands:
     steps:
       - attach_workspace:
           at: /tmp
-      - run:
-          name: Secret-injector - Download & install yq
-          command: |
-            VERSION=v4.25.2
-            wget -O /usr/bin/yq https://github.com/mikefarah/yq/releases/download/$VERSION/yq_linux_amd64
-            chmod +x /usr/bin/yq
+      <<: *download_yq
       - vault-login
       - run:
           name: Secret-injector - kubectl kustomize
@@ -312,7 +310,7 @@ commands:
             mv ./$DEPLOYMENT_TYPE\_var.yml ./$DEPLOYMENT_TYPE.yml
 
             # workaround due to: https://github.com/kubernetes-sigs/kustomize/issues/4062
-            KUBE_VERSION=$(kubectl version -o yaml | yq eval .clientVersion.minor -)
+            KUBE_VERSION=$(kubectl version -o yaml | yq .clientVersion.minor)
             DEPLOYMENT_TYPE=CronJob
             if [[ $KUBE_VERSION == 22 && $DEPLOYMENT_TYPE == "CronJob" ]]; then
               wget https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv4.5.5/kustomize_v4.5.5_linux_amd64.tar.gz
