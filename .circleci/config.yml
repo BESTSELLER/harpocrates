@@ -297,23 +297,17 @@ workflows:
       - secret-injector/dump-secrets:
           <<: *common_context
           filters:
-            branches:
-              only:
-                - artifact-registry
+            branches: artifact-registry
       - cci-common/go_test_unit:
           <<: *common_context
           filters:
-            branches:
-              only:
-                - artifact-registry
+            branches: artifact-registry
       - build-go:
           requires:
             - secret-injector/dump-secrets
           <<: *common_context
           filters:
-            branches:
-              only:
-                - artifact-registry
+            branches: artifact-registry
       - cci-common/build_n_push_docker:
           name: docker-build-n-push
           repo: public-docker
@@ -323,7 +317,5 @@ workflows:
           push_latest: true
           <<: *common_context
           filters:
-            branches:
-              only:
-                - artifact-registry
+            branches: artifact-registry
           requires: build-go
