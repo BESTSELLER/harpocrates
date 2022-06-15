@@ -121,13 +121,13 @@ jobs:
           command: |
             source /tmp/secrets
             cp /tmp/harpocrates .
-            docker login -u $docker_harpocrates_username -p $docker_harpocrates_password $K8S_CLUSTER_docker_registry_url
+            docker login -u $docker_harpocrates_username -p $docker_harpocrates_password $K8S_CLUSTER_artifact_registry_url/$K8S_CLUSTER_artifact_registry_project
             docker build \
-              -t $K8S_CLUSTER_docker_registry_url/library/$CIRCLE_PROJECT_REPONAME:$CIRCLE_TAG \
-              -t $K8S_CLUSTER_docker_registry_url/library/$CIRCLE_PROJECT_REPONAME:latest \
+              -t $K8S_CLUSTER_artifact_registry_url/$K8S_CLUSTER_artifact_registry_project/public-docker/$CIRCLE_PROJECT_REPONAME:$CIRCLE_TAG \
+              -t $K8S_CLUSTER_artifact_registry_url/$K8S_CLUSTER_artifact_registry_project/public-docker/$CIRCLE_PROJECT_REPONAME:latest \
               .
-            docker push $K8S_CLUSTER_docker_registry_url/library/$CIRCLE_PROJECT_REPONAME:$CIRCLE_TAG
-            docker push $K8S_CLUSTER_docker_registry_url/library/$CIRCLE_PROJECT_REPONAME:latest
+            docker push $K8S_CLUSTER_artifact_registry_url/$K8S_CLUSTER_artifact_registry_project/public-docker/$CIRCLE_PROJECT_REPONAME:$CIRCLE_TAG
+            docker push $K8S_CLUSTER_artifact_registry_url/$K8S_CLUSTER_artifact_registry_project/public-docker/$CIRCLE_PROJECT_REPONAME:latest
   docker-build:
     executor: docker
     working_directory: /app
@@ -141,9 +141,9 @@ jobs:
           command: |
             source /tmp/secrets
             cp /tmp/harpocrates .
-            docker login -u $docker_harpocrates_username -p $docker_harpocrates_password $K8S_CLUSTER_docker_registry_url
+            docker login -u $docker_harpocrates_username -p $docker_harpocrates_password $K8S_CLUSTER_artifact_registry_url/$K8S_CLUSTER_artifact_registry_project
             docker build \
-              -t $K8S_CLUSTER_docker_registry_url/library/$CIRCLE_PROJECT_REPONAME:latest \
+              -t $K8S_CLUSTER_artifact_registry_url/$K8S_CLUSTER_artifact_registry_project/public-docker/$CIRCLE_PROJECT_REPONAME:latest \
               .
 
   publish:
@@ -221,7 +221,7 @@ release_filter: &release_filter
       ignore: /.*/
 
 common_context: &common_context
-  context: 
+  context:
     - es02-prod
     - shared
 
