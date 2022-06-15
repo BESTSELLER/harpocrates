@@ -10,7 +10,7 @@ executors:
 
 orbs:
   secret-injector: bestsellerit/secret-injector@1.6.5
-  cci-common: bestsellerit/cci-common@1.2.5
+  cci-common: bestsellerit/cci-common@1.2.6
 
 jobs:
   build-go:
@@ -116,13 +116,6 @@ release_filter: &release_filter
     branches:
       ignore: /.*/
 
-test_release_filter: &test_release_filter
-  filters:
-    tags:
-      ignore: /^[0-9]+(\.[0-9]+)*(-.*)*$/
-    branches:
-      only: artifact-registry
-
 common_context: &common_context
   context:
     - es02-prod
@@ -164,10 +157,10 @@ workflows:
   test-build-release:
     jobs:
       - secret-injector/dump-secrets:
-          <<: *test_release_filter
+          <<: *release_filter
           <<: *common_context
       - cci-common/go_test_unit:
-          <<: *test_release_filter
+          <<: *release_filter
           <<: *common_context
       - cci-common/go_test_sonar:
           requires:
@@ -178,7 +171,7 @@ workflows:
           requires:
             - cci-common/go_test_unit
             - secret-injector/dump-secrets
-          <<: *test_release_filter
+          <<: *release_filter
           <<: *common_context
       - cci-common/build_n_push_docker:
           name: docker-build-n-push
@@ -187,5 +180,10 @@ workflows:
           push_latest: true
           requires:
             - build-go
-          <<: *test_release_filter
+          <<: *release_filter
+          <<: *common_context
+      - publish:
+          requires:
+            - cci-common/build_n_push_docker
+          <<: *release_filter
           <<: *common_context
