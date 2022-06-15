@@ -242,16 +242,19 @@ workflows:
           <<: *common_context
           <<: *test_filter
       - cci-common/go_test_unit:
+          requires:
+            - secrets-common
           <<: *common_context
           <<: *test_filter
       - cci-common/go_test_sonar:
           requires:
-            - secrets-app
+            - secrets-common
           <<: *common_context
           <<: *test_filter
       - build-go:
           requires:
-            - secrets-app
+            - cci-common/go_test_unit
+            - cci-common/go_test_sonar
           <<: *common_context
           <<: *test_filter
       - docker-build:
