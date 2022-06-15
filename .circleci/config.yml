@@ -16,7 +16,7 @@ executors:
 
 orbs:
   secret-injector: bestsellerit/secret-injector@1.6.5
-  cci-common: bestsellerit/cci-common:1.2.5
+  cci-common: bestsellerit/cci-common@1.2.5
 
 jobs:
   test:
