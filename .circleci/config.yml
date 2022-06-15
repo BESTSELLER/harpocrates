@@ -7,81 +7,12 @@ executors:
         auth:
           username: $DOCKERHUB_USER
           password: $DOCKERHUB_PASS
-  docker:
-    docker:
-      - image: docker:stable-git
-        auth:
-          username: $DOCKERHUB_USER
-          password: $DOCKERHUB_PASS
 
 orbs:
   secret-injector: bestsellerit/secret-injector@1.6.5
   cci-common: bestsellerit/cci-common@1.2.5
 
 jobs:
-  test:
-    executor: go_image
-    steps:
-      - checkout
-      - run:
-          name: go get
-          command: |
-            go get ./...
-      - run:
-          name: install gotestsum
-          command: |
-            go install gotest.tools/gotestsum@latest
-            # go get gotest.tools/assert@v2.2.0+incompatible
-      - run:
-          name: go test
-          command: |
-            mkdir junit
-            gotestsum --junitfile junit/unit-tests.xml
-      - store_test_results:
-          path: ~/project/junit
-      - run:
-          name: go build
-          command: |
-            GOOS=linux \
-            GOARCH=amd64 \
-            go build -ldflags="-w -s"
-  test-sonar:
-    executor: go_image
-    steps:
-      - attach_workspace:
-          at: /tmp
-      - checkout
-      - run:
-          name: Install Sonarqube scanner
-          command: |
-            wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.5.0.2216-linux.zip -P /tmp/
-            cd /tmp/
-            unzip sonar-scanner-cli-4.5.0.2216-linux.zip
-      - run:
-          name: go get
-          command: |
-            go get ./...
-      - run:
-          name: go test - sonar
-          command: |
-            go test ./... -coverprofile=coverage.out
-      - run:
-          name: Run SonarCloud Scanner
-          command: |
-            source /tmp/secrets
-            export SONAR_SCANNER_OPTS="-Xmx2048m"
-            eval /tmp/sonar-scanner-4.5.0.2216-linux/bin/sonar-scanner \
-              -Dsonar.projectKey=$K8S_CLUSTER_SONAR_KEY_GH"_"$CIRCLE_PROJECT_REPONAME \
-              -Dsonar.projectName=$CIRCLE_PROJECT_REPONAME \
-              -Dsonar.organization=$K8S_CLUSTER_SONAR_ORG_GH \
-              -Dsonar.sources=. \
-              -Dsonar.test.inclusions=**/**_test.go \
-              -Dsonar.sources.inclusions=**/**.go \
-              -Dsonar.host.url=$K8S_CLUSTER_SONAR_HOST \
-              -Dsonar.login=$K8S_CLUSTER_SONAR_LOGIN_GH \
-              -Dsonar.links.scm=$CIRCLE_REPOSITORY_URL \
-              -Dsonar.go.coverage.reportPaths=coverage.out
-
   build-go:
     executor: go_image
     steps:
@@ -110,41 +41,6 @@ jobs:
           root: /tmp
           paths:
             - harpocrates*
-  docker-build-n-push:
-    executor: docker
-    working_directory: /app
-    steps:
-      - attach_workspace:
-          at: /tmp
-      - checkout
-      - setup_remote_docker
-      - run:
-          name: Copy /tmp/harpocrates files
-          command: cp /tmp/harpocrates .
-      - cci-common/build_n_push_docker:
-          name: docker-build-n-push
-          repo: public-docker
-          dry_run: false
-          tag: test3
-          push_latest: true
-
-  docker-build:
-    executor: docker
-    working_directory: /app
-    steps:
-      - attach_workspace:
-          at: /tmp
-      - checkout
-      - setup_remote_docker
-      - run:
-          name: Push and build image
-          command: |
-            source /tmp/secrets
-            cp /tmp/harpocrates .
-            docker login -u $docker_harpocrates_username -p $docker_harpocrates_password $K8S_CLUSTER_artifact_registry_url/$K8S_CLUSTER_artifact_registry_project
-            docker build \
-              -t $K8S_CLUSTER_artifact_registry_url/$K8S_CLUSTER_artifact_registry_project/public-docker/$CIRCLE_PROJECT_REPONAME:latest \
-              .
 
   publish:
     executor: go_image
@@ -255,7 +151,11 @@ workflows:
             - cci-common/go_test_sonar
           <<: *common_context
           <<: *test_filter
-      - docker-build:
+      - cci-common/build_n_push_docker:
+          name: docker-build-n-push
+          repo: public-docker
+          tag: test4
+          dry_run: true
           requires:
             - build-go
           <<: *common_context
@@ -269,13 +169,22 @@ workflows:
       - cci-common/go_test_unit:
           <<: *test_release_filter
           <<: *common_context
+      - cci-common/go_test_sonar:
+          requires:
+            - secret-injector/dump-secrets
+          <<: *common_context
+          <<: *test_filter
       - build-go:
           requires:
+            - cci-common/go_test_unit
             - secret-injector/dump-secrets
           <<: *test_release_filter
           <<: *common_context
-      - build-n-push-docker:
-          <<: *test_release_filter
-          <<: *common_context
+      - cci-common/build_n_push_docker:
+          name: docker-build-n-push
+          repo: public-docker
+          tag: test4
           requires:
             - build-go
+          <<: *test_release_filter
+          <<: *common_context
