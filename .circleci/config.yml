@@ -318,7 +318,6 @@ workflows:
           name: docker-build-n-push
           repo: public-docker
           dry_run: false
-          # tag: $CIRCLE_TAG
           tag: test
           push_latest: true
           <<: *common_context
