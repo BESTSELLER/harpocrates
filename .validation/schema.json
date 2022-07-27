@@ -1,6 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
+  "additionalProperties": false,
   "properties": {
     "format": {
       "type": "string"
@@ -18,41 +19,82 @@
       "type": "boolean"
     },
     "secrets": {
+      "$ref": "#/$defs/secretsArray"
+    }
+  },
+  "required": [
+    "output",
+    "secrets"
+  ],
+  "$defs": {
+    "secretsArray": {
       "type": "array",
-      "items": [
-        {
-          "type": "string"
-        },
-        {
+      "items": {
+        "anyOf": [
+          {
+            "type": "string",
+            "pattern": "^(?:\\S+\/)*\\S+$"
+          },
+          {
+            "$ref": "#/$defs/secretsObject"
+          }
+        ]
+      }
+    },
+    "secretsObject": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {
+        "^(?:\\S+\/)*\\S+$": {
           "type": "object",
-          "patternProperties": {
-            ".*": {
-              "type": "object",
-              "properties": {
-                "owner": {
-                  "type": "integer"
-                },
-                "format": {
-                  "type": "string",
-                  "enum": [
-                    "json",
-                    "env",
-                    "secret"
-                  ]
-                }
+          "additionalProperties": false,
+          "properties": {
+            "format": {
+              "type": "string",
+              "enum": [
+                "env",
+                "json"
+              ]
+            },
+            "owner": {
+              "type": "integer"
+            },
+            "filename": {
+              "type": "string"
+            },
+            "prefix": {
+              "type": "string"
+            },
+            "keys": {
+              "type": "array",
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "object",
+                    "patternProperties": {
+                      "^(?:\\S+\/)*\\S+$": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                          "prefix": {
+                            "type": "string"
+                          },
+                          "saveAsFile": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]
               }
             }
           }
         }
-      ]
+      }
     }
-  },
-  "required": [
-    "format",
-    "output",
-    "owner",
-    "prefix",
-    "uppercase",
-    "secrets"
-  ]
+  }
 }
