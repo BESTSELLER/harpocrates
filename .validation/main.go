@@ -2,14 +2,28 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 
 	"github.com/xeipuuv/gojsonschema"
+	"sigs.k8s.io/yaml"
 )
 
 func main() {
 
+	documentFile, err := ioutil.ReadFile("./secret.yaml")
+	if err != nil {
+		panic(err)
+	}
+
+	y, err := yaml.YAMLToJSON(documentFile)
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Println(string(y))
+
 	schemaLoader := gojsonschema.NewReferenceLoader("file://./schema.json")
-	documentLoader := gojsonschema.NewReferenceLoader("file://./example.json")
+	documentLoader := gojsonschema.NewStringLoader(string(y))
 
 	result, err := gojsonschema.Validate(schemaLoader, documentLoader)
 	if err != nil {
