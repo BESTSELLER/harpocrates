@@ -30,7 +30,6 @@ func collectTests() []string {
 // Test all secret file tests in the test_data directory.
 func TestSecretsFile(t *testing.T) {
 	tests := collectTests()
-	
 	for _, test := range tests {
 		switch strings.Contains(test, "not_valid") {
 		case true:
