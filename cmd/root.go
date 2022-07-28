@@ -82,13 +82,9 @@ var (
 
 				if v.Format == "json" {
 					files.Write(config.Config.Output, fileName, v.Result.ToJSON(), v.Owner)
-				}
-
-				if v.Format == "env" {
+				} else if v.Format == "env" {
 					files.Write(config.Config.Output, fileName, v.Result.ToENV(), v.Owner)
-				}
-
-				if v.Format == "secret" {
+				} else if v.Format == "secret" {
 					files.Write(config.Config.Output, fileName, v.Result.ToK8sSecret(), v.Owner)
 				}
 

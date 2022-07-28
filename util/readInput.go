@@ -50,8 +50,8 @@ func ReadInput(input string) SecretJSON {
 
 MoveOn:
 	if secretJSON.Format != "" {
-		if secretJSON.Format != "json" && secretJSON.Format != "env" {
-			fmt.Println("An invalid format was provided, only these formats are allowed at the moment:\njson\nenv")
+		if secretJSON.Format != "json" && secretJSON.Format != "env" && secretJSON.Format != "secret" {
+			fmt.Println("An invalid format was provided, only these formats are allowed at the moment:\njson\nenv\nsecret")
 			os.Exit(1)
 		}
 

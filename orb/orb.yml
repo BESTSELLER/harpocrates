@@ -4,7 +4,7 @@ description: Secret-injector orb
 executors:
   secret_image:
     docker:
-      - image: harbor.bestsellerit.com/library/harpocrates:$HARPOCRATES_VERSION
+      - image: europe-docker.pkg.dev/artifacts-pub-prod-b57f/public-docker/harpocrates:$HARPOCRATES_VERSION
 
 jobs:
   dump-secrets:
@@ -107,6 +107,87 @@ jobs:
             - << parameters.output-filename >>
             - cluster_secret.json
 
+  dump-secrets-yaml:
+    description: >
+      Read secret from Vault, and write to designated output file. 
+      This utilises an yaml template file to determine the secrets being fetched.
+      Compared to dump-secrets this can fetch multiple secrets at once.
+      The structure of the yaml file is shown here. https://github.com/BESTSELLER/harpocrates/blob/master/examples/secret.yaml
+    executor: secret_image
+    parameters:
+      secret-file:
+        description: Path to your secret file
+        type: string
+      output:
+        type: string
+        default: "/tmp"
+        description: Path in the workspace to store the secrets
+      common-secrets:
+        type: boolean
+        default: true
+        description: Should the orb fetch the secrets common to BESTSELLER.
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /tmp
+      - run:
+          name: Install envsubt
+          command: |
+            apk update
+            apk add gettext
+      - run:
+          name: replace strings
+          command: |
+
+            envsubst < << parameters.secret-file >> > ./secrets_var.yaml && mv ./secrets_var.yaml << parameters.secret-file >>
+      - download_n_install_yq
+      - vault-login
+      - run:
+          name: Secret-injector - Write secrets to file
+          command: |
+            # Exit script if you try to use an uninitialized variable.
+            set -o nounset
+
+            # Exit script if a statement returns a non-true return value.
+            set -o errexit
+
+            # Use the error status of the first failure, rather than that of the last item in a pipeline.
+            set -o pipefail
+
+            # Insert output path
+            export OUTPUT=<< parameters.output >>
+            yq e '.output = env(OUTPUT)' -i  << parameters.secret-file >> 
+
+            # Fetch common secrets 
+            if [  << parameters.common-secrets >> = true ] ; then
+
+              # Update secret file with common secrets
+              if [ "$HARPOCRATES_SECRETS" != "" ]; then
+                IFS=',' read -ra SECRET_PATH \<<<"$HARPOCRATES_SECRETS"
+                for i in "${SECRET_PATH[@]}"; do
+                  export TMP_PATHS="$i"
+                  yq e '.secrets += [ { env(TMP_PATHS): {"prefix": "K8S_CLUSTER_"}}]' -i  << parameters.secret-file >>
+                done
+              fi
+
+              if [ "$CLUSTER_SECRET" != "" ] ; then
+                yq e '.secrets += [ { env(CLUSTER_SECRET): {"format": "json", "fileName": "cluster_secret.json"}}]' -i << parameters.secret-file >>   
+              fi
+
+              if [ "$SHORT" != "" ] ; then
+                export TMP_PATH="ES/data/service_accounts/harbor/$SHORT-ci"
+                yq e '.secrets += [ { env(TMP_PATH): {"prefix": "DOCKER_"}}]' -i << parameters.secret-file >>
+              fi
+            fi
+
+            /harpocrates \
+                -f << parameters.secret-file >>
+
+      - persist_to_workspace:
+          root: << parameters.output >>
+          paths:
+            - "*"
+
 commands:
   use-secrets:
     description: Will add the secrets to BASH_ENV, defaults to /tmp/secrets
@@ -121,16 +202,23 @@ commands:
       - run:
           name: Secret-injector - Adding secrets to BASH_ENV
           command: cat "<< parameters.file >>" >> $BASH_ENV
+  download_n_install_yq:
+    steps:
+      - run:
+          name: Download & install yq
+          command: |
+            VERSION=v4.25.2
+            wget -O /usr/bin/yq https://github.com/mikefarah/yq/releases/download/$VERSION/yq_linux_amd64
+            chmod +x /usr/bin/yq
   vault-login:
     steps:
       - run:
           name: Secret-injector - Install Vault and login
           command: |
-            VERSION=1.6.3
+            VERSION=1.10.4
             wget -O ./vault_$VERSION\_linux_amd64.zip https://releases.hashicorp.com/vault/$VERSION/vault_$VERSION\_linux_amd64.zip
-            unzip -o vault_$VERSION\_linux_amd64.zip
-            chmod +x vault
-            mv vault /usr/bin/.
+            unzip -o ./vault_$VERSION\_linux_amd64.zip -d /usr/bin/.
+            chmod +x /usr/bin/./vault
             vault login -method=userpass username=$VAULT_USERNAME password=$VAULT_PASSWORD >/dev/null
             echo 'export VAULT_TOKEN=$(cat $HOME/.vault-token)' >> $BASH_ENV
   inject:
@@ -168,12 +256,7 @@ commands:
     steps:
       - attach_workspace:
           at: /tmp
-      - run:
-          name: Secret-injector - Download & install yq
-          command: |
-            VERSION=2.4.0
-            wget -O /usr/bin/yq https://github.com/mikefarah/yq/releases/download/$VERSION/yq_linux_amd64
-            chmod +x /usr/bin/yq
+      - download_n_install_yq
       - vault-login
       - run:
           name: Secret-injector - kubectl kustomize
@@ -209,12 +292,12 @@ commands:
             else
               export ROLE_NAME="$AUTH_NAME"
             fi
-        
+
             export DEPLOYMENT_TYPE=<< parameters.deploy-type >>
             export DEPLOY_FILE=<< parameters.deploy-file >>
             export APP_NAME=<< parameters.app-name >>
             export SECRET_FILE=<< parameters.secret-file >>
-            export SECRETS=$(yq read $SECRET_FILE -j)
+            export SECRETS=$(yq -o=json $SECRET_FILE)
 
             curl -s -H "Accept:application/vnd.github.v3.raw" -o $DEPLOYMENT_TYPE.yml -L https://github.com/BESTSELLER/harpocrates/releases/download/$HARPOCRATES_VERSION/$DEPLOYMENT_TYPE.yml
             curl -s -H "Accept:application/vnd.github.v3.raw" -o kustomization.yml -L https://github.com/BESTSELLER/harpocrates/releases/download/$HARPOCRATES_VERSION/kustomization.yml
@@ -225,5 +308,20 @@ commands:
             envsubst < ./$DEPLOYMENT_TYPE.yml > ./$DEPLOYMENT_TYPE\_var.yml
             mv ./$DEPLOYMENT_TYPE\_var.yml ./$DEPLOYMENT_TYPE.yml
 
-            kubectl kustomize . > new.yml
+            # workaround due to: https://github.com/kubernetes-sigs/kustomize/issues/4062
+            KUBE_VERSION=$(kubectl version -o yaml | yq .clientVersion.minor)
+            if [[ $KUBE_VERSION == 22 && $DEPLOYMENT_TYPE == "CronJob" ]]; then
+
+              if [ ! -f "./kustomize" ]; then
+                wget https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv4.5.5/kustomize_v4.5.5_linux_amd64.tar.gz
+                tar -zxf kustomize_v4.5.5_linux_amd64.tar.gz
+                chmod +x kustomize
+              fi
+
+              ./kustomize build > new.yml
+            else
+              kubectl kustomize . > new.yml
+            fi
+
             mv new.yml $DEPLOY_FILE
+
