@@ -7,6 +7,7 @@ import (
 	"github.com/BESTSELLER/harpocrates/config"
 	"github.com/BESTSELLER/harpocrates/files"
 	"github.com/BESTSELLER/harpocrates/util"
+	"github.com/BESTSELLER/harpocrates/validate"
 	"github.com/BESTSELLER/harpocrates/vault"
 	"github.com/gookit/color"
 	"github.com/rs/zerolog"
@@ -26,7 +27,14 @@ var (
 
 			if secretFile != "" { // --file is being used
 				data = files.Read(secretFile)
+				
+				validFile := validate.SecretsFile(secretFile)
+				if !validFile {
+						log.Fatal().Msg("Invalid file")
+				}
+				
 				input = util.ReadInput(data)
+			
 			} else if len(*secret) > 0 { // Parameters is being used
 				if config.Config.Output == "" {
 					log.Error().Msg("Output is required!")
