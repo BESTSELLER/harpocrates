@@ -1,4 +1,4 @@
-format: envs
+format: env
 output: ../.tmp/
 owner: 123
 prefix: TEST_
