@@ -13,8 +13,8 @@ import (
 // Validate secrets file and returns true or false depending on the validation result.
 // Outputs error message if validation fails including what the issue is.
 // Debug message is logged if debug is true and validation succeeded.
-func SecretsFile(f string) bool {
-	documentFile, err := ioutil.ReadFile(f)
+func SecretsFile(fileToValidate string, schemaPath string) bool {
+	documentFile, err := ioutil.ReadFile(fileToValidate)
 	if err != nil {
 		panic(err)
 	}
@@ -25,8 +25,8 @@ func SecretsFile(f string) bool {
 	}
 
 	fmt.Println(string(y))
-
-	schemaLoader := gojsonschema.NewReferenceLoader("file://./validate/schema.json")
+	schemaFinalPath := fmt.Sprintf("file://%s", schemaPath)
+	schemaLoader := gojsonschema.NewReferenceLoader(schemaFinalPath)
 	documentLoader := gojsonschema.NewStringLoader(string(y))
 
 	result, err := gojsonschema.Validate(schemaLoader, documentLoader)

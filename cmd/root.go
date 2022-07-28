@@ -27,7 +27,7 @@ var (
 
 			if secretFile != "" { // --file is being used
 				data = files.Read(secretFile)
-				validFile := validate.SecretsFile(secretFile)
+				validFile := validate.SecretsFile(secretFile, "./validate/schema.json")
 				if !validFile {
 					log.Fatal().Msg("Invalid file")
 				}
