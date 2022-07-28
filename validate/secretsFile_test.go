@@ -3,6 +3,7 @@ package validate
 import (
 	"fmt"
 	"io/ioutil"
+	"strings"
 	"testing"
 )
 
@@ -16,7 +17,8 @@ func collectTests() []string {
 
 	collectedTests := make([]string, 0)
 	for _, test := range tests {
-		if test.IsDir() {
+		// If it's a folder or file isn't a yaml then just skip it.
+		if test.IsDir() || !strings.Contains(test.Name(), ".yaml") || !strings.Contains(test.Name(), ".yml") {
 			continue
 		}
 		collectedTests = append(collectedTests, fmt.Sprintf("../test_data/%s", test.Name()))
@@ -30,8 +32,15 @@ func TestSecretsFile(t *testing.T) {
 	tests := collectTests()
 	
 	for _, test := range tests {
-		if !SecretsFile(test, "./schema.json") {
-			t.Errorf("SecretsFile(%q) = false", test)
+		switch strings.Contains(test, "not_valid") {
+		case true:
+			if SecretsFile(test, "./schema.json") {
+				t.Errorf("Expected %s to fail validation", test)
+			}
+		case false:
+			if !SecretsFile(test, "./schema.json") {
+				t.Errorf("Expected %s to pass validation", test)
+			}
 		}
 	}
 }
