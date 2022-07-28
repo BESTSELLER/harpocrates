@@ -27,14 +27,11 @@ var (
 
 			if secretFile != "" { // --file is being used
 				data = files.Read(secretFile)
-				
 				validFile := validate.SecretsFile(secretFile)
 				if !validFile {
-						log.Fatal().Msg("Invalid file")
+					log.Fatal().Msg("Invalid file")
 				}
-				
 				input = util.ReadInput(data)
-			
 			} else if len(*secret) > 0 { // Parameters is being used
 				if config.Config.Output == "" {
 					log.Error().Msg("Output is required!")
