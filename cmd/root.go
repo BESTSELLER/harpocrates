@@ -137,16 +137,12 @@ func SetupLogLevel() {
 	switch strings.ToLower(config.Config.LogLevel) {
 	case "debug":
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
-		break
 	case "info":
 		zerolog.SetGlobalLevel(zerolog.InfoLevel)
-		break
 	case "warn":
 		zerolog.SetGlobalLevel(zerolog.WarnLevel)
-		break
 	case "error":
 		zerolog.SetGlobalLevel(zerolog.ErrorLevel)
-		break
 	default:
 		zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	}
