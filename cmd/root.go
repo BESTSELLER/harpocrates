@@ -27,7 +27,7 @@ var (
 
 			if secretFile != "" { // --file is being used
 				data = files.Read(secretFile)
-				validFile := validate.SecretsFile(secretFile, "./validate/schema.json")
+				validFile := validate.SecretsFile(data)
 				if !validFile {
 					log.Fatal().Msg("Invalid file")
 				}
@@ -53,7 +53,10 @@ var (
 					cmd.Help()
 					return
 				}
-				input = util.ReadInput(args[0])
+
+				if validate.SecretsFile(args[0]) {
+					input = util.ReadInput(args[0])
+				}
 			}
 
 			vault.Login()
