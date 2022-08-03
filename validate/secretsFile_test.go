@@ -5,6 +5,9 @@ import (
 	"io/ioutil"
 	"strings"
 	"testing"
+
+	"github.com/BESTSELLER/harpocrates/files"
+	"github.com/rs/zerolog/log"
 )
 
 // Collect all secret file tests from the test_data directory.
@@ -17,13 +20,12 @@ func collectTests() []string {
 
 	collectedTests := make([]string, 0)
 	for _, test := range tests {
-		// If it's a folder or file isn't a yaml then just skip it.
-		if test.IsDir() || !strings.Contains(test.Name(), ".yaml") || !strings.Contains(test.Name(), ".yml") {
+		// Only include if it's yaml or json
+		if strings.Contains(test.Name(), ".yaml") || strings.Contains(test.Name(), ".yml") || strings.Contains(test.Name(), ".json") {
+			collectedTests = append(collectedTests, fmt.Sprintf("../test_data/%s", test.Name()))
 			continue
 		}
-		collectedTests = append(collectedTests, fmt.Sprintf("../test_data/%s", test.Name()))
 	}
-
 	return collectedTests
 }
 
@@ -31,13 +33,15 @@ func collectTests() []string {
 func TestSecretsFile(t *testing.T) {
 	tests := collectTests()
 	for _, test := range tests {
+		log.Debug().Msgf("Testing file: %s\n", test)
+		file := files.Read(test)
 		switch strings.Contains(test, "not_valid") {
 		case true:
-			if SecretsFile(test, "./schema.json") {
+			if SecretsFile(file) {
 				t.Errorf("Expected %s to fail validation", test)
 			}
 		case false:
-			if !SecretsFile(test, "./schema.json") {
+			if !SecretsFile(file) {
 				t.Errorf("Expected %s to pass validation", test)
 			}
 		}
