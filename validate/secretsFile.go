@@ -1,8 +1,7 @@
 package validate
 
 import (
-	"fmt"
-	"io/ioutil"
+	_ "embed"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -10,23 +9,19 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
+//go:embed schema.json
+var schema string
+
 // Validate secrets file and returns true or false depending on the validation result.
 // Outputs error message if validation fails including what the issue is.
 // Debug message is logged if debug is true and validation succeeded.
-func SecretsFile(fileToValidate string, schemaPath string) bool {
-	documentFile, err := ioutil.ReadFile(fileToValidate)
+func SecretsFile(fileToValidate string) bool {
+	y, err := yaml.YAMLToJSON([]byte(fileToValidate))
 	if err != nil {
 		panic(err)
 	}
 
-	y, err := yaml.YAMLToJSON(documentFile)
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println(string(y))
-	schemaFinalPath := fmt.Sprintf("file://%s", schemaPath)
-	schemaLoader := gojsonschema.NewReferenceLoader(schemaFinalPath)
+	schemaLoader := gojsonschema.NewStringLoader(schema)
 	documentLoader := gojsonschema.NewStringLoader(string(y))
 
 	result, err := gojsonschema.Validate(schemaLoader, documentLoader)
