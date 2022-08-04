@@ -7,6 +7,7 @@ import (
 	"github.com/BESTSELLER/harpocrates/config"
 	"github.com/BESTSELLER/harpocrates/files"
 	"github.com/BESTSELLER/harpocrates/util"
+	"github.com/BESTSELLER/harpocrates/validate"
 	"github.com/BESTSELLER/harpocrates/vault"
 	"github.com/gookit/color"
 	"github.com/rs/zerolog"
@@ -26,6 +27,10 @@ var (
 
 			if secretFile != "" { // --file is being used
 				data = files.Read(secretFile)
+				validFile := validate.SecretsFile(data)
+				if !validFile {
+					log.Fatal().Msg("Invalid file")
+				}
 				input = util.ReadInput(data)
 			} else if len(*secret) > 0 { // Parameters is being used
 				if config.Config.Output == "" {
@@ -48,7 +53,10 @@ var (
 					cmd.Help()
 					return
 				}
-				input = util.ReadInput(args[0])
+
+				if validate.SecretsFile(args[0]) {
+					input = util.ReadInput(args[0])
+				}
 			}
 
 			vault.Login()
@@ -125,16 +133,12 @@ func SetupLogLevel() {
 	switch strings.ToLower(config.Config.LogLevel) {
 	case "debug":
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
-		break
 	case "info":
 		zerolog.SetGlobalLevel(zerolog.InfoLevel)
-		break
 	case "warn":
 		zerolog.SetGlobalLevel(zerolog.WarnLevel)
-		break
 	case "error":
 		zerolog.SetGlobalLevel(zerolog.ErrorLevel)
-		break
 	default:
 		zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	}
