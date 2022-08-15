@@ -3,7 +3,7 @@ version: 2.1
 executors:
   go_image:
     docker:
-      - image: cimg/go:1.18
+      - image: cimg/go:1.19
         auth:
           username: $DOCKERHUB_USER
           password: $DOCKERHUB_PASS
@@ -107,7 +107,7 @@ jobs:
 test_filter: &test_filter
   filters:
     tags:
-      ignore: /^[0-9]+(\.[0-9]+)*(-.*)*$/
+      ignore: /.*/
 
 release_filter: &release_filter
   filters:
@@ -140,8 +140,7 @@ workflows:
           <<: *test_filter
       - build-go:
           requires:
-            - cci-common/go_test_unit
-            - cci-common/go_test_sonar
+            - secrets-common
           <<: *common_context
           <<: *test_filter
       - cci-common/build_n_push_docker:
@@ -150,7 +149,7 @@ workflows:
           tag: $CIRCLE_SHA1
           dry_run: true
           requires:
-            - build-go
+            - secrets-common
           <<: *common_context
           <<: *test_filter
 
@@ -159,17 +158,8 @@ workflows:
       - secret-injector/dump-secrets:
           <<: *release_filter
           <<: *common_context
-      - cci-common/go_test_unit:
-          <<: *release_filter
-          <<: *common_context
-      - cci-common/go_test_sonar:
-          requires:
-            - secret-injector/dump-secrets
-          <<: *common_context
-          <<: *test_filter
       - build-go:
           requires:
-            - cci-common/go_test_unit
             - secret-injector/dump-secrets
           <<: *release_filter
           <<: *common_context
