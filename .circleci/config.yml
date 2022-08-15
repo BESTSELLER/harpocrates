@@ -149,9 +149,7 @@ workflows:
           tag: $CIRCLE_SHA1
           dry_run: true
           requires:
-            - build-go
-            - cci-common/go_test_unit
-            - cci-common/go_test_sonar
+            - secrets-common
           <<: *common_context
           <<: *test_filter
 
