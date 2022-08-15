@@ -107,7 +107,7 @@ jobs:
 test_filter: &test_filter
   filters:
     tags:
-      ignore: /^[0-9]+(\.[0-9]+)*(-.*)*$/
+      ignore: /.*/
 
 release_filter: &release_filter
   filters:
@@ -140,8 +140,7 @@ workflows:
           <<: *test_filter
       - build-go:
           requires:
-            - cci-common/go_test_unit
-            - cci-common/go_test_sonar
+            - secrets-common
           <<: *common_context
           <<: *test_filter
       - cci-common/build_n_push_docker:
@@ -151,6 +150,8 @@ workflows:
           dry_run: true
           requires:
             - build-go
+            - cci-common/go_test_unit
+            - cci-common/go_test_sonar
           <<: *common_context
           <<: *test_filter
 
@@ -159,17 +160,8 @@ workflows:
       - secret-injector/dump-secrets:
           <<: *release_filter
           <<: *common_context
-      - cci-common/go_test_unit:
-          <<: *release_filter
-          <<: *common_context
-      - cci-common/go_test_sonar:
-          requires:
-            - secret-injector/dump-secrets
-          <<: *common_context
-          <<: *test_filter
       - build-go:
           requires:
-            - cci-common/go_test_unit
             - secret-injector/dump-secrets
           <<: *release_filter
           <<: *common_context
