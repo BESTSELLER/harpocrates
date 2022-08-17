@@ -23,7 +23,7 @@ func Read(filePath string) string {
 }
 
 // Write will write some string data to a file
-func Write(output string, fileName string, content string, owner *int) {
+func Write(output string, fileName string, content string, owner *int, append bool) {
 	fileName = fixFileName(fileName)
 	path := filepath.Join(output, fileName)
 
@@ -35,7 +35,12 @@ func Write(output string, fileName string, content string, owner *int) {
 		}
 	}
 
-	f, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0600)
+	overWriteOrAppend := os.O_TRUNC
+	if append {
+		overWriteOrAppend = os.O_APPEND
+	}
+
+	f, err := os.OpenFile(path, overWriteOrAppend|os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
 		log.Fatal().Err(err).Msgf("An error happened while trying to open file %s", path)
 		os.Exit(1)

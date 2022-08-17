@@ -2,7 +2,9 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"strings"
+	"time"
 
 	"github.com/BESTSELLER/harpocrates/config"
 	"github.com/BESTSELLER/harpocrates/files"
@@ -59,37 +61,64 @@ var (
 				}
 			}
 
-			vault.Login()
+			var duration time.Duration
+			continuous := false
+			envVar, ok := os.LookupEnv("CONTINUOUS")
+			if ok && strings.ToLower(envVar) == "true" {
+				continuous = true
 
-			vaultClient := vault.NewClient()
+				interval, _ := os.LookupEnv("INTERVAL")
 
-			allSecrets, err := vaultClient.ExtractSecrets(input)
-			if err != nil {
-				log.Fatal().Err(err).Msgf("%s", err)
-			}
-
-			if cmd.Flags().Changed("format") && (config.Config.Format != "json" && config.Config.Format != "env" && config.Config.Format != "secret") {
-				log.Error().Msg("Please a valid format of either: json, env or secret")
-				cmd.Help()
-				return
-			}
-
-			for _, v := range allSecrets {
-				fileName := config.Config.FileName
-				if v.Filename != "" {
-					fileName = v.Filename
+				duration, err := time.ParseDuration(interval)
+				if err != nil {
+					log.Fatal().Err(err).Msgf("%s", err)
 				}
 
-				if v.Format == "json" {
-					files.Write(config.Config.Output, fileName, v.Result.ToJSON(), v.Owner)
-				} else if v.Format == "env" {
-					files.Write(config.Config.Output, fileName, v.Result.ToENV(), v.Owner)
-				} else if v.Format == "secret" {
-					files.Write(config.Config.Output, fileName, v.Result.ToK8sSecret(), v.Owner)
+				if duration < (1 * time.Minute) {
+					log.Fatal().Msg("Interval must be at least 1 minute")
+				}
+			}
+
+			for {
+				vault.Login()
+
+				vaultClient := vault.NewClient()
+
+				allSecrets, err := vaultClient.ExtractSecrets(input, !continuous)
+				if err != nil {
+					log.Fatal().Err(err).Msgf("%s", err)
 				}
 
-				log.Debug().Msgf("Secrets written to file: %s/%s", config.Config.Output, fileName)
+				if cmd.Flags().Changed("format") && (config.Config.Format != "json" && config.Config.Format != "env" && config.Config.Format != "secret") {
+					log.Error().Msg("Please a valid format of either: json, env or secret")
+					cmd.Help()
+					return
+				}
+
+				for _, v := range allSecrets {
+					fileName := config.Config.FileName
+					if v.Filename != "" {
+						fileName = v.Filename
+					}
+
+					if v.Format == "json" {
+						files.Write(config.Config.Output, fileName, v.Result.ToJSON(), v.Owner, !continuous)
+					} else if v.Format == "env" {
+						files.Write(config.Config.Output, fileName, v.Result.ToENV(), v.Owner, !continuous)
+					} else if v.Format == "secret" {
+						files.Write(config.Config.Output, fileName, v.Result.ToK8sSecret(), v.Owner, !continuous)
+					}
+
+					log.Debug().Msgf("Secrets written to file: %s/%s", config.Config.Output, fileName)
+				}
+
+				if !continuous {
+					break
+				}
+
+				time.Sleep(duration)
 			}
+
 		},
 		Use:   "harpocrates",
 		Short: fmt.Sprintf("%sThis application will fetch secrets from Hashicorp Vault", color.Blue.Sprintf("\"Harpocrates was the god of silence, secrets and confidentiality\"\n")),
@@ -127,7 +156,7 @@ func initConfig() {
 	SetupLogLevel()
 }
 
-//SetupLogLevel sets the global loglevel
+// SetupLogLevel sets the global loglevel
 func SetupLogLevel() {
 	// default is info
 	switch strings.ToLower(config.Config.LogLevel) {

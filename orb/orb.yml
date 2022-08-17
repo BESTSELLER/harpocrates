@@ -253,6 +253,18 @@ commands:
         description: Vault role name, defaults to the value of auth-name
         type: string
         default: ""
+      init-container:
+        description: Whether to add the initContainer or not
+        type: boolean
+        default: true
+      side-car:
+        description: Whether to add the sideCar or not
+        type: boolean
+        default: false
+      side-car-interval:
+        description: Number of minutes between each fetch of secrets.
+        type: string
+        default: "5m"
     steps:
       - attach_workspace:
           at: /tmp
@@ -299,14 +311,36 @@ commands:
             export SECRET_FILE=<< parameters.secret-file >>
             export SECRETS=$(yq -o=json $SECRET_FILE)
 
-            curl -s -H "Accept:application/vnd.github.v3.raw" -o $DEPLOYMENT_TYPE.yml -L https://github.com/BESTSELLER/harpocrates/releases/download/$HARPOCRATES_VERSION/$DEPLOYMENT_TYPE.yml
             curl -s -H "Accept:application/vnd.github.v3.raw" -o kustomization.yml -L https://github.com/BESTSELLER/harpocrates/releases/download/$HARPOCRATES_VERSION/kustomization.yml
+
+            if [ "<< parameters.side-car >>" == "true" ]; then
+              export SIDECAR_INTERVAL="<< parameters.side-car-interval >>"
+              curl -s -H "Accept:application/vnd.github.v3.raw" -o $DEPLOYMENT_TYPE-sidecar.yml -L https://github.com/BESTSELLER/harpocrates/releases/download/$HARPOCRATES_VERSION/$DEPLOYMENT_TYPE-sidecar.yml
+              
+              envsubst < ./$DEPLOYMENT_TYPE-sidecar.yml > ./$DEPLOYMENT_TYPE-sidecar_var.yml
+              mv ./$DEPLOYMENT_TYPE-sidecar_var.yml ./$DEPLOYMENT_TYPE-sidecar.yml
+            fi
+
+            if [ "<< parameters.init-container >>" == "true" ]; then
+              curl -s -H "Accept:application/vnd.github.v3.raw" -o $DEPLOYMENT_TYPE.yml -L https://github.com/BESTSELLER/harpocrates/releases/download/$HARPOCRATES_VERSION/$DEPLOYMENT_TYPE.yml
+              
+              envsubst < ./$DEPLOYMENT_TYPE.yml > ./$DEPLOYMENT_TYPE\_var.yml
+              mv ./$DEPLOYMENT_TYPE\_var.yml ./$DEPLOYMENT_TYPE.yml
+            fi
+
+
+            # This will remove all the files that doesn't exists.
+            MY_LIST=$(yq '.patchesStrategicMerge[]' kustomization.yml)
+            while IFS= read -r line; do
+              echo "... $line ..."
+              if [ ! -f "$line" ]; then
+                yq -i 'del( .patchesStrategicMerge[] | select(. == "'"$line"'") )' kustomization.yml
+              fi
+            done <<< "$MY_LIST"
+
 
             envsubst < ./kustomization.yml > ./kustomization_var.yml
             mv ./kustomization_var.yml ./kustomization.yml
-
-            envsubst < ./$DEPLOYMENT_TYPE.yml > ./$DEPLOYMENT_TYPE\_var.yml
-            mv ./$DEPLOYMENT_TYPE\_var.yml ./$DEPLOYMENT_TYPE.yml
 
             # workaround due to: https://github.com/kubernetes-sigs/kustomize/issues/4062
             KUBE_VERSION=$(kubectl version -o yaml | yq .clientVersion.minor)
@@ -324,4 +358,3 @@ commands:
             fi
 
             mv new.yml $DEPLOY_FILE
-

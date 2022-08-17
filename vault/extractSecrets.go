@@ -18,7 +18,7 @@ type Outputs struct {
 }
 
 // ExtractSecrets will loop through al those damn interfaces
-func (vaultClient *API) ExtractSecrets(input util.SecretJSON) ([]Outputs, error) {
+func (vaultClient *API) ExtractSecrets(input util.SecretJSON, appendToFile bool) ([]Outputs, error) {
 	var finalResult []Outputs
 	var result = make(secrets.Result)
 	var currentPrefix = config.Config.Prefix
@@ -72,7 +72,7 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON) ([]Outputs, error)
 									return nil, err
 								}
 								if *i.SaveAsFile {
-									files.Write(input.Output, secrets.ToUpperOrNotToUpper(fmt.Sprintf("%s%s", currentPrefix, h), &currentUpperCase), secretValue, nil)
+									files.Write(input.Output, secrets.ToUpperOrNotToUpper(fmt.Sprintf("%s%s", currentPrefix, h), &currentUpperCase), secretValue, nil, appendToFile)
 								} else {
 									result.Add(h, secretValue, currentPrefix, currentUpperCase)
 								}
