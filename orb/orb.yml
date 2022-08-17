@@ -336,7 +336,7 @@ commands:
               if [ ! -f "$line" ]; then
                 yq -i 'del( .patchesStrategicMerge[] | select(. == "'"$line"'") )' kustomization.yml
               fi
-            done <<< "$MY_LIST"
+            done \<<< "$MY_LIST"
 
 
             envsubst < ./kustomization.yml > ./kustomization_var.yml
