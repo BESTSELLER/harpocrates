@@ -262,7 +262,7 @@ commands:
         type: boolean
         default: false
       side-car-interval:
-        description: Number of minutes between each fetch of secrets.
+        description: Number of minutes between each fetch of secrets. 1m is the lowest value supported.
         type: string
         default: "5m"
     steps:
@@ -358,3 +358,7 @@ commands:
             fi
 
             mv new.yml $DEPLOY_FILE
+      - run:
+          name: Secret-injector - Validate secret file
+          command: |
+            /harpocrates validate << parameters.secret-file >>
