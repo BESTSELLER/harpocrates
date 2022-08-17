@@ -64,13 +64,19 @@ jobs:
       - run:
           name: Update stuff with git tag
           command: |
-            sed -i -e "s?\$HARPOCRATES_VERSION?$CIRCLE_TAG?g" orb/CronJob.yml
-            sed -i -e "s?\$HARPOCRATES_VERSION?$CIRCLE_TAG?g" orb/Deployment.yml
             sed -i -e "s?\$HARPOCRATES_VERSION?$CIRCLE_TAG?g" orb/orb.yml
+            sed -i -e "s?\$HARPOCRATES_VERSION?$CIRCLE_TAG?g" orb/CronJob.yml
+            sed -i -e "s?\$HARPOCRATES_VERSION?$CIRCLE_TAG?g" orb/CronJob-sidecar.yml
+            sed -i -e "s?\$HARPOCRATES_VERSION?$CIRCLE_TAG?g" orb/Deployment.yml
+            sed -i -e "s?\$HARPOCRATES_VERSION?$CIRCLE_TAG?g" orb/Deployment-sidecar.yml
             sed -i -e "s?\$HARPOCRATES_VERSION?$CIRCLE_TAG?g" orb/StatefulSet.yml
+            sed -i -e "s?\$HARPOCRATES_VERSION?$CIRCLE_TAG?g" orb/StatefulSet-sidecar.yml
             cp orb/CronJob.yml ./releases
-            cp orb/Deployment.yml ./releases
-            cp orb/StatefulSet.yml ./releases
+            cp orb/CronJob-sidecar.yml ./releases
+            cp orb/Deployment-sidecar.yml ./releases
+            cp orb/Deployment-sidecar.yml ./releases
+            cp orb/StatefulSet-sidecar.yml ./releases
+            cp orb/StatefulSet-sidecar.yml ./releases
             cp orb/kustomization.yml ./releases
       - run:
           name: Download ghr
