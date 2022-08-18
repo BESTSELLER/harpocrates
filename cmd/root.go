@@ -79,7 +79,7 @@ var (
 				}
 
 				duration = durationParsed
-				log.Debug().Msgf("Continuous mode enabled, will run every", durationParsed)
+				log.Debug().Msgf("Continuous mode enabled, will run every %s", durationParsed)
 			}
 
 			for {
