@@ -73,9 +73,9 @@ jobs:
             sed -i -e "s?\$HARPOCRATES_VERSION?$CIRCLE_TAG?g" orb/StatefulSet-sidecar.yml
             cp orb/CronJob.yml ./releases
             cp orb/CronJob-sidecar.yml ./releases
+            cp orb/Deployment.yml ./releases
             cp orb/Deployment-sidecar.yml ./releases
-            cp orb/Deployment-sidecar.yml ./releases
-            cp orb/StatefulSet-sidecar.yml ./releases
+            cp orb/StatefulSet.yml ./releases
             cp orb/StatefulSet-sidecar.yml ./releases
             cp orb/kustomization.yml ./releases
       - run:
