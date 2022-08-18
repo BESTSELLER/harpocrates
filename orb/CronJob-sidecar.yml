@@ -13,7 +13,7 @@ spec:
               volumeMounts:
                 - name: secrets
                   mountPath: /secrets
-            - name: secret-dumper
+            - name: secret-dumper-sidecar
               image: europe-docker.pkg.dev/artifacts-pub-prod-b57f/public-docker/harpocrates:$HARPOCRATES_VERSION
               args:
                 - '$SECRETS'
