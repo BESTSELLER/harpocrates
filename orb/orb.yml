@@ -358,7 +358,3 @@ commands:
             fi
 
             mv new.yml $DEPLOY_FILE
-      - run:
-          name: Secret-injector - Validate secret file
-          command: |
-            /harpocrates validate << parameters.secret-file >>

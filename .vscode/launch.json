@@ -12,9 +12,11 @@
       "program": "${workspaceFolder}/main.go",
       "env": {
         "VAULT_ADDRESS": "https://vault.bestsellerit.com",
-        "TOKEN_PATH": "/Users/lasse.gaardsholt/olympus-jdy.token",
-        "ROLE_NAME": "olympus01-prod-jdy",
-        "AUTH_NAME": "olympus01-prod"
+        "TOKEN_PATH": "/Users/lasse.gaardsholt/olympus-core.token",
+        "ROLE_NAME": "olympus01-dev-core",
+        "AUTH_NAME": "olympus01-dev",
+        "CONTINUOUS": "true",
+        "INTERVAL": "1m"
       },
       "args": [
         "-f",
