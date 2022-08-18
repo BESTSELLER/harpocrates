@@ -18,6 +18,7 @@ import (
 )
 
 var (
+	duration time.Duration
 	// Used for flags.
 	secretFile string
 	secret     *[]string
@@ -61,7 +62,6 @@ var (
 				}
 			}
 
-			var duration time.Duration
 			continuous := false
 			envVar, ok := os.LookupEnv("CONTINUOUS")
 			if ok && strings.ToLower(envVar) == "true" {
@@ -69,14 +69,17 @@ var (
 
 				interval, _ := os.LookupEnv("INTERVAL")
 
-				duration, err := time.ParseDuration(interval)
+				durationParsed, err := time.ParseDuration(interval)
 				if err != nil {
 					log.Fatal().Err(err).Msgf("%s", err)
 				}
 
-				if duration < (1 * time.Minute) {
+				if durationParsed < (1 * time.Minute) {
 					log.Fatal().Msg("Interval must be at least 1 minute")
 				}
+
+				duration = durationParsed
+				log.Debug().Msgf("Continuous mode enabled, will run every", durationParsed)
 			}
 
 			for {
@@ -116,6 +119,7 @@ var (
 					break
 				}
 
+				log.Debug().Msgf("Sleeping for %s", duration)
 				time.Sleep(duration)
 			}
 
