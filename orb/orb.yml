@@ -49,7 +49,9 @@ jobs:
           steps:
             - run:
                 name: Delete old secrets file
-                command: rm << parameters.output >><< parameters.output-filename >> || true
+                command: |
+                  rm << parameters.output >><< parameters.output-filename >> || true
+                  mkdir << parameters.output >> || true
       - run:
           name: Secret-injector - Write secrets to file
           command: |
@@ -161,7 +163,9 @@ jobs:
           steps:
             - run:
                 name: Delete old secrets file
-                command: rm << parameters.output >>/secrets || true
+                command: |
+                  rm -rf << parameters.output >> || true
+                  mkdir << parameters.output >> || true
       - run:
           name: Secret-injector - Write secrets to file
           command: |
