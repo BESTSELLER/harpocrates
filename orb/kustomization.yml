@@ -1,4 +1,9 @@
 resources:
 - $DEPLOY_FILE
 patchesStrategicMerge:
-- $DEPLOYMENT_TYPE.yml
+- CronJob.yml
+- CronJob-sidecar.yml
+- Deployment.yml
+- Deployment-sidecar.yml
+- StatefulSet.yml
+- StatefulSet-sidecar.yml

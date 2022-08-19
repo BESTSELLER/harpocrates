@@ -64,13 +64,19 @@ jobs:
       - run:
           name: Update stuff with git tag
           command: |
-            sed -i -e "s?\$HARPOCRATES_VERSION?$CIRCLE_TAG?g" orb/CronJob.yml
-            sed -i -e "s?\$HARPOCRATES_VERSION?$CIRCLE_TAG?g" orb/Deployment.yml
             sed -i -e "s?\$HARPOCRATES_VERSION?$CIRCLE_TAG?g" orb/orb.yml
+            sed -i -e "s?\$HARPOCRATES_VERSION?$CIRCLE_TAG?g" orb/CronJob.yml
+            sed -i -e "s?\$HARPOCRATES_VERSION?$CIRCLE_TAG?g" orb/CronJob-sidecar.yml
+            sed -i -e "s?\$HARPOCRATES_VERSION?$CIRCLE_TAG?g" orb/Deployment.yml
+            sed -i -e "s?\$HARPOCRATES_VERSION?$CIRCLE_TAG?g" orb/Deployment-sidecar.yml
             sed -i -e "s?\$HARPOCRATES_VERSION?$CIRCLE_TAG?g" orb/StatefulSet.yml
+            sed -i -e "s?\$HARPOCRATES_VERSION?$CIRCLE_TAG?g" orb/StatefulSet-sidecar.yml
             cp orb/CronJob.yml ./releases
+            cp orb/CronJob-sidecar.yml ./releases
             cp orb/Deployment.yml ./releases
+            cp orb/Deployment-sidecar.yml ./releases
             cp orb/StatefulSet.yml ./releases
+            cp orb/StatefulSet-sidecar.yml ./releases
             cp orb/kustomization.yml ./releases
       - run:
           name: Download ghr
@@ -96,13 +102,26 @@ jobs:
             ORB_PATH=./orb/orb.yml
             ORB_NAME=secret-injector
 
-            ./cli/circleci orb validate $ORB_PATH
-
             if [[ $CIRCLE_TAG == *"dev"* ]]; then
               ./cli/circleci orb publish $ORB_PATH $CC_NAMESPACE/$ORB_NAME@dev:$CIRCLE_TAG
             else
               ./cli/circleci orb publish $ORB_PATH $CC_NAMESPACE/$ORB_NAME@$CIRCLE_TAG
             fi
+  orb-validate:
+    executor: go_image
+    steps:
+      - attach_workspace:
+          at: /tmp
+      - checkout
+      - run:
+          name: Publish CircleCI orb
+          command: |
+            CCI_VERSION=0.1.20500
+            wget https://github.com/CircleCI-Public/circleci-cli/releases/download/v$CCI_VERSION/circleci-cli_$CCI_VERSION\_linux_amd64.tar.gz
+            tar -xf circleci-cli_$CCI_VERSION\_linux_amd64.tar.gz
+            mv circleci-cli_$CCI_VERSION\_linux_amd64 cli
+
+            ./cli/circleci orb validate ./orb/orb.yml
 
 test_filter: &test_filter
   filters:
@@ -148,6 +167,11 @@ workflows:
           repo: public-docker
           tag: $CIRCLE_SHA1
           dry_run: true
+          requires:
+            - secrets-common
+          <<: *common_context
+          <<: *test_filter
+      - orb-validate:
           requires:
             - secrets-common
           <<: *common_context
