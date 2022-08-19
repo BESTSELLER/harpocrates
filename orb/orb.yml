@@ -161,7 +161,7 @@ jobs:
           steps:
             - run:
                 name: Delete old secrets file
-                command: rm << parameters.output >><< parameters.output-filename >> || true
+                command: rm << parameters.output >>/secrets || true
       - run:
           name: Secret-injector - Write secrets to file
           command: |
