@@ -36,10 +36,20 @@ jobs:
         type: string
         default: ""
         description: Prefix to be used for secrets
+      overwrite:
+        type: boolean
+        default: false
+        description: Overwrite existing secrets
     steps:
       - attach_workspace:
           at: /tmp
       - vault-login
+      - when:
+          condition: << parameters.overwrite >>
+          steps:
+            - run:
+                name: Delete old secrets file
+                command: rm << parameters.output >><< parameters.output-filename >> || true
       - run:
           name: Secret-injector - Write secrets to file
           command: |
