@@ -36,22 +36,10 @@ jobs:
         type: string
         default: ""
         description: Prefix to be used for secrets
-      overwrite:
-        type: boolean
-        default: false
-        description: Overwrite existing secrets
     steps:
       - attach_workspace:
           at: /tmp
       - vault-login
-      - when:
-          condition: << parameters.overwrite >>
-          steps:
-            - run:
-                name: Delete old secrets file
-                command: |
-                  rm << parameters.output >><< parameters.output-filename >> || true
-                  mkdir << parameters.output >> || true
       - run:
           name: Secret-injector - Write secrets to file
           command: |
@@ -138,10 +126,6 @@ jobs:
         type: boolean
         default: true
         description: Should the orb fetch the secrets common to BESTSELLER.
-      overwrite:
-        type: boolean
-        default: false
-        description: Overwrite existing secrets
     steps:
       - checkout
       - attach_workspace:
@@ -158,14 +142,6 @@ jobs:
             envsubst < << parameters.secret-file >> > ./secrets_var.yaml && mv ./secrets_var.yaml << parameters.secret-file >>
       - download_n_install_yq
       - vault-login
-      - when:
-          condition: << parameters.overwrite >>
-          steps:
-            - run:
-                name: Delete old secrets file
-                command: |
-                  rm -rf << parameters.output >> || true
-                  mkdir << parameters.output >> || true
       - run:
           name: Secret-injector - Write secrets to file
           command: |
