@@ -9,8 +9,8 @@ executors:
           password: $DOCKERHUB_PASS
 
 orbs:
-  secret-injector: bestsellerit/secret-injector@2.0.5
-  cci-common: bestsellerit/cci-common@1.2.6
+  secret-injector: bestsellerit/secret-injector@2.0.6
+  cci-common: bestsellerit/cci-common@1.6.2
 
 jobs:
   build-go:
