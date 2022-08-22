@@ -34,6 +34,9 @@ var (
 				if !validFile {
 					log.Fatal().Msg("Invalid file")
 				}
+				if config.Config.Validate {
+					return
+				}
 				input = util.ReadInput(data)
 			} else if len(*secret) > 0 { // Parameters is being used
 				if config.Config.Output == "" {
@@ -59,6 +62,9 @@ var (
 
 				if validate.SecretsFile(args[0]) {
 					input = util.ReadInput(args[0])
+				}
+				if config.Config.Validate {
+					return
 				}
 			}
 
@@ -151,6 +157,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&config.Config.Prefix, "prefix", "", "key prefix e.g TEST_ will produce TEST_key=secret")
 	rootCmd.PersistentFlags().BoolVar(&config.Config.UpperCase, "uppercase", false, "will convert key to UPPERCASE")
 	rootCmd.PersistentFlags().StringVar(&config.Config.LogLevel, "log-level", "", "LogLevel, default is warn")
+	rootCmd.PersistentFlags().BoolVar(&config.Config.Validate, "validate", false, "Validate, will only validate the secrets file")
 	secret = rootCmd.PersistentFlags().StringSlice("secret", []string{}, "vault path to secret, supports array of secrets e.g. SECRETENGINE/data/test/dev,SECRETENGINE/data/test/prod")
 
 }

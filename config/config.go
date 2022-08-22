@@ -22,6 +22,7 @@ type GlobalConfig struct {
 	FileName     string `required:"false"`
 	Owner        int    `required:"false"`
 	LogLevel     string `required:"false"`
+	Validate     bool   `required:"false"`
 }
 
 // Config stores the Global Configuration.

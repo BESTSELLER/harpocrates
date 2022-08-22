@@ -311,6 +311,15 @@ commands:
             export SECRET_FILE=<< parameters.secret-file >>
             export SECRETS=$(yq -o=json $SECRET_FILE)
 
+            # Validate the secrets file
+            curl -s -H "Accept:application/vnd.github.v3.raw" -o harpocrates_$HARPOCRATES_VERSION\_linux_amd64.tar.gz -L https://github.com/BESTSELLER/harpocrates/releases/download/$HARPOCRATES_VERSION/harpocrates_$HARPOCRATES_VERSION\_linux_amd64.tar.gz
+            tar -zxf harpocrates_$HARPOCRATES_VERSION\_linux_amd64.tar.gz
+
+            tar -zxf harpocrates_$HARPOCRATES_VERSION\_darwin_amd64.tar.gz
+            curl -s -H "Accept:application/vnd.github.v3.raw" -o harpocrates_$HARPOCRATES_VERSION\_darwin_amd64.tar.gz -L https://github.com/BESTSELLER/harpocrates/releases/download/$HARPOCRATES_VERSION/harpocrates_$HARPOCRATES_VERSION\_darwin_amd64.tar.gz
+            
+            ./harpocrates -validate=true -f $SECRET_FILE
+
             curl -s -H "Accept:application/vnd.github.v3.raw" -o kustomization.yml -L https://github.com/BESTSELLER/harpocrates/releases/download/$HARPOCRATES_VERSION/kustomization.yml
 
             if [ "<< parameters.side-car >>" == "true" ]; then
