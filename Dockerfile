@@ -1,4 +1,4 @@
-FROM golang:1.19.0-alpine AS builder
+FROM golang:1.19.1-alpine AS builder
 WORKDIR $GOPATH/src/harpocrates
 COPY . .
 RUN GOOS=linux GOARCH=amd64 go build -buildvcs=false -ldflags="-w -s" -o /tmp/harpocrates
