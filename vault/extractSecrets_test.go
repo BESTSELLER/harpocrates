@@ -78,7 +78,7 @@ func TestExtractSecretsWithFormatAsExpected(t *testing.T) {
 	}
 
 	// act
-	result, err := vaultClient.ExtractSecrets(input)
+	result, err := vaultClient.ExtractSecrets(input, false)
 	if err != nil {
 		t.Error(err)
 	}
@@ -110,7 +110,7 @@ func TestExtractSecretsAsExpected(t *testing.T) {
 	}
 
 	// act
-	result, err := vaultClient.ExtractSecrets(input)
+	result, err := vaultClient.ExtractSecrets(input, false)
 	if err != nil {
 		t.Error(err)
 	}
@@ -141,7 +141,7 @@ func TestExtractSecretsWithPrefixAsExpected(t *testing.T) {
 	}
 
 	// act
-	result, err := vaultClient.ExtractSecrets(input)
+	result, err := vaultClient.ExtractSecrets(input, false)
 	if err != nil {
 		t.Error(err)
 	}
@@ -173,7 +173,7 @@ func TestExtractSecretsSaveAsFileAsExpected(t *testing.T) {
 	}
 
 	// act
-	_, err := vaultClient.ExtractSecrets(input)
+	_, err := vaultClient.ExtractSecrets(input, false)
 	if err != nil {
 		t.Error(err)
 	}
