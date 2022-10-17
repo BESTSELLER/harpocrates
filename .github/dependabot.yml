@@ -9,12 +9,15 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "monthly"
+    labels:
+      - automerge
     reviewers: 
       - BESTSELLER/engineering-services 
   - package-ecosystem: "docker" # See documentation for possible values
     directory: "/" # Location of package manifests
     schedule:
       interval: "monthly"
+    labels:
+      - automerge
     reviewers: 
       - BESTSELLER/engineering-services 
-
