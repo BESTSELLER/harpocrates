@@ -6,8 +6,8 @@ import (
 	"strings"
 )
 
-const keyNotFound = "The key '%s' was not found in the path '%s'"
-const secretNotFound = "The secret '%s' was not found"
+const keyNotFound = "the key '%s' was not found in the path '%s'"
+const secretNotFound = "the secret '%s' was not found"
 
 // ReadSecret from Vault
 func (client *API) ReadSecret(path string) (map[string]interface{}, error) {
@@ -37,7 +37,7 @@ func (client *API) ReadSecret(path string) (map[string]interface{}, error) {
 			return client.ReadSecret(strings.Join(pathWithData, "/"))
 
 		}
-		return nil, fmt.Errorf("No data recieved")
+		return nil, fmt.Errorf("no data recieved")
 	}
 
 	b, err := json.Marshal(secretData)
@@ -48,7 +48,7 @@ func (client *API) ReadSecret(path string) (map[string]interface{}, error) {
 	var f interface{}
 	err = json.Unmarshal(b, &f)
 	if err != nil {
-		return nil, fmt.Errorf("Unable to unmarshal response from Vault")
+		return nil, fmt.Errorf("unable to unmarshal response from Vault")
 	}
 
 	myMap := f.(map[string]interface{})
