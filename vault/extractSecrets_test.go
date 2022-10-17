@@ -2,7 +2,6 @@ package vault
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"testing"
 
@@ -45,7 +44,7 @@ func GetTestVaultServer(t *testing.T) vaultTest {
 	client := cluster.Cores[0].Client
 
 	// put secrets
-	secretPath := fmt.Sprintf("secret/data/secret")
+	secretPath := "secret/data/secret"
 	secret := map[string]interface{}{"key1": "value1", "key2": "value2", "key3": "value3"}
 
 	_, err := client.Logical().Write(secretPath, secret)
@@ -72,13 +71,12 @@ func TestExtractSecretsWithFormatAsExpected(t *testing.T) {
 	// mock prefix
 	config.Config.Prefix = input.Prefix
 
-	var vaultClient *API
-	vaultClient = &API{
+	vaultClient := &API{
 		Client: testVault.Client,
 	}
 
 	// act
-	result, err := vaultClient.ExtractSecrets(input)
+	result, err := vaultClient.ExtractSecrets(input, false)
 	if err != nil {
 		t.Error(err)
 	}
@@ -104,13 +102,12 @@ func TestExtractSecretsAsExpected(t *testing.T) {
 	// mock prefix
 	config.Config.Prefix = input.Prefix
 
-	var vaultClient *API
-	vaultClient = &API{
+	vaultClient := &API{
 		Client: testVault.Client,
 	}
 
 	// act
-	result, err := vaultClient.ExtractSecrets(input)
+	result, err := vaultClient.ExtractSecrets(input, false)
 	if err != nil {
 		t.Error(err)
 	}
@@ -135,13 +132,12 @@ func TestExtractSecretsWithPrefixAsExpected(t *testing.T) {
 	// mock prefix
 	config.Config.Prefix = input.Prefix
 
-	var vaultClient *API
-	vaultClient = &API{
+	vaultClient := &API{
 		Client: testVault.Client,
 	}
 
 	// act
-	result, err := vaultClient.ExtractSecrets(input)
+	result, err := vaultClient.ExtractSecrets(input, false)
 	if err != nil {
 		t.Error(err)
 	}
@@ -167,13 +163,12 @@ func TestExtractSecretsSaveAsFileAsExpected(t *testing.T) {
 	// mock prefix
 	config.Config.Prefix = input.Prefix
 
-	var vaultClient *API
-	vaultClient = &API{
+	vaultClient := &API{
 		Client: testVault.Client,
 	}
 
 	// act
-	_, err := vaultClient.ExtractSecrets(input)
+	_, err := vaultClient.ExtractSecrets(input, false)
 	if err != nil {
 		t.Error(err)
 	}
@@ -182,7 +177,7 @@ func TestExtractSecretsSaveAsFileAsExpected(t *testing.T) {
 	defer os.Remove("../.tmp/TEST_key1")
 
 	// assert
-	content, err := ioutil.ReadFile("../.tmp/TEST_key1")
+	content, err := os.ReadFile("../.tmp/TEST_key1")
 	if err != nil {
 		t.Errorf("could not read file: %v", err)
 	}

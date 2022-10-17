@@ -43,7 +43,7 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON, appendToFile bool)
 				setFormat(d.Format, &currentFormat)
 
 				if len(d.Keys) == 0 {
-					secretValue, err := vaultClient.ReadSecret(fmt.Sprintf("%s", c))
+					secretValue, err := vaultClient.ReadSecret(c)
 					if err != nil {
 						return nil, err
 					}
@@ -67,7 +67,7 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON, appendToFile bool)
 							setUpper(d.UpperCase, &currentUpperCase)
 
 							if i.SaveAsFile != nil {
-								secretValue, err := vaultClient.ReadSecretKey(fmt.Sprintf("%s", c), h)
+								secretValue, err := vaultClient.ReadSecretKey(c, h)
 								if err != nil {
 									return nil, err
 								}
@@ -77,7 +77,7 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON, appendToFile bool)
 									result.Add(h, secretValue, currentPrefix, currentUpperCase)
 								}
 							} else {
-								secretValue, err := vaultClient.ReadSecretKey(fmt.Sprintf("%s", c), h)
+								secretValue, err := vaultClient.ReadSecretKey(c, h)
 								if err != nil {
 									return nil, err
 								}
@@ -87,7 +87,7 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON, appendToFile bool)
 							setUpper(d.UpperCase, &currentUpperCase)
 						}
 					} else {
-						secretValue, err := vaultClient.ReadSecretKey(fmt.Sprintf("%s", c), fmt.Sprintf("%s", f))
+						secretValue, err := vaultClient.ReadSecretKey(c, fmt.Sprintf("%s", f))
 						if err != nil {
 							return nil, err
 						}

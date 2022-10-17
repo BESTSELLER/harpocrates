@@ -1,2 +1,4 @@
 reviewers: 
-  - BESTSELLER/engineering-services 
+  - BESTSELLER/engineering-services
+labels:
+  - automerge
