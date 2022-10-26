@@ -339,7 +339,7 @@ commands:
             MY_LIST=$(yq '.patchesStrategicMerge[]' kustomization.yml)
             while IFS= read -r line; do
               echo "... $line ..."
-              if [ ! -f "$line" ]; then
+              if [ "$line" != "$DEPLOYMENT_TYPE.yml" ]; then
                 yq -i 'del( .patchesStrategicMerge[] | select(. == "'"$line"'") )' kustomization.yml
               fi
             done \<<< "$MY_LIST"
