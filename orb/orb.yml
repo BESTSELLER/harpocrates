@@ -76,15 +76,6 @@ jobs:
                 unset HARPOCRATES_FILENAME
               fi
 
-              # Fetch docker credentials
-              if [ "$SHORT" != "" ] ; then
-                /harpocrates \
-                  --format "<< parameters.format >>" \
-                  --output "<< parameters.output >>" \
-                  --prefix "DOCKER_" \
-                  --secret "ES/data/service_accounts/harbor/$SHORT-ci"
-              fi
-
             fi
 
             # Check if they have specified vault-path and then fetch those from Vault
@@ -172,11 +163,6 @@ jobs:
 
               if [ "$CLUSTER_SECRET" != "" ] ; then
                 yq e '.secrets += [ { env(CLUSTER_SECRET): {"format": "json", "fileName": "cluster_secret.json"}}]' -i << parameters.secret-file >>   
-              fi
-
-              if [ "$SHORT" != "" ] ; then
-                export TMP_PATH="ES/data/service_accounts/harbor/$SHORT-ci"
-                yq e '.secrets += [ { env(TMP_PATH): {"prefix": "DOCKER_"}}]' -i << parameters.secret-file >>
               fi
             fi
 
