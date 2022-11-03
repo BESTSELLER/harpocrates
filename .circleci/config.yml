@@ -171,6 +171,17 @@ workflows:
             - secrets-common
           <<: *common_context
           <<: *test_filter
+      - cci-common/build_n_push_docker:
+          name: docker-build-ci
+          image_name: $CIRCLE_PROJECT_REPONAME-ci
+          repo: public-docker
+          tag: $CIRCLE_SHA1
+          dry_run: true
+          file: Dockerfile.ci
+          requires:
+            - secrets-common
+          <<: *common_context
+          <<: *test_filter
       - orb-validate:
           requires:
             - secrets-common
@@ -192,6 +203,17 @@ workflows:
           repo: public-docker
           tag: $CIRCLE_TAG
           push_latest: true
+          requires:
+            - build-go
+          <<: *release_filter
+          <<: *common_context
+      - cci-common/build_n_push_docker:
+          name: docker-build-n-push-ci
+          image_name: $CIRCLE_PROJECT_REPONAME-ci
+          repo: public-docker
+          tag: $CIRCLE_TAG
+          push_latest: true
+          file: Dockerfile.ci
           requires:
             - build-go
           <<: *release_filter
