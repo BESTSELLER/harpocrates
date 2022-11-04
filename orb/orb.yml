@@ -181,6 +181,14 @@ commands:
       - run:
           name: Secret-injector - Adding secrets to BASH_ENV
           command: cat "<< parameters.file >>" >> $BASH_ENV
+  download_n_install_yq:
+    steps:
+      - run:
+          name: Download & install yq
+          command: |
+            VERSION=v4.25.2
+            command -v yq >/dev/null 2>&1 || { wget -O /usr/bin/yq https://github.com/mikefarah/yq/releases/download/$VERSION/yq_linux_amd64 && \
+              chmod +x /usr/bin/yq; }
   vault-login:
     steps:
       - run:
@@ -241,6 +249,7 @@ commands:
     steps:
       - attach_workspace:
           at: /tmp
+      - download_n_install_yq
       - vault-login
       - run:
           name: Secret-injector - kubectl kustomize
