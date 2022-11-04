@@ -184,8 +184,14 @@ commands:
   vault-login:
     steps:
       - run:
-          name: Secret-injector - Vault login
+          name: Secret-injector - Install Vault and login
           command: |
+            VERSION=1.12.1
+            command -v vault >/dev/null 2>&1 || { wget -O ./vault_$VERSION\_linux_amd64.zip https://releases.hashicorp.com/vault/$VERSION/vault_$VERSION\_linux_amd64.zip && \
+              unzip -o ./vault_$VERSION\_linux_amd64.zip -d /usr/bin/. && \
+              chmod +x /usr/bin/./vault
+              rm ./vault_$VERSION\_linux_amd64.zip; }
+            
             vault login -method=userpass username=$VAULT_USERNAME password=$VAULT_PASSWORD >/dev/null
             echo 'export VAULT_TOKEN=$(cat $HOME/.vault-token)' >> $BASH_ENV
   inject:
