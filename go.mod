@@ -56,8 +56,10 @@ require (
 	github.com/dgryski/go-metro v0.0.0-20180109044635-280f6062b5bc // indirect
 	github.com/digitalocean/godo v1.7.5 // indirect
 	github.com/dimchansky/utfbom v1.1.1 // indirect
+	github.com/dnaeon/go-vcr v1.2.0 // indirect
 	github.com/duosecurity/duo_api_golang v0.0.0-20190308151101-6c680f768e74 // indirect
 	github.com/evanphx/json-patch/v5 v5.6.0 // indirect
+	github.com/frankban/quicktest v1.14.2 // indirect
 	github.com/go-logr/logr v1.2.0 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/go-openapi/analysis v0.20.0 // indirect
@@ -83,6 +85,7 @@ require (
 	github.com/googleapis/gax-go/v2 v2.4.0 // indirect
 	github.com/googleapis/gnostic v0.5.5 // indirect
 	github.com/gophercloud/gophercloud v0.1.0 // indirect
+	github.com/hashicorp/consul/sdk v0.11.0 // indirect
 	github.com/hashicorp/go-discover v0.0.0-20210818145131-c573d69da192 // indirect
 	github.com/hashicorp/go-kms-wrapping/entropy/v2 v2.0.0 // indirect
 	github.com/hashicorp/go-kms-wrapping/v2 v2.0.5 // indirect
@@ -159,7 +162,7 @@ require (
 	go.mongodb.org/mongo-driver v1.7.3 // indirect
 	go.opencensus.io v0.23.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20220524215830-622c5d57e401 // indirect
-	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f // indirect
+	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4 // indirect
 	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
 	google.golang.org/api v0.83.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
@@ -185,7 +188,7 @@ require (
 	github.com/google/go-cmp v0.5.8 // indirect
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-cleanhttp v0.5.2 // indirect
-	github.com/hashicorp/go-hclog v1.3.0 // indirect
+	github.com/hashicorp/go-hclog v1.3.1 // indirect
 	github.com/hashicorp/go-immutable-radix v1.3.1 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
 	github.com/hashicorp/go-plugin v1.4.5 // indirect
@@ -198,9 +201,9 @@ require (
 	github.com/hashicorp/go-uuid v1.0.3 // indirect
 	github.com/hashicorp/go-version v1.6.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.4 // indirect
-	github.com/hashicorp/hcl v1.0.1-vault-3 // indirect
-	github.com/hashicorp/vault v1.12.0
-	github.com/hashicorp/vault/sdk v0.6.1-0.20221010215534-6545e24b6023 // indirect
+	github.com/hashicorp/hcl v1.0.1-vault-5 // indirect
+	github.com/hashicorp/vault v1.12.2
+	github.com/hashicorp/vault/sdk v0.6.1-0.20221102145943-1e9b0a1225c3 // indirect
 	github.com/hashicorp/yamux v0.0.0-20211028200310-0bc27b27de87 // indirect
 	github.com/inconshreveable/mousetrap v1.0.1 // indirect
 	github.com/mattn/go-colorable v0.1.12 // indirect
