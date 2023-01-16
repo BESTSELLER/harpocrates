@@ -88,16 +88,21 @@ jobs:
       - run:
           name: Create Github releases
           command: |
+            source $BASH_ENV || true
+            source /tmp/secrets || true
+
             ghr -replace $CIRCLE_TAG ./releases
       - run:
           name: Publish CircleCI orb
           command: |
+            source $BASH_ENV || true
+            source /tmp/secrets || true
+
             CCI_VERSION=0.1.11540
             wget https://github.com/CircleCI-Public/circleci-cli/releases/download/v$CCI_VERSION/circleci-cli_$CCI_VERSION\_linux_amd64.tar.gz
             tar -xf circleci-cli_$CCI_VERSION\_linux_amd64.tar.gz
             mv circleci-cli_$CCI_VERSION\_linux_amd64 cli
 
-            export CIRCLECI_CLI_TOKEN=$(vault kv get -field=circleci_token ES/harpocrates)
             CC_NAMESPACE=bestsellerit
             ORB_PATH=./orb/orb.yml
             ORB_NAME=secret-injector
@@ -116,6 +121,9 @@ jobs:
       - run:
           name: Publish CircleCI orb
           command: |
+            source $BASH_ENV || true
+            source /tmp/secrets || true
+            
             CCI_VERSION=0.1.22924
             wget https://github.com/CircleCI-Public/circleci-cli/releases/download/v$CCI_VERSION/circleci-cli_$CCI_VERSION\_linux_amd64.tar.gz
             tar -xf circleci-cli_$CCI_VERSION\_linux_amd64.tar.gz
