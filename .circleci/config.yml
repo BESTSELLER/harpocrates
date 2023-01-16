@@ -10,7 +10,7 @@ executors:
 
 orbs:
   secret-injector: bestsellerit/secret-injector@2.0.8
-  cci-common: bestsellerit/cci-common@1.9.4
+  cci-common: bestsellerit/cci-common@1.10.0
 
 jobs:
   build-go:
@@ -190,12 +190,13 @@ workflows:
 
   test-build-release:
     jobs:
-      - secret-injector/dump-secrets:
+      - secret-injector/dump-secrets-yaml:
+          secret-file: ci-secrets.yaml
           <<: *release_filter
           <<: *common_context
       - build-go:
           requires:
-            - secret-injector/dump-secrets
+            - secret-injector/dump-secrets-yaml
           <<: *release_filter
           <<: *common_context
       - cci-common/build_n_push_docker:
