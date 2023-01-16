@@ -116,7 +116,7 @@ jobs:
       - run:
           name: Publish CircleCI orb
           command: |
-            CCI_VERSION=0.1.20500
+            CCI_VERSION=0.1.22924
             wget https://github.com/CircleCI-Public/circleci-cli/releases/download/v$CCI_VERSION/circleci-cli_$CCI_VERSION\_linux_amd64.tar.gz
             tar -xf circleci-cli_$CCI_VERSION\_linux_amd64.tar.gz
             mv circleci-cli_$CCI_VERSION\_linux_amd64 cli
