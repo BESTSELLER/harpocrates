@@ -19,5 +19,5 @@ func TestReadSecretWrongPath(t *testing.T) {
 	}
 
 	// assert
-	assert.Equal(t, fmt.Sprintf(secretNotFound, path), err.Error())
+	assert.Equal(t, fmt.Sprintf(secretNotFound, path, err), err.Error())
 }
