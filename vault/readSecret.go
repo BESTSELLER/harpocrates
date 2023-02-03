@@ -6,15 +6,15 @@ import (
 	"strings"
 )
 
-const keyNotFound = "the key '%s' was not found in the path '%s'"
-const secretNotFound = "the secret '%s' was not found"
+const keyNotFound = "the key '%s' was not found in the path '%s': %v"
+const secretNotFound = "the secret '%s' was not found: %v"
 
 // ReadSecret from Vault
 func (client *API) ReadSecret(path string) (map[string]interface{}, error) {
 
-	secretValues, _ := client.Client.Logical().Read(path)
+	secretValues, err := client.Client.Logical().Read(path)
 	if secretValues == nil {
-		return nil, fmt.Errorf(secretNotFound, path)
+		return nil, fmt.Errorf(secretNotFound, path, err)
 	}
 
 	secretData := secretValues.Data["data"]
@@ -60,14 +60,14 @@ func (client *API) ReadSecret(path string) (map[string]interface{}, error) {
 func (client *API) ReadSecretKey(path string, key string) (string, error) {
 	secret, err := client.ReadSecret(path)
 	if secret == nil {
-		return "", fmt.Errorf(keyNotFound, key, path)
+		return "", fmt.Errorf(keyNotFound, key, path, err)
 	}
 	if err != nil {
 		return "", err
 	}
 	secretKey := secret[key]
 	if secretKey == nil {
-		return "", fmt.Errorf(keyNotFound, key, path)
+		return "", fmt.Errorf(keyNotFound, key, path, err)
 	}
 
 	return secretKey.(string), nil

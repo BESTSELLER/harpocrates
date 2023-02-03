@@ -13,11 +13,14 @@ func TestReadSecretWrongPath(t *testing.T) {
 	path := "somepath"
 
 	// act
-	_, err := NewClient().ReadSecret(path)
+	vaultClient := &API{
+		Client: testVault.Client,
+	}
+	_, err := vaultClient.ReadSecret(path)
 	if err == nil {
 		t.Error("expected error got nil")
 	}
 
 	// assert
-	assert.Equal(t, fmt.Sprintf(secretNotFound, path), err.Error())
+	assert.Equal(t, fmt.Sprintf(secretNotFound, path, nil), err.Error())
 }
