@@ -66,6 +66,7 @@ yaml is a great options for readability and replication of configs. yaml options
 | owner     | no       | UID of the user e.g 0, can be set on "root" and secret level | current user |
 | prefix    | no       | prefix, can be set on any level                              | -            |
 | uppercase | no       | will uppercase prefix and key                                | false        |
+| append    | no       | appends secrets to a file                                    | true         |
 | secrets   | yes      | an array of secret paths                                     | -            |
 
 <br/>
@@ -156,6 +157,7 @@ There is not the same granularity as in the json and yaml specs. e.g. prefix can
 | prefix        | -                    | prefix keys, eg. K8S_                                                                                      |                          -                          |
 | uppercase     | -                    | will uppercase prefix and key                                                                              |                        false                        |
 | secret        | -                    | vault path /secretengine/data/some/secret                                                                  |                          -                          |
+| append        | -                    | Appends secrets to a file                                                                                  |                        true                         |
 | -             | HARPOCRATES_FILENAME | overwrites the default output filename                                                                     |                          -                          |
 
 
