@@ -37,7 +37,7 @@ jobs:
         default: ""
         description: Prefix to be used for secrets
       append:
-        type: bool
+        type: boolean
         default: true
         description: Append, appends secrets to a file, defaults to true 
     steps:
