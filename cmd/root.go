@@ -86,6 +86,9 @@ var (
 
 				duration = durationParsed
 				log.Debug().Msgf("Continuous mode enabled, will run every %s", durationParsed)
+
+				// If we are in continuous mode, we want to overwrite to the file
+				config.Config.Append = false
 			}
 
 			for {
@@ -93,7 +96,7 @@ var (
 
 				vaultClient := vault.NewClient()
 
-				allSecrets, err := vaultClient.ExtractSecrets(input, !continuous)
+				allSecrets, err := vaultClient.ExtractSecrets(input, config.Config.Append)
 				if err != nil {
 					log.Fatal().Err(err).Msgf("%s", err)
 				}
@@ -111,11 +114,11 @@ var (
 					}
 
 					if v.Format == "json" {
-						files.Write(config.Config.Output, fileName, v.Result.ToJSON(), v.Owner, !continuous)
+						files.Write(config.Config.Output, fileName, v.Result.ToJSON(), v.Owner, config.Config.Append)
 					} else if v.Format == "env" {
-						files.Write(config.Config.Output, fileName, v.Result.ToENV(), v.Owner, !continuous)
+						files.Write(config.Config.Output, fileName, v.Result.ToENV(), v.Owner, config.Config.Append)
 					} else if v.Format == "secret" {
-						files.Write(config.Config.Output, fileName, v.Result.ToK8sSecret(), v.Owner, !continuous)
+						files.Write(config.Config.Output, fileName, v.Result.ToK8sSecret(), v.Owner, config.Config.Append)
 					}
 
 					log.Debug().Msgf("Secrets written to file: %s/%s", config.Config.Output, fileName)
@@ -158,6 +161,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&config.Config.UpperCase, "uppercase", false, "will convert key to UPPERCASE")
 	rootCmd.PersistentFlags().StringVar(&config.Config.LogLevel, "log-level", "", "LogLevel, default is warn")
 	rootCmd.PersistentFlags().BoolVar(&config.Config.Validate, "validate", false, "Validate, will only validate the secrets file")
+	rootCmd.PersistentFlags().BoolVar(&config.Config.Append, "append", true, "Append, appends secrets to a file, defaults to true")
 	secret = rootCmd.PersistentFlags().StringSlice("secret", []string{}, "vault path to secret, supports array of secrets e.g. SECRETENGINE/data/test/dev,SECRETENGINE/data/test/prod")
 
 }
