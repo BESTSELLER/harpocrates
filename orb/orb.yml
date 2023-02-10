@@ -66,7 +66,7 @@ jobs:
                 /harpocrates \
                   --format "<< parameters.format >>" \
                   --output "<< parameters.output >>" \
-                  --append "<< parameters.append >>" \
+                  --append << parameters.append >> \
                   --prefix $prefix \
                   --secret $HARPOCRATES_SECRETS
               fi
@@ -77,7 +77,7 @@ jobs:
                 /harpocrates \
                   --format json \
                   --output "<< parameters.output >>" \
-                  --append "<< parameters.append >>" \
+                  --append << parameters.append >> \
                   --secret "$CLUSTER_SECRET"
                 unset HARPOCRATES_FILENAME
               fi
@@ -93,7 +93,7 @@ jobs:
               /harpocrates \
                 --format "<< parameters.format >>" \
                 --output "<< parameters.output >>" \
-                --append "<< parameters.append >>" \
+                --append << parameters.append >> \
                 --prefix "<< parameters.prefix >>" \
                 --secret "<< parameters.vault-path >>" 
             fi
