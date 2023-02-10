@@ -3,6 +3,9 @@
   "type": "object",
   "additionalProperties": false,
   "properties": {
+    "append": {
+      "type": "boolean"
+    },
     "format": {
       "type": "string",
       "enum": [
@@ -53,6 +56,9 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
+            "append": {
+              "type": "boolean"
+            },
             "format": {
               "type": "string",
               "enum": [
@@ -90,6 +96,9 @@
                         "type": "object",
                         "additionalProperties": false,
                         "properties": {
+                          "append": {
+                            "type": "boolean"
+                          },
                           "prefix": {
                             "type": "string"
                           },
