@@ -119,7 +119,7 @@ jobs:
           at: /tmp
       - checkout
       - run:
-          name: Publish CircleCI orb
+          name: Validate CircleCI orb
           command: |
             source $BASH_ENV || true
             source /tmp/secrets || true
