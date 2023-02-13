@@ -11,6 +11,7 @@ import (
 
 // SecretJSON holds the information about which secrets to fetch and how to save them again
 type SecretJSON struct {
+	Append    *bool         `json:"append,omitempty"      yaml:"append,omitempty"`
 	Format    string        `json:"format,omitempty"      yaml:"format,omitempty"`
 	Output    string        `json:"output,omitempty"      yaml:"output,omitempty"`
 	Owner     *int          `json:"owner,omitempty"       yaml:"owner,omitempty"`
@@ -20,6 +21,7 @@ type SecretJSON struct {
 }
 
 type Secret struct {
+	Append    *bool         `json:"append,omitempty"      yaml:"append,omitempty"`
 	Prefix    string        `json:"prefix,omitempty"      yaml:"prefix,omitempty"`
 	Format    string        `json:"format,omitempty"      yaml:"format,omitempty"      mapstructure:"format,omitempty"`
 	FileName  string        `json:"filename,omitempty"    yaml:"filename,omitempty"    mapstructure:"filename,omitempty"`
@@ -29,6 +31,7 @@ type Secret struct {
 }
 
 type SecretKeys struct {
+	Append     *bool  `json:"append,omitempty"         yaml:"append,omitempty"`
 	Prefix     string `json:"prefix,omitempty"         yaml:"prefix,omitempty"      mapstructure:"prefix,omitempty"`
 	UpperCase  *bool  `json:"uppercase,omitempty"      yaml:"uppercase,omitempty"   mapstructure:"uppercase,omitempty"`
 	SaveAsFile *bool  `json:"saveAsFile,omitempty"     yaml:"saveAsFile,omitempty"`
@@ -78,6 +81,10 @@ MoveOn:
 
 	if secretJSON.UpperCase != nil {
 		config.Config.UpperCase = *secretJSON.UpperCase
+	}
+
+	if secretJSON.Append != nil {
+		config.Config.Append = *secretJSON.Append
 	}
 
 	return secretJSON

@@ -10,19 +10,20 @@ import (
 
 // GlobalConfig defines the structure of the global configuration parameters
 type GlobalConfig struct {
-	VaultAddress string `required:"false"`
+	Append       bool   `required:"false"`
 	AuthName     string `required:"false"`
+	FileName     string `required:"false"`
+	Format       string `required:"false"`
+	LogLevel     string `required:"false"`
+	Output       string `required:"false"`
+	Owner        int    `required:"false"`
+	Prefix       string `required:"false"`
 	RoleName     string `required:"false"`
 	TokenPath    string `required:"false"`
-	VaultToken   string `required:"false"`
-	Prefix       string `required:"false"`
 	UpperCase    bool   `required:"false"`
-	Format       string `required:"false"`
-	Output       string `required:"false"`
-	FileName     string `required:"false"`
-	Owner        int    `required:"false"`
-	LogLevel     string `required:"false"`
 	Validate     bool   `required:"false"`
+	VaultAddress string `required:"false"`
+	VaultToken   string `required:"false"`
 }
 
 // Config stores the Global Configuration.
