@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/gookit/color v1.5.2
-	github.com/hashicorp/vault/api v1.8.2
+	github.com/hashicorp/vault/api v1.9.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/rs/zerolog v1.29.0
 	github.com/spf13/cobra v1.6.1
@@ -163,7 +163,7 @@ require (
 	go.opencensus.io v0.23.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20220524215830-622c5d57e401 // indirect
 	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4 // indirect
-	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
+	golang.org/x/term v0.4.0 // indirect
 	google.golang.org/api v0.83.0 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
@@ -221,10 +221,10 @@ require (
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	github.com/xo/terminfo v0.0.0-20210125001918-ca9a967f8778 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
-	golang.org/x/crypto v0.0.0-20220817201139-bc19a97f63c8 // indirect
-	golang.org/x/net v0.0.0-20220909164309-bea034e7d591 // indirect
-	golang.org/x/sys v0.0.0-20220913175220-63ea55921009 // indirect
-	golang.org/x/text v0.3.8 // indirect
+	golang.org/x/crypto v0.5.0 // indirect
+	golang.org/x/net v0.5.0 // indirect
+	golang.org/x/sys v0.4.0 // indirect
+	golang.org/x/text v0.6.0 // indirect
 	golang.org/x/time v0.0.0-20220411224347-583f2d630306 // indirect
 	google.golang.org/genproto v0.0.0-20220602131408-e326c6e8e9c8 // indirect
 	google.golang.org/grpc v1.47.0 // indirect
