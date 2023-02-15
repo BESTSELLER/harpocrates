@@ -220,7 +220,7 @@ commands:
               $SUDO chmod +x /usr/bin/./vault
               $SUDO rm ./vault_$VERSION\_linux_amd64.zip; }
             
-            vault login -method=userpass username=$VAULT_USERNAME password=$VAULT_PASSWORD -no-print
+            vault login -no-print -method=userpass username=$VAULT_USERNAME password=$VAULT_PASSWORD
             echo 'export VAULT_TOKEN=$(cat $HOME/.vault-token)' >> $BASH_ENV
   inject:
     description: Secret-injector orb
