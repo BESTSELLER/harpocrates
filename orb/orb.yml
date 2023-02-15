@@ -188,26 +188,39 @@ commands:
       - run:
           name: Secret-injector - Adding secrets to BASH_ENV
           command: cat "<< parameters.file >>" >> $BASH_ENV
+  check_if_sudo:
+    steps:
+      - run:
+          name: Check if current user as sudo permission
+          command: |
+            sudo -v &> /dev/null
+            if [ $? == 0 ]; then
+              echo 'export SUDO="sudo"' >> $BASH_ENV
+            fi
   download_n_install_yq:
     steps:
       - run:
           name: Download & install yq
           command: |
+            source $BASH_ENV || true
+
             VERSION=v4.25.2
-            command -v yq >/dev/null 2>&1 || { wget -O /usr/bin/yq https://github.com/mikefarah/yq/releases/download/$VERSION/yq_linux_amd64 && \
-              chmod +x /usr/bin/yq; }
+            command -v yq >/dev/null 2>&1 || { $SUDO wget -O /usr/bin/yq https://github.com/mikefarah/yq/releases/download/$VERSION/yq_linux_amd64 && \
+              $SUDO chmod +x /usr/bin/yq; }
   vault-login:
     steps:
       - run:
           name: Secret-injector - Install Vault and login
           command: |
+            source $BASH_ENV || true
+
             VERSION=1.12.1
-            command -v vault >/dev/null 2>&1 || { wget -O ./vault_$VERSION\_linux_amd64.zip https://releases.hashicorp.com/vault/$VERSION/vault_$VERSION\_linux_amd64.zip && \
-              unzip -o ./vault_$VERSION\_linux_amd64.zip -d /usr/bin/. && \
-              chmod +x /usr/bin/./vault
-              rm ./vault_$VERSION\_linux_amd64.zip; }
+            command -v vault >/dev/null 2>&1 || { $SUDO wget -O ./vault_$VERSION\_linux_amd64.zip https://releases.hashicorp.com/vault/$VERSION/vault_$VERSION\_linux_amd64.zip && \
+              $SUDO unzip -o ./vault_$VERSION\_linux_amd64.zip -d /usr/bin/. && \
+              $SUDO chmod +x /usr/bin/./vault
+              $SUDO rm ./vault_$VERSION\_linux_amd64.zip; }
             
-            vault login -method=userpass username=$VAULT_USERNAME password=$VAULT_PASSWORD >/dev/null
+            vault login -method=userpass username=$VAULT_USERNAME password=$VAULT_PASSWORD -no-print
             echo 'export VAULT_TOKEN=$(cat $HOME/.vault-token)' >> $BASH_ENV
   inject:
     description: Secret-injector orb
@@ -256,18 +269,14 @@ commands:
     steps:
       - attach_workspace:
           at: /tmp
+      - check_if_sudo
       - download_n_install_yq
       - vault-login
       - run:
           name: Secret-injector - kubectl kustomize
           command: |
-            if [ -f ${BASH_ENV} ]; then
-              source ${BASH_ENV}
-            fi
-
-            if [ -f "/tmp/secrets" ]; then
-              source /tmp/secrets
-            fi
+            source ${BASH_ENV} || true
+            source /tmp/secrets || true
 
             if [ -z "<< parameters.container-name >>" ]; then
                 export CONTAINER_NAME=<< parameters.app-name >>
