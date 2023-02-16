@@ -193,8 +193,6 @@ commands:
       - run:
           name: Check if current user as sudo permission
           command: |
-            set -e
-            
             sudo -v >/dev/null 2>&1
             if [ $? == 0 ]; then
               echo 'export SUDO="sudo"' >> $BASH_ENV
