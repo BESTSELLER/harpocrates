@@ -55,7 +55,7 @@ jobs:
             wget https://releases.hashicorp.com/vault/$VERSION/vault_$VERSION\_linux_amd64.zip
             sudo unzip -o vault_$VERSION\_linux_amd64.zip -d /usr/bin/
             sudo chmod +x /usr/bin/vault
-            vault login -method=userpass username=$VAULT_USERNAME password=$VAULT_PASSWORD >/dev/null
+            vault login -no-print -method=userpass username=$VAULT_USERNAME password=$VAULT_PASSWORD
       - run:
           name: Create release folder
           command: |
