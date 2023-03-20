@@ -263,6 +263,13 @@ commands:
 
             ( command -v python3 && command -v pip ) >/dev/null 2>&1 || { apk add --no-cache python3 py3-pip; }
 
+  curl_install:
+    steps:
+      - run:
+          name: Install curl
+          command: |
+            command -v curl >/dev/null 2>&1 || { apk add --no-cache curl; }
+
   gcloud_install:
     steps:
       - run:
@@ -298,6 +305,7 @@ commands:
 
     steps:
       - python_install
+      - curl_install
       - gcloud_install
       - run:
           name: Generate credential configuration for CircleCI OIDC Token
