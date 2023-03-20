@@ -333,6 +333,7 @@ commands:
             source ${BASH_ENV}
 
             vault login -no-print -method=gcp role=<< parameters.username >> service_account=<< parameters.service_account >>
+            echo 'export VAULT_TOKEN=$(cat $HOME/.vault-token)' >> $BASH_ENV
   inject:
     description: Secret-injector orb
     parameters:
