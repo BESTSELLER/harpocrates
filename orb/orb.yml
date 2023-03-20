@@ -39,11 +39,22 @@ jobs:
       append:
         type: boolean
         default: true
-        description: Append, appends secrets to a file, defaults to true 
+        description: Append, appends secrets to a file, defaults to true
+      vault-oidc:
+        type: boolean
+        default: false
+        description: Login to vault using oidc
     steps:
       - attach_workspace:
           at: /tmp
-      - vault-login
+      - when:
+          condition: << parameters.vault-oidc >>
+          steps:
+            - vault_login_oidc
+      - unless:
+          condition: << parameters.vault-oidc >>
+          steps:
+            - vault-login
       - run:
           name: Secret-injector - Write secrets to file
           command: |
@@ -124,6 +135,10 @@ jobs:
         type: boolean
         default: true
         description: Should the orb fetch the secrets common to BESTSELLER.
+      vault-oidc:
+        type: boolean
+        default: false
+        description: Login to vault using oidc
     steps:
       - checkout
       - attach_workspace:
@@ -132,7 +147,14 @@ jobs:
           name: replace strings
           command: |
             envsubst < << parameters.secret-file >> > ./secrets_var.yaml && mv ./secrets_var.yaml << parameters.secret-file >>
-      - vault-login
+      - when:
+          condition: << parameters.vault-oidc >>
+          steps:
+            - vault_login_oidc
+      - unless:
+          condition: << parameters.vault-oidc >>
+          steps:
+            - vault-login
       - run:
           name: Secret-injector - Write secrets to file
           command: |
@@ -209,10 +231,10 @@ commands:
             VERSION=v4.25.2
             command -v yq >/dev/null 2>&1 || { $SUDO wget -O /usr/bin/yq https://github.com/mikefarah/yq/releases/download/$VERSION/yq_linux_amd64 && \
               $SUDO chmod +x /usr/bin/yq; }
-  vault-login:
+  vault_install:
     steps:
       - run:
-          name: Secret-injector - Install Vault and login
+          name: Secret-injector - Vault install
           command: |
             source $BASH_ENV || true
 
@@ -221,9 +243,88 @@ commands:
               $SUDO unzip -o ./vault_$VERSION\_linux_amd64.zip -d /usr/bin/. && \
               $SUDO chmod +x /usr/bin/./vault
               $SUDO rm ./vault_$VERSION\_linux_amd64.zip; }
-            
+
+  vault-login:
+    steps:
+      - vault_install
+      - run:
+          name: Secret-injector - Vault login
+          command: |
+            source $BASH_ENV || true
+
             vault login -no-print -method=userpass username=$VAULT_USERNAME password=$VAULT_PASSWORD
             echo 'export VAULT_TOKEN=$(cat $HOME/.vault-token)' >> $BASH_ENV
+
+  python_install:
+    steps:
+      - run:
+          name: Install Python
+          command: |
+
+            ( command -v python3 && command -v pip ) >/dev/null 2>&1 || { apk add --no-cache python3 py3-pip; }
+
+  gcloud_install:
+    steps:
+      - run:
+          name: Install gcloud
+          command: |
+            source $BASH_ENV || true
+
+            GCLOUD_VERSION=422.0.0
+            command -v gcloud >/dev/null 2>&1 || { curl https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-"$GCLOUD_VERSION"-linux-x86_64.tar.gz --output "$HOME"/google-cloud-sdk-"$GCLOUD_VERSION"-linux-x86_64.tar.gz && \
+            tar -zxf "$HOME"/google-cloud-sdk-"$GCLOUD_VERSION"-linux-x86_64.tar.gz -C "$HOME" && \
+            "$HOME"/google-cloud-sdk/install.sh -q --command-completion true --path-update true; }
+
+            echo 'export PATH="$HOME"/google-cloud-sdk/bin/:${PATH}' >> "$BASH_ENV"
+
+  vault_login_oidc:
+    description: Login in to Vault using OIDC
+    parameters:
+      gcp_cred_config_file_path:
+        description: path for storing the generated credential file
+        type: string
+        default: /tmp/gcp_cred_config.json
+      oidc_token_file_path:
+        description: path of the circleci oidc token
+        type: string
+        default: /tmp/oidc_token.json
+      service_account:
+        description: service account to connect circleci with vault
+        type: string
+        default: $VAULT_ACCOUNT
+      username:
+        type: string
+        default: $VAULT_USERNAME
+
+    steps:
+      - python_install
+      - gcloud_install
+      - run:
+          name: Generate credential configuration for CircleCI OIDC Token
+          command: |
+
+            echo $CIRCLE_OIDC_TOKEN > << parameters.oidc_token_file_path >>
+
+            # Create a credential configuration for the generated OIDC ID Token
+            gcloud iam workload-identity-pools create-cred-config \
+              "projects/850054384889/locations/global/workloadIdentityPools/circleci/providers/circleci-oidc-prv"\
+              --output-file="<< parameters.gcp_cred_config_file_path >>" \
+              --service-account=<< parameters.service_account >> \
+              --credential-source-file=<< parameters.oidc_token_file_path >>
+      - run:
+          name: Gcloud login using credential configuration
+          command: |
+
+            gcloud auth login --brief --cred-file "<< parameters.gcp_cred_config_file_path >>"
+
+            echo "export GOOGLE_APPLICATION_CREDENTIALS='<< parameters.gcp_cred_config_file_path >>'" | tee -a $BASH_ENV
+      - vault_install
+      - run:
+          name: Vault login
+          command: |
+            source ${BASH_ENV}
+
+            vault login -no-print -method=gcp role=<< parameters.username >> service_account=<< parameters.service_account >>
   inject:
     description: Secret-injector orb
     parameters:
@@ -268,12 +369,23 @@ commands:
         description: Number of minutes between each fetch of secrets. 1m is the lowest value supported.
         type: string
         default: "5m"
+      vault-oidc:
+        type: boolean
+        default: false
+        description: Login to vault using oidc
     steps:
       - attach_workspace:
           at: /tmp
       - check_if_sudo
       - download_n_install_yq
-      - vault-login
+      - when:
+          condition: << parameters.vault-oidc >>
+          steps:
+            - vault_login_oidc
+      - unless:
+          condition: << parameters.vault-oidc >>
+          steps:
+            - vault-login
       - run:
           name: Secret-injector - kubectl kustomize
           command: |
