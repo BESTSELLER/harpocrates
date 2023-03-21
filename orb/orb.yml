@@ -268,7 +268,16 @@ commands:
       - run:
           name: Install curl
           command: |
-            command -v curl >/dev/null 2>&1 || { apk add --no-cache curl; }
+            if cat /etc/issue | grep Alpine > /dev/null 2>&1; then
+              echo "Checking For curl: Alpine"
+              command -v curl >/dev/null 2>&1 || { apk add --no-cache curl; }
+            elif cat /etc/issue | grep Debian > /dev/null 2>&1 || cat /etc/issue | grep Ubuntu > /dev/null 2>&1; then
+              echo "Checking For curl: Debian"
+              if [ "$(id -u)" = 0 ]; then export SUDO=""; else # Check if we're root
+                export SUDO="sudo";
+              fi
+              command -v curl >/dev/null 2>&1 || { $SUDO apt -qq update && $SUDO apt -qq install -y curl; }
+            fi
 
   gcloud_install:
     steps:
