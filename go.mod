@@ -3,7 +3,7 @@ module github.com/BESTSELLER/harpocrates
 go 1.19
 
 require (
-	github.com/gookit/color v1.5.2
+	github.com/gookit/color v1.5.3
 	github.com/hashicorp/vault/api v1.9.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/rs/zerolog v1.29.0
@@ -233,7 +233,7 @@ require (
 	go.uber.org/atomic v1.9.0 // indirect
 	golang.org/x/crypto v0.6.0 // indirect
 	golang.org/x/net v0.7.0 // indirect
-	golang.org/x/sys v0.5.0 // indirect
+	golang.org/x/sys v0.6.0 // indirect
 	golang.org/x/text v0.7.0 // indirect
 	golang.org/x/time v0.0.0-20220411224347-583f2d630306 // indirect
 	google.golang.org/genproto v0.0.0-20221227171554-f9683d7f8bef // indirect
