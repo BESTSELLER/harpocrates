@@ -7,7 +7,7 @@ require (
 	github.com/hashicorp/vault/api v1.9.1
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/rs/zerolog v1.29.1
-	github.com/spf13/cobra v1.6.1
+	github.com/spf13/cobra v1.7.0
 	github.com/xeipuuv/gojsonschema v1.2.0
 	gopkg.in/yaml.v3 v3.0.1
 	gotest.tools v2.2.0+incompatible
@@ -215,7 +215,7 @@ require (
 	github.com/hashicorp/vault v1.13.2
 	github.com/hashicorp/vault/sdk v0.8.1 // indirect
 	github.com/hashicorp/yamux v0.0.0-20211028200310-0bc27b27de87 // indirect
-	github.com/inconshreveable/mousetrap v1.0.1 // indirect
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
