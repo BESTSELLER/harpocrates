@@ -40,7 +40,7 @@
         "anyOf": [
           {
             "type": "string",
-            "pattern": "^(?:\\S+\/)*\\S+$"
+            "pattern": "^(?:(\\S| )+\/)*(\\S| )+$"
           },
           {
             "$ref": "#/$defs/secretsObject"
@@ -52,7 +52,7 @@
       "type": "object",
       "additionalProperties": false,
       "patternProperties": {
-        "^(?:\\S+\/)*\\S+$": {
+        "^(?:(\\S| )+\/)*(\\S| )+$": {
           "type": "object",
           "additionalProperties": false,
           "properties": {
@@ -92,7 +92,7 @@
                   {
                     "type": "object",
                     "patternProperties": {
-                      "^(?:\\S+\/)*\\S+$": {
+                      "^(?:(\\S| )+\/)*(\\S| )+$": {
                         "type": "object",
                         "additionalProperties": false,
                         "properties": {
