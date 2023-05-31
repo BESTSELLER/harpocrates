@@ -44,6 +44,10 @@ jobs:
         type: boolean
         default: false
         description: Login to vault using oidc
+      uppercase:
+        type: boolean
+        default: false
+        description: Convert all secret keys to uppercase, only when `vault-path` is set
     steps:
       - attach_workspace:
           at: /tmp
@@ -106,6 +110,7 @@ jobs:
                 --output "<< parameters.output >>" \
                 --append=<< parameters.append >> \
                 --prefix "<< parameters.prefix >>" \
+                --uppercase=<< parameters.uppercase >> \
                 --secret "<< parameters.vault-path >>" 
             fi
 
