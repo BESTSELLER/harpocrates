@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/gookit/color v1.5.3
-	github.com/hashicorp/vault/api v1.9.1
+	github.com/hashicorp/vault/api v1.9.2
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/rs/zerolog v1.29.1
 	github.com/spf13/cobra v1.7.0
@@ -63,6 +63,7 @@ require (
 	github.com/emicklei/go-restful/v3 v3.8.0 // indirect
 	github.com/evanphx/json-patch/v5 v5.6.0 // indirect
 	github.com/frankban/quicktest v1.14.3 // indirect
+	github.com/go-jose/go-jose/v3 v3.0.0 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/go-openapi/analysis v0.20.0 // indirect
