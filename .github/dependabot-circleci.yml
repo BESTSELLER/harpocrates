@@ -1,4 +1,5 @@
-reviewers: 
+reviewers:
   - BESTSELLER/engineering-services
 labels:
   - automerge
+  - dependencies

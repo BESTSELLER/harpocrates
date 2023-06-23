@@ -11,7 +11,8 @@ updates:
       interval: "monthly"
     labels:
       - automerge
-    reviewers: 
+      - dependencies
+    reviewers:
       - BESTSELLER/engineering-services
   - package-ecosystem: "docker" # See documentation for possible values
     directory: "/" # Location of package manifests
@@ -19,7 +20,8 @@ updates:
       interval: "monthly"
     labels:
       - automerge
-    reviewers: 
+      - dependencies
+    reviewers:
       - BESTSELLER/engineering-services
   - package-ecosystem: "github-actions" # See documentation for possible values
     directory: "/" # Location of package manifests
@@ -27,5 +29,6 @@ updates:
       interval: "monthly"
     labels:
       - automerge
-    reviewers: 
+      - dependencies
+    reviewers:
       - BESTSELLER/engineering-services
