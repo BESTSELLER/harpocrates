@@ -153,6 +153,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&config.Config.RoleName, "role-name", "", "k8s auth role name, use when running as a k8s pod")
 	rootCmd.PersistentFlags().StringVar(&config.Config.TokenPath, "token-path", "", "/path/to/token/file")
 	rootCmd.PersistentFlags().StringVar(&config.Config.VaultToken, "vault-token", "", "vault token in clear text")
+	rootCmd.PersistentFlags().BoolVar(&config.Config.GcpWorkloadID, "gcpWorkloadID", false, "Enable GcpWorkloadID auth method instead of using vault token")
 
 	rootCmd.PersistentFlags().StringVar(&config.Config.Format, "format", "", "output format, either json or env, defaults to env")
 	rootCmd.PersistentFlags().StringVar(&config.Config.Output, "output", "", "folder in which secret files will be created e.g. /path/to/folder")

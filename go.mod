@@ -3,6 +3,7 @@ module github.com/BESTSELLER/harpocrates
 go 1.19
 
 require (
+	github.com/BESTSELLER/go-vault v0.1.5
 	github.com/gookit/color v1.5.3
 	github.com/hashicorp/vault/api v1.9.2
 	github.com/mitchellh/mapstructure v1.5.0

@@ -50,6 +50,12 @@ The easiest way to authenticate is to use your Vault token:
 harpocrates --vault-token "sometoken"
 ```
 This can also be specified as the environment var `VAULT_TOKEN`
+### GCP Workload identity
+
+When running in GCP you can use the GCP Workload identity to authenticate to Vault. This requires that the [GCP Auth Method](https://www.vaultproject.io/docs/auth/gcp) is enabled in Vault and your service account has been given access to secrets. 
+Check this blog post for more info : [Serverless Secrets with Google Cloud Run and Hashicorp Vault](https://bestseller.tech/posts/google-serverless-secrets/) 
+
+To use, set the `gcpWorkloadID` flag to `true`.
 
 ---
 <br/>
@@ -59,15 +65,16 @@ In harpocrates you can specify which secrets to pull in 3 different ways.
 ### YAML file
 yaml is a great options for readability and replication of configs. yaml options are: 
 
-| Option    | Required | Value                                                        | default      |
-| --------- | -------- | ------------------------------------------------------------ | ------------ |
-| format    | no       | one of: env, json, secret                                    | env          |
-| output    | yes      | /path/to/output/folder                                       | -            |
-| owner     | no       | UID of the user e.g 0, can be set on "root" and secret level | current user |
-| prefix    | no       | prefix, can be set on any level                              | -            |
-| uppercase | no       | will uppercase prefix and key                                | false        |
-| append    | no       | appends secrets to a file                                    | true         |
-| secrets   | yes      | an array of secret paths                                     | -            |
+| Option          | Required | Value                                                        | default      |
+|-----------------|----------|--------------------------------------------------------------|--------------|
+| format          | no       | one of: env, json, secret                                    | env          |
+| output          | yes      | /path/to/output/folder                                       | -            |
+| owner           | no       | UID of the user e.g 0, can be set on "root" and secret level | current user |
+| prefix          | no       | prefix, can be set on any level                              | -            |
+| uppercase       | no       | will uppercase prefix and key                                | false        |
+| append          | no       | appends secrets to a file                                    | true         |
+| secrets         | yes      | an array of secret paths                                     | -            |
+| gcpWorkloadID | no       | GCP workload identity, useful when running in GCP            | false        |
 
 <br/>
 
@@ -145,7 +152,7 @@ There is not the same granularity as in the json and yaml specs. e.g. prefix can
 ## CLI and ENV Options
 
 | Flag          | Env Var              | Values                                                                                                     |                       Default                       |
-| ------------- | -------------------- | ---------------------------------------------------------------------------------------------------------- | :-------------------------------------------------: |
+|---------------|----------------------|------------------------------------------------------------------------------------------------------------|:---------------------------------------------------:|
 | vault-address | VAULT_ADDR           | https://vaulturl                                                                                           |                          -                          |
 | auth-name     | AUTH_NAME            | Vault auth name, used at login                                                                             |                          -                          |
 | role-name     | ROLE_NAME            | Vault role name, used at login                                                                             |                          -                          |
@@ -159,17 +166,21 @@ There is not the same granularity as in the json and yaml specs. e.g. prefix can
 | secret        | -                    | vault path /secretengine/data/some/secret                                                                  |                          -                          |
 | append        | -                    | Appends secrets to a file                                                                                  |                        true                         |
 | -             | HARPOCRATES_FILENAME | overwrites the default output filename                                                                     |                          -                          |
-
-
+| gcpWorkloadID | GCP_WORKLOAD_ID      | set to true to enable GCP workload identity, useful when running in GCP                                    |                        false                        |
+| -             | CONTINUOUS           | set to true to run harpocrates in a loop and fetch secrets every 1 minute, useful as a sidecar             |                        false                        |
+| -             | INTERVAL             | set the interval in minutes for the continuous mode                                                        |                          1                          |
 ---
 <br/>
 
 ## Kubernetes
-When running `harpocrates` as an init container you have to mount a volume to pass on the exported secrets to your main application.
+When running `harpocrates` or `cloudrun` as an init container or sidecar you have to mount a volume to pass on the exported secrets to your main application.
 Then you can either chose to source the env file or simply just read the json formatted file.
 Harpocrates will startup and export the secrets in a matter of seconds. 
 
 An example can be found at [examples/deployment.yaml](examples/deployment.yaml)
+
+### Sidecar
+To run harpocrates as a sidecar you have to set the `CONTINUOUS`  env var to true. Harpocrates will then run in a loop and fetch secrets every 1 minute. The shortest secret refresh interval is 1 minute and can be increased using the `INTERVAL` variable.
 
 ---
 <br/>

@@ -2,28 +2,28 @@ package config
 
 import (
 	"fmt"
+	"github.com/spf13/cobra"
 	"os"
 	"strings"
-
-	"github.com/spf13/cobra"
 )
 
 // GlobalConfig defines the structure of the global configuration parameters
 type GlobalConfig struct {
-	Append       bool   `required:"false"`
-	AuthName     string `required:"false"`
-	FileName     string `required:"false"`
-	Format       string `required:"false"`
-	LogLevel     string `required:"false"`
-	Output       string `required:"false"`
-	Owner        int    `required:"false"`
-	Prefix       string `required:"false"`
-	RoleName     string `required:"false"`
-	TokenPath    string `required:"false"`
-	UpperCase    bool   `required:"false"`
-	Validate     bool   `required:"false"`
-	VaultAddress string `required:"false"`
-	VaultToken   string `required:"false"`
+	Append        bool   `required:"false"`
+	AuthName      string `required:"false"`
+	FileName      string `required:"false"`
+	Format        string `required:"false"`
+	LogLevel      string `required:"false"`
+	Output        string `required:"false"`
+	Owner         int    `required:"false"`
+	Prefix        string `required:"false"`
+	RoleName      string `required:"false"`
+	TokenPath     string `required:"false"`
+	UpperCase     bool   `required:"false"`
+	Validate      bool   `required:"false"`
+	VaultAddress  string `required:"false"`
+	VaultToken    string `required:"false"`
+	GcpWorkloadID bool   `required:"false"`
 }
 
 // Config stores the Global Configuration.
@@ -53,6 +53,11 @@ func SyncEnvToFlags(cmd *cobra.Command) {
 	}
 	if Config.VaultToken == "" {
 		tryEnv("vault_token", &Config.VaultToken, notRequired, cmd)
+	}
+	if !Config.GcpWorkloadID {
+		if envVar, ok := os.LookupEnv("GCP_WORKLOAD_ID"); ok && strings.ToLower(envVar) == "true" {
+			(&Config).GcpWorkloadID = true
+		}
 	}
 	if Config.Format == "" {
 		tryEnv("format", &Config.Format, notRequired, cmd)
