@@ -19,7 +19,7 @@ import (
 )
 
 var (
-	duration time.Duration
+	duration *time.Duration
 	// Used for flags.
 	secretFile string
 	secret     *[]string
@@ -86,7 +86,7 @@ var (
 					log.Fatal().Msg("Interval must be at least 1 minute")
 				}
 
-				duration = durationParsed
+				duration = &durationParsed
 				log.Debug().Msgf("Continuous mode enabled, will run every %s", durationParsed)
 
 				// If we are in continuous mode, we want to overwrite to the file
@@ -142,7 +142,7 @@ var (
 				}
 
 				log.Debug().Msgf("Sleeping for %s", duration)
-				time.Sleep(duration)
+				time.Sleep(*duration)
 			}
 
 		},
