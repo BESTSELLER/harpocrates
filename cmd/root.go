@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -22,6 +23,7 @@ var (
 	// Used for flags.
 	secretFile string
 	secret     *[]string
+	success    bool
 
 	rootCmd = &cobra.Command{
 		Run: func(cmd *cobra.Command, args []string) {
@@ -89,6 +91,16 @@ var (
 
 				// If we are in continuous mode, we want to overwrite to the file
 				config.Config.Append = false
+				http.Handle("/status", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					if success {
+						w.WriteHeader(http.StatusOK)
+					} else {
+						w.WriteHeader(http.StatusTooEarly)
+					}
+				}))
+				go func() {
+					http.ListenAndServe(":8000", nil)
+				}()
 			}
 
 			for {
@@ -98,6 +110,7 @@ var (
 
 				allSecrets, err := vaultClient.ExtractSecrets(input, config.Config.Append)
 				if err != nil {
+					success = false
 					log.Fatal().Err(err).Msgf("%s", err)
 				}
 
@@ -120,9 +133,9 @@ var (
 					} else if v.Format == "secret" {
 						files.Write(config.Config.Output, fileName, v.Result.ToK8sSecret(), v.Owner, config.Config.Append)
 					}
-
 					log.Debug().Msgf("Secrets written to file: %s/%s", config.Config.Output, fileName)
 				}
+				success = true
 
 				if !continuous {
 					break
