@@ -52,6 +52,7 @@ func Write(output string, fileName string, content string, owner *int, append bo
 		log.Fatal().Err(err).Msgf("Unable to write to file '%s'", path)
 		os.Exit(1)
 	}
+	log.Debug().Msgf("Wrote file '%s'", path)
 
 	// set permissions on file and folder
 	if owner != nil {
