@@ -88,5 +88,9 @@ MoveOn:
 		config.Config.Append = *secretJSON.Append
 	}
 
+	if secretJSON.GcpWorkloadID {
+		config.Config.GcpWorkloadID = secretJSON.GcpWorkloadID
+	}
+
 	return secretJSON
 }
