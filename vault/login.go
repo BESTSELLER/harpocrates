@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"net/http"
-	"os"
-
+	"github.com/BESTSELLER/go-vault/gcpss"
 	"github.com/BESTSELLER/harpocrates/config"
 	"github.com/BESTSELLER/harpocrates/token"
 	"github.com/rs/zerolog/log"
+	"net/http"
+	"os"
 )
 
 // VaultLoginResult contains the result after logging in.
@@ -53,35 +53,45 @@ func Login() {
 	if config.Config.VaultToken != "" {
 		return
 	}
+	if config.Config.GcpWorkloadID {
+		vaultToken, err := gcpss.FetchVaultToken(config.Config.VaultAddress, config.Config.AuthName)
+		if err != nil {
+			log.Fatal().Err(err).Msg("GcpWorkload Identity was enabled but auth failed")
+			os.Exit(1)
+		}
+		config.Config.VaultToken = vaultToken
+		return
+	} else {
 
-	url := config.Config.VaultAddress + "/v1/auth/" + config.Config.AuthName + "/login"
+		url := config.Config.VaultAddress + "/v1/auth/" + config.Config.AuthName + "/login"
 
-	b := new(bytes.Buffer)
-	err := json.NewEncoder(b).Encode(JWTPayLoad{Jwt: token.Read(), Role: config.Config.RoleName})
-	if err != nil {
-		log.Fatal().Err(err).Msg("Unable to prepare jwt token")
-		os.Exit(1)
+		b := new(bytes.Buffer)
+		err := json.NewEncoder(b).Encode(JWTPayLoad{Jwt: token.Read(), Role: config.Config.RoleName})
+		if err != nil {
+			log.Fatal().Err(err).Msg("Unable to prepare jwt token")
+			os.Exit(1)
+		}
+
+		req, _ := http.NewRequest("POST", url, b)
+
+		res, err := http.DefaultClient.Do(req)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Unable to make login call to Vault")
+			os.Exit(1)
+		}
+
+		returnPayload := VaultLoginResult{}
+		err = json.NewDecoder(res.Body).Decode(&returnPayload)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Unexpected response from Vault")
+			os.Exit(1)
+		}
+
+		if len(returnPayload.Errors) != 0 {
+			log.Fatal().Err(fmt.Errorf("%s", returnPayload.Errors)).Msg("API call to Vault failed")
+			os.Exit(1)
+		}
+
+		config.Config.VaultToken = returnPayload.Auth.ClientToken
 	}
-
-	req, _ := http.NewRequest("POST", url, b)
-
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Unable to make login call to Vault")
-		os.Exit(1)
-	}
-
-	returnPayload := VaultLoginResult{}
-	err = json.NewDecoder(res.Body).Decode(&returnPayload)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Unexpected response from Vault")
-		os.Exit(1)
-	}
-
-	if len(returnPayload.Errors) != 0 {
-		log.Fatal().Err(fmt.Errorf("%s", returnPayload.Errors)).Msg("API call to Vault failed")
-		os.Exit(1)
-	}
-
-	config.Config.VaultToken = returnPayload.Auth.ClientToken
 }

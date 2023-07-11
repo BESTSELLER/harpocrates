@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"strings"
 	"time"
@@ -18,10 +19,11 @@ import (
 )
 
 var (
-	duration time.Duration
+	duration *time.Duration
 	// Used for flags.
 	secretFile string
 	secret     *[]string
+	success    bool
 
 	rootCmd = &cobra.Command{
 		Run: func(cmd *cobra.Command, args []string) {
@@ -84,11 +86,21 @@ var (
 					log.Fatal().Msg("Interval must be at least 1 minute")
 				}
 
-				duration = durationParsed
+				duration = &durationParsed
 				log.Debug().Msgf("Continuous mode enabled, will run every %s", durationParsed)
 
 				// If we are in continuous mode, we want to overwrite to the file
 				config.Config.Append = false
+				http.Handle("/status", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+					if success {
+						w.WriteHeader(http.StatusOK)
+					} else {
+						w.WriteHeader(http.StatusTooEarly)
+					}
+				}))
+				go func() {
+					http.ListenAndServe(":8000", nil)
+				}()
 			}
 
 			for {
@@ -98,6 +110,7 @@ var (
 
 				allSecrets, err := vaultClient.ExtractSecrets(input, config.Config.Append)
 				if err != nil {
+					success = false
 					log.Fatal().Err(err).Msgf("%s", err)
 				}
 
@@ -120,16 +133,16 @@ var (
 					} else if v.Format == "secret" {
 						files.Write(config.Config.Output, fileName, v.Result.ToK8sSecret(), v.Owner, config.Config.Append)
 					}
-
 					log.Debug().Msgf("Secrets written to file: %s/%s", config.Config.Output, fileName)
 				}
+				success = true
 
 				if !continuous {
 					break
 				}
 
 				log.Debug().Msgf("Sleeping for %s", duration)
-				time.Sleep(duration)
+				time.Sleep(*duration)
 			}
 
 		},
@@ -153,6 +166,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&config.Config.RoleName, "role-name", "", "k8s auth role name, use when running as a k8s pod")
 	rootCmd.PersistentFlags().StringVar(&config.Config.TokenPath, "token-path", "", "/path/to/token/file")
 	rootCmd.PersistentFlags().StringVar(&config.Config.VaultToken, "vault-token", "", "vault token in clear text")
+	rootCmd.PersistentFlags().BoolVar(&config.Config.GcpWorkloadID, "gcpWorkloadID", false, "Enable GcpWorkloadID auth method instead of using vault token")
 
 	rootCmd.PersistentFlags().StringVar(&config.Config.Format, "format", "", "output format, either json or env, defaults to env")
 	rootCmd.PersistentFlags().StringVar(&config.Config.Output, "output", "", "folder in which secret files will be created e.g. /path/to/folder")

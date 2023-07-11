@@ -11,13 +11,14 @@ import (
 
 // SecretJSON holds the information about which secrets to fetch and how to save them again
 type SecretJSON struct {
-	Append    *bool         `json:"append,omitempty"      yaml:"append,omitempty"`
-	Format    string        `json:"format,omitempty"      yaml:"format,omitempty"`
-	Output    string        `json:"output,omitempty"      yaml:"output,omitempty"`
-	Owner     *int          `json:"owner,omitempty"       yaml:"owner,omitempty"`
-	Prefix    string        `json:"prefix,omitempty"      yaml:"prefix,omitempty"`
-	UpperCase *bool         `json:"uppercase,omitempty"   yaml:"uppercase,omitempty"`
-	Secrets   []interface{} `json:"secrets,omitempty"     yaml:"secrets,omitempty"`
+	Append        *bool         `json:"append,omitempty"      yaml:"append,omitempty"`
+	Format        string        `json:"format,omitempty"      yaml:"format,omitempty"`
+	Output        string        `json:"output,omitempty"      yaml:"output,omitempty"`
+	Owner         *int          `json:"owner,omitempty"       yaml:"owner,omitempty"`
+	Prefix        string        `json:"prefix,omitempty"      yaml:"prefix,omitempty"`
+	UpperCase     *bool         `json:"uppercase,omitempty"   yaml:"uppercase,omitempty"`
+	Secrets       []interface{} `json:"secrets,omitempty"     yaml:"secrets,omitempty"`
+	GcpWorkloadID bool          `json:"gcpWorkloadID,omitempty"     yaml:"gcpWorkloadID,omitempty"`
 }
 
 type Secret struct {
@@ -85,6 +86,10 @@ MoveOn:
 
 	if secretJSON.Append != nil {
 		config.Config.Append = *secretJSON.Append
+	}
+
+	if secretJSON.GcpWorkloadID {
+		config.Config.GcpWorkloadID = secretJSON.GcpWorkloadID
 	}
 
 	return secretJSON
