@@ -153,6 +153,7 @@ workflows:
     jobs:
       - secret-injector/dump-secrets:
           name: secrets-common
+          vault-oidc: true
           <<: *common_context
           <<: *test_filter
       - cci-common/go_test_unit:
@@ -200,6 +201,7 @@ workflows:
     jobs:
       - secret-injector/dump-secrets-yaml:
           secret-file: ci-secrets.yaml
+          vault-oidc: true
           <<: *release_filter
           <<: *common_context
       - build-go:
