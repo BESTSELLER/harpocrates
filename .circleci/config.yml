@@ -156,10 +156,12 @@ workflows:
           vault-oidc: true
           <<: [*common_context, *test_filter]
       - cci-common/go_test_unit:
+          go_version: "1.21.0"
           requires:
             - secrets-common
           <<: [*common_context, *test_filter]
       - cci-common/go_test_sonar:
+          go_version: "1.21.0"
           requires:
             - secrets-common
           <<: [*common_context, *test_filter]
