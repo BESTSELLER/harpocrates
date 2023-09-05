@@ -1,6 +1,6 @@
 module github.com/BESTSELLER/harpocrates
 
-go 1.21.0
+go 1.21
 
 require (
 	github.com/BESTSELLER/go-vault v0.1.5
