@@ -123,7 +123,7 @@ jobs:
           command: |
             source $BASH_ENV || true
             source /tmp/secrets || true
-            
+
             CCI_VERSION=0.1.22924
             wget https://github.com/CircleCI-Public/circleci-cli/releases/download/v$CCI_VERSION/circleci-cli_$CCI_VERSION\_linux_amd64.tar.gz
             tar -xf circleci-cli_$CCI_VERSION\_linux_amd64.tar.gz
@@ -154,23 +154,19 @@ workflows:
       - secret-injector/dump-secrets:
           name: secrets-common
           vault-oidc: true
-          <<: *common_context
-          <<: *test_filter
+          <<: [*common_context, *test_filter]
       - cci-common/go_test_unit:
           requires:
             - secrets-common
-          <<: *common_context
-          <<: *test_filter
+          <<: [*common_context, *test_filter]
       - cci-common/go_test_sonar:
           requires:
             - secrets-common
-          <<: *common_context
-          <<: *test_filter
+          <<: [*common_context, *test_filter]
       - build-go:
           requires:
             - secrets-common
-          <<: *common_context
-          <<: *test_filter
+          <<: [*common_context, *test_filter]
       - cci-common/build_n_push_docker:
           name: docker-build
           repo: public-docker
@@ -178,8 +174,7 @@ workflows:
           dry_run: true
           requires:
             - secrets-common
-          <<: *common_context
-          <<: *test_filter
+          <<: [*common_context, *test_filter]
       - cci-common/build_n_push_docker:
           name: docker-build-ci
           image_name: $CIRCLE_PROJECT_REPONAME-ci
@@ -189,26 +184,22 @@ workflows:
           file: Dockerfile.ci
           requires:
             - secrets-common
-          <<: *common_context
-          <<: *test_filter
+          <<: [*common_context, *test_filter]
       - orb-validate:
           requires:
             - secrets-common
-          <<: *common_context
-          <<: *test_filter
+          <<: [*common_context, *test_filter]
 
   test-build-release:
     jobs:
       - secret-injector/dump-secrets-yaml:
           secret-file: ci-secrets.yaml
           vault-oidc: true
-          <<: *release_filter
-          <<: *common_context
+          <<: [*common_context, *release_filter]
       - build-go:
           requires:
             - secret-injector/dump-secrets-yaml
-          <<: *release_filter
-          <<: *common_context
+          <<: [*common_context, *release_filter]
       - cci-common/build_n_push_docker:
           name: docker-build-n-push
           repo: public-docker
@@ -216,8 +207,7 @@ workflows:
           push_latest: true
           requires:
             - build-go
-          <<: *release_filter
-          <<: *common_context
+          <<: [*common_context, *release_filter]
       - cci-common/build_n_push_docker:
           name: docker-build-n-push-ci
           image_name: $CIRCLE_PROJECT_REPONAME-ci
@@ -227,10 +217,8 @@ workflows:
           file: Dockerfile.ci
           requires:
             - build-go
-          <<: *release_filter
-          <<: *common_context
+          <<: [*common_context, *release_filter]
       - publish:
           requires:
             - docker-build-n-push
-          <<: *release_filter
-          <<: *common_context
+          <<: [*common_context, *release_filter]
