@@ -67,14 +67,14 @@ yaml is a great options for readability and replication of configs. yaml options
 
 | Option          | Required | Value                                                        | default      |
 |-----------------|----------|--------------------------------------------------------------|--------------|
-| format          | no       | one of: env, json, secret                                    | env          |
+| format          | no       | one of: env, json, secret, yaml                              | env          |
 | output          | yes      | /path/to/output/folder                                       | -            |
 | owner           | no       | UID of the user e.g 0, can be set on "root" and secret level | current user |
 | prefix          | no       | prefix, can be set on any level                              | -            |
 | uppercase       | no       | will uppercase prefix and key                                | false        |
 | append          | no       | appends secrets to a file                                    | true         |
 | secrets         | yes      | an array of secret paths                                     | -            |
-| gcpWorkloadID | no       | GCP workload identity, useful when running in GCP            | false        |
+| gcpWorkloadID   | no       | GCP workload identity, useful when running in GCP            | false        |
 
 <br/>
 
@@ -158,7 +158,7 @@ There is not the same granularity as in the json and yaml specs. e.g. prefix can
 | role-name     | ROLE_NAME            | Vault role name, used at login                                                                             |                          -                          |
 | token-path    | TOKEN_PATH           | /path/to/token, uses clustername and path to login and exchange a vault token which is used in vault_token | /var/run/secrets/kubernetes.io/serviceaccount/token |
 | vault-token   | VAULT_TOKEN          | token as a string. If empty token_path will be queried                                                     |                          -                          |
-| format        | -                    | env, json or secret                                                                                        |                         env                         |
+| format        | -                    | env, json, secret or yaml                                                                                  |                         env                         |
 | output        | -                    | /path/to/output                                                                                            |                  /tmp/secrets.env                   |
 | owner         | -                    | UID of the user e.g 0                                                                                      |                    current user                     |
 | prefix        | -                    | prefix keys, eg. K8S_                                                                                      |                          -                          |

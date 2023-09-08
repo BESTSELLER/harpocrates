@@ -132,7 +132,7 @@ var (
 						files.Write(config.Config.Output, fileName, v.Result.ToENV(), v.Owner, config.Config.Append)
 					} else if v.Format == "secret" {
 						files.Write(config.Config.Output, fileName, v.Result.ToK8sSecret(), v.Owner, config.Config.Append)
-					} else if v.Format == "yaml" || v.Format == "yml" {
+					} else if v.Format == "yaml" {
 						files.Write(config.Config.Output, fileName, v.Result.ToYAML(), v.Owner, config.Config.Append)
 					}
 					log.Debug().Msgf("Secrets written to file: %s/%s", config.Config.Output, fileName)
