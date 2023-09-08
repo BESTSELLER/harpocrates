@@ -5,7 +5,7 @@ go 1.21.0
 require (
 	github.com/BESTSELLER/go-vault v0.1.5
 	github.com/gookit/color v1.5.4
-	github.com/hashicorp/vault/api v1.9.2
+	github.com/hashicorp/vault/api v1.10.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/rs/zerolog v1.30.0
 	github.com/spf13/cobra v1.7.0
