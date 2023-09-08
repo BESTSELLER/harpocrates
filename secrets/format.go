@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/rs/zerolog/log"
+	"gopkg.in/yaml.v3"
 )
 
 // Result holds the result of all the secrets pulled from Vault
@@ -35,7 +36,7 @@ func (result Result) toKV(prefix string) string {
 	for key, val := range result {
 		leKey := fixEnvName(key)
 		log.Info().Msgf("Exporting key: %s", leKey)
-		resturnString += fmt.Sprintf("%s%s='%s'\n", prefix, leKey, val)
+		resturnString += fmt.Sprintf("%s%s=%s\n", prefix, leKey, getStringRepresentation(val))
 	}
 	return resturnString
 }
@@ -45,7 +46,7 @@ func (result Result) toSecretKV() string {
 
 	for key, val := range result {
 		log.Info().Msgf("Exporting key: %s", key)
-		resturnString += fmt.Sprintf("%s='%s'\n", key, val)
+		resturnString += fmt.Sprintf("%s=%s\n", key, getStringRepresentation(val))
 	}
 	return resturnString
 }
@@ -64,6 +65,17 @@ func (result Result) ToK8sSecret() string {
 	return result.toSecretKV()
 }
 
+// ToYaml exports secrets as yaml
+func (result Result) ToYAML() string {
+	log.Debug().Msg("Exporting as YAML")
+	yamlString, err := yaml.Marshal(result)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Unable to convert result to yaml")
+		os.Exit(1)
+	}
+	return string(yamlString)
+}
+
 // fixEnvName replaces all unsported env characters with "_"
 func fixEnvName(currentName string) string {
 	reg, _ := regexp.Compile("[^a-zA-Z0-9_]+")
@@ -71,9 +83,27 @@ func fixEnvName(currentName string) string {
 
 	return envVar
 }
+
 func ToUpperOrNotToUpper(something string, currentUpper *bool) string {
 	if *currentUpper {
 		return strings.ToUpper(something)
 	}
 	return something
+}
+
+func getStringRepresentation(val interface{}) string {
+	switch val.(type) {
+	case string:
+		return fmt.Sprintf("'%s'", val)
+	case int:
+		return fmt.Sprintf("%d", val)
+	case float64:
+		return fmt.Sprintf("%f", val)
+	case bool:
+		return fmt.Sprintf("%t", val)
+	case nil:
+		return "null"
+	default:
+		return fmt.Sprintf("'%s'", val)
+	}
 }
