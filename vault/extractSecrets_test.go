@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/vault/api"
 	vaulthttp "github.com/hashicorp/vault/http"
 	hashivault "github.com/hashicorp/vault/vault"
-	"gotest.tools/assert"
+	"gotest.tools/v3/assert"
 )
 
 var testVault vaultTest

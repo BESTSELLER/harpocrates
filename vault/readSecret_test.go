@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"gotest.tools/assert"
+	"gotest.tools/v3/assert"
 )
 
 // TestReadSecretWrongPath tests that the function fails on unknown secret path
