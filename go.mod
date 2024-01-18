@@ -1,6 +1,6 @@
 module github.com/BESTSELLER/harpocrates
 
-go 1.21.0
+go 1.21
 
 require (
 	github.com/BESTSELLER/go-vault v0.1.5
@@ -11,7 +11,7 @@ require (
 	github.com/spf13/cobra v1.8.0
 	github.com/xeipuuv/gojsonschema v1.2.0
 	gopkg.in/yaml.v3 v3.0.1
-	gotest.tools v2.2.0+incompatible
+	gotest.tools/v3 v3.4.0
 	sigs.k8s.io/yaml v1.4.0
 )
 
