@@ -11,7 +11,7 @@ require (
 	github.com/spf13/cobra v1.8.0
 	github.com/xeipuuv/gojsonschema v1.2.0
 	gopkg.in/yaml.v3 v3.0.1
-	gotest.tools/v3 v3.4.0
+	gotest.tools/v3 v3.5.1
 	sigs.k8s.io/yaml v1.4.0
 )
 
