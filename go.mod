@@ -5,9 +5,9 @@ go 1.21
 require (
 	github.com/BESTSELLER/go-vault v0.1.5
 	github.com/gookit/color v1.5.4
-	github.com/hashicorp/vault/api v1.11.0
+	github.com/hashicorp/vault/api v1.12.0
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/rs/zerolog v1.31.0
+	github.com/rs/zerolog v1.32.0
 	github.com/spf13/cobra v1.8.0
 	github.com/xeipuuv/gojsonschema v1.2.0
 	gopkg.in/yaml.v3 v3.0.1
