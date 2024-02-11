@@ -56,9 +56,9 @@ jobs:
       - attach_workspace:
           at: /tmp
       - when:
-        condition: << parameters.custom_steps >>
-        steps:
-          - steps: << parameters.custom_steps >>
+          condition: << parameters.custom_steps >>
+          steps:
+            - steps: << parameters.custom_steps >>
       - when:
           condition: << parameters.vault-oidc >>
           steps:
@@ -162,9 +162,9 @@ jobs:
       - attach_workspace:
           at: /tmp
       - when:
-        condition: << parameters.custom_steps >>
-        steps:
-          - steps: << parameters.custom_steps >>
+          condition: << parameters.custom_steps >>
+          steps:
+            - steps: << parameters.custom_steps >>
       - run:
           name: replace strings
           command: |
