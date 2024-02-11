@@ -15,6 +15,7 @@ orbs:
 jobs:
   build-go:
     executor: go_image
+    resource_class: large
     steps:
       - attach_workspace:
           at: /tmp
@@ -157,11 +158,13 @@ workflows:
           <<: [*common_context, *test_filter]
       - cci-common/go_test_unit:
           go_version: "1.21.0"
+          resource_class: large
           requires:
             - secrets-common
           <<: [*common_context, *test_filter]
       - cci-common/go_test_sonar:
           go_version: "1.21.0"
+          resource_class: large
           requires:
             - secrets-common
           <<: [*common_context, *test_filter]
