@@ -158,13 +158,13 @@ workflows:
           <<: [*common_context, *test_filter]
       - cci-common/go_test_unit:
           go_version: "1.21.0"
-          resource_class: large
+          resource_class: xlarge
           requires:
             - secrets-common
           <<: [*common_context, *test_filter]
       - cci-common/go_test_sonar:
           go_version: "1.21.0"
-          resource_class: large
+          resource_class: xlarge
           requires:
             - secrets-common
           <<: [*common_context, *test_filter]
