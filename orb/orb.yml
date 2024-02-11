@@ -48,9 +48,17 @@ jobs:
         type: boolean
         default: false
         description: Convert all secret keys to uppercase, only when `vault-path` is set
+      custom_steps:
+        type: steps
+        default: []
+        description: Custom steps that will be executed right after code checkout and attach_workspace - https://circleci.com/docs/reusing-config/#steps
     steps:
       - attach_workspace:
           at: /tmp
+      - when:
+        condition: << parameters.custom_steps >>
+        steps:
+          - steps: << parameters.custom_steps >>
       - when:
           condition: << parameters.vault-oidc >>
           steps:
@@ -73,10 +81,10 @@ jobs:
               # Fetch all the "common" secrets if that env var has been set
               if [ "$HARPOCRATES_SECRETS" != "" ] ; then
                 prefix=""
-                if [ "<< parameters.prefix >>" == "" ] ; then 
+                if [ "<< parameters.prefix >>" == "" ] ; then
                   prefix="K8S_CLUSTER_"
                 else
-                  prefix="<< parameters.prefix >>"                 
+                  prefix="<< parameters.prefix >>"
                 fi
                 /harpocrates \
                   --format "<< parameters.format >>" \
@@ -111,7 +119,7 @@ jobs:
                 --append=<< parameters.append >> \
                 --prefix "<< parameters.prefix >>" \
                 --uppercase=<< parameters.uppercase >> \
-                --secret "<< parameters.vault-path >>" 
+                --secret "<< parameters.vault-path >>"
             fi
 
       - persist_to_workspace:
@@ -123,7 +131,7 @@ jobs:
 
   dump-secrets-yaml:
     description: >
-      Read secret from Vault, and write to designated output file. 
+      Read secret from Vault, and write to designated output file.
       This utilises an yaml template file to determine the secrets being fetched.
       Compared to dump-secrets this can fetch multiple secrets at once.
       The structure of the yaml file is shown here. https://github.com/BESTSELLER/harpocrates/blob/master/examples/secret.yaml
@@ -144,10 +152,19 @@ jobs:
         type: boolean
         default: false
         description: Login to vault using oidc
+      custom_steps:
+        type: steps
+        default: []
+        description: Custom steps that will be executed right after code checkout and attach_workspace - https://circleci.com/docs/reusing-config/#steps
+
     steps:
       - checkout
       - attach_workspace:
           at: /tmp
+      - when:
+        condition: << parameters.custom_steps >>
+        steps:
+          - steps: << parameters.custom_steps >>
       - run:
           name: replace strings
           command: |
@@ -174,9 +191,9 @@ jobs:
 
             # Insert output path
             export OUTPUT=<< parameters.output >>
-            yq e '.output = env(OUTPUT)' -i  << parameters.secret-file >> 
+            yq e '.output = env(OUTPUT)' -i  << parameters.secret-file >>
 
-            # Fetch common secrets 
+            # Fetch common secrets
             if [  << parameters.common-secrets >> = true ] ; then
 
               # Update secret file with common secrets
@@ -189,7 +206,7 @@ jobs:
               fi
 
               if [ "$CLUSTER_SECRET" != "" ] ; then
-                yq e '.secrets += [ { env(CLUSTER_SECRET): {"format": "json", "fileName": "cluster_secret.json"}}]' -i << parameters.secret-file >>   
+                yq e '.secrets += [ { env(CLUSTER_SECRET): {"format": "json", "fileName": "cluster_secret.json"}}]' -i << parameters.secret-file >>
               fi
             fi
 
@@ -464,14 +481,14 @@ commands:
             if [ "<< parameters.side-car >>" == "true" ]; then
               export SIDECAR_INTERVAL="<< parameters.side-car-interval >>"
               curl -s -H "Accept:application/vnd.github.v3.raw" -o $DEPLOYMENT_TYPE-sidecar.yml -L https://github.com/BESTSELLER/harpocrates/releases/download/$HARPOCRATES_VERSION/$DEPLOYMENT_TYPE-sidecar.yml
-              
+
               envsubst < ./$DEPLOYMENT_TYPE-sidecar.yml > ./$DEPLOYMENT_TYPE-sidecar_var.yml
               mv ./$DEPLOYMENT_TYPE-sidecar_var.yml ./$DEPLOYMENT_TYPE-sidecar.yml
             fi
 
             if [ "<< parameters.init-container >>" == "true" ]; then
               curl -s -H "Accept:application/vnd.github.v3.raw" -o $DEPLOYMENT_TYPE.yml -L https://github.com/BESTSELLER/harpocrates/releases/download/$HARPOCRATES_VERSION/$DEPLOYMENT_TYPE.yml
-              
+
               envsubst < ./$DEPLOYMENT_TYPE.yml > ./$DEPLOYMENT_TYPE\_var.yml
               mv ./$DEPLOYMENT_TYPE\_var.yml ./$DEPLOYMENT_TYPE.yml
             fi
