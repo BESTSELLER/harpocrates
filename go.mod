@@ -5,7 +5,7 @@ go 1.22
 require (
 	github.com/BESTSELLER/go-vault v0.1.5
 	github.com/gookit/color v1.5.4
-	github.com/hashicorp/vault/api v1.12.2
+	github.com/hashicorp/vault/api v1.13.0
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/rs/zerolog v1.32.0
 	github.com/spf13/cobra v1.8.0
@@ -14,6 +14,8 @@ require (
 	gotest.tools/v3 v3.5.1
 	sigs.k8s.io/yaml v1.4.0
 )
+
+require github.com/go-jose/go-jose/v4 v4.0.1 // indirect
 
 require (
 	cloud.google.com/go/compute v1.19.3 // indirect
