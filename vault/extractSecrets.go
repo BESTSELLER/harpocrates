@@ -7,7 +7,7 @@ import (
 	"github.com/BESTSELLER/harpocrates/files"
 	"github.com/BESTSELLER/harpocrates/secrets"
 	"github.com/BESTSELLER/harpocrates/util"
-	"github.com/mitchellh/mapstructure"
+	"github.com/go-viper/mapstructure/v2"
 )
 
 type Outputs struct {
