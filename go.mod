@@ -9,7 +9,7 @@ require (
 	github.com/hashicorp/vault v1.17.1
 	github.com/hashicorp/vault/api v1.14.0
 	github.com/rs/zerolog v1.33.0
-	github.com/spf13/cobra v1.8.0
+	github.com/spf13/cobra v1.8.1
 	github.com/xeipuuv/gojsonschema v1.2.0
 	gopkg.in/yaml.v3 v3.0.1
 	gotest.tools/v3 v3.5.1
