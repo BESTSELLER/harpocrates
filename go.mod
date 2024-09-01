@@ -4,7 +4,7 @@ go 1.22
 
 require (
 	github.com/BESTSELLER/go-vault v0.1.5
-	github.com/go-viper/mapstructure/v2 v2.0.0
+	github.com/go-viper/mapstructure/v2 v2.1.0
 	github.com/gookit/color v1.5.4
 	github.com/hashicorp/vault v1.17.1
 	github.com/hashicorp/vault/api v1.14.0
