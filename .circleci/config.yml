@@ -3,7 +3,7 @@ version: 2.1
 executors:
   go_image:
     docker:
-      - image: cimg/go:1.22.6
+      - image: cimg/go:1.23.1
         auth:
           username: $DOCKERHUB_USER
           password: $DOCKERHUB_PASS
