@@ -10,7 +10,7 @@ executors:
 
 orbs:
   secret-injector: bestsellerit/secret-injector@2.8.0
-  cci-common: bestsellerit/cci-common@dev:ES-3310
+  cci-common: bestsellerit/cci-common@3.6.1
 
 jobs:
   build-go:
