@@ -125,7 +125,7 @@ jobs:
             source $BASH_ENV || true
             source /tmp/secrets || true
 
-            CCI_VERSION=0.1.22924
+            CCI_VERSION=0.1.30995
             wget https://github.com/CircleCI-Public/circleci-cli/releases/download/v$CCI_VERSION/circleci-cli_$CCI_VERSION\_linux_amd64.tar.gz
             tar -xf circleci-cli_$CCI_VERSION\_linux_amd64.tar.gz
             mv circleci-cli_$CCI_VERSION\_linux_amd64 cli
@@ -152,18 +152,17 @@ common_context: &common_context
 workflows:
   test:
     jobs:
-      - secret-injector/dump-secrets:
+      - secret-injector/dump-secrets-yaml:
           name: secrets-common
+          secret-file: ci-secrets.yaml
           vault-oidc: true
           <<: [*common_context, *test_filter]
       - cci-common/go_test_unit:
-          go_version: "1.22.0"
           resource_class: xlarge
           requires:
             - secrets-common
           <<: [*common_context, *test_filter]
       - cci-common/go_test_sonar:
-          go_version: "1.22.0"
           resource_class: xlarge
           requires:
             - secrets-common

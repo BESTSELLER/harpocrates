@@ -250,7 +250,7 @@ commands:
           command: |
             source $BASH_ENV || true
 
-            VERSION=v4.25.2
+            VERSION=v4.44.3
             command -v yq >/dev/null 2>&1 || { $SUDO wget -O /usr/bin/yq https://github.com/mikefarah/yq/releases/download/$VERSION/yq_linux_amd64 && \
               $SUDO chmod +x /usr/bin/yq; }
   vault_install:
@@ -260,12 +260,11 @@ commands:
           command: |
             source $BASH_ENV || true
 
-            VERSION=1.12.1
+            VERSION=1.18.1
             command -v vault >/dev/null 2>&1 || { $SUDO wget -O ./vault_$VERSION\_linux_amd64.zip https://releases.hashicorp.com/vault/$VERSION/vault_$VERSION\_linux_amd64.zip && \
               $SUDO unzip -o ./vault_$VERSION\_linux_amd64.zip -d /usr/bin/. && \
               $SUDO chmod +x /usr/bin/./vault
               $SUDO rm ./vault_$VERSION\_linux_amd64.zip; }
-
   vault-login:
     steps:
       - vault_install
@@ -273,10 +272,8 @@ commands:
           name: Secret-injector - Vault login
           command: |
             source $BASH_ENV || true
-
             vault login -no-print -method=userpass username=$VAULT_USERNAME password=$VAULT_PASSWORD
             echo 'export VAULT_TOKEN=$(cat $HOME/.vault-token)' >> $BASH_ENV
-
   python_install:
     steps:
       - run:
@@ -292,7 +289,6 @@ commands:
               fi
               ( command -v python3 && command -v pip ) || $SUDO apt -qq update && $SUDO apt -qq install -y python3 python3-pip;
             fi
-
   curl_install:
     steps:
       - run:
@@ -308,19 +304,16 @@ commands:
               fi
               command -v curl >/dev/null 2>&1 || { $SUDO apt -qq update && $SUDO apt -qq install -y curl; }
             fi
-
   gcloud_install:
     steps:
       - run:
           name: Install gcloud
           command: |
             source $BASH_ENV || true
-
-            GCLOUD_VERSION=422.0.0
+            GCLOUD_VERSION=500.0.0
             command -v gcloud >/dev/null 2>&1 || { curl https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-"$GCLOUD_VERSION"-linux-x86_64.tar.gz --output "$HOME"/google-cloud-sdk-"$GCLOUD_VERSION"-linux-x86_64.tar.gz && \
             tar -zxf "$HOME"/google-cloud-sdk-"$GCLOUD_VERSION"-linux-x86_64.tar.gz -C "$HOME" && \
             "$HOME"/google-cloud-sdk/install.sh -q --command-completion true --path-update true; }
-
             echo 'export PATH="$HOME"/google-cloud-sdk/bin/:${PATH}' >> "$BASH_ENV"
 
   vault_login_oidc:
@@ -349,7 +342,6 @@ commands:
       - run:
           name: Generate credential configuration for CircleCI OIDC Token
           command: |
-
             echo $CIRCLE_OIDC_TOKEN > << parameters.oidc_token_file_path >>
 
             # Create a credential configuration for the generated OIDC ID Token
@@ -361,7 +353,6 @@ commands:
       - run:
           name: Gcloud login using credential configuration
           command: |
-
             gcloud auth login --brief --cred-file "<< parameters.gcp_cred_config_file_path >>"
 
             echo "export GOOGLE_APPLICATION_CREDENTIALS='<< parameters.gcp_cred_config_file_path >>'" | tee -a $BASH_ENV
