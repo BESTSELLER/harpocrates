@@ -263,7 +263,7 @@ commands:
           command: |
             source $BASH_ENV || true
 
-            VERSION=1.12.1
+            VERSION=1.18.1
             command -v vault >/dev/null 2>&1 || { $SUDO wget -O ./vault_$VERSION\_linux_amd64.zip https://releases.hashicorp.com/vault/$VERSION/vault_$VERSION\_linux_amd64.zip && \
               $SUDO unzip -o ./vault_$VERSION\_linux_amd64.zip -d /usr/bin/. && \
               $SUDO chmod +x /usr/bin/./vault
