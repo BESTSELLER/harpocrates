@@ -197,13 +197,12 @@ workflows:
   test-build-release:
     jobs:
       - secret-injector/dump-secrets-yaml:
-          name: secrets-common
           secret-file: ci-secrets.yaml
           vault-oidc: true
           <<: [*common_context, *release_filter]
       - build-go:
           requires:
-            - secrets-common
+            - secret-injector/dump-secrets-yaml
           <<: [*common_context, *release_filter]
       - cci-common/build_n_push_docker:
           name: docker-build-n-push
