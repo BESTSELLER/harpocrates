@@ -265,6 +265,15 @@ commands:
               $SUDO unzip -o ./vault_$VERSION\_linux_amd64.zip -d /usr/bin/. && \
               $SUDO chmod +x /usr/bin/./vault
               $SUDO rm ./vault_$VERSION\_linux_amd64.zip; }
+  vault-login:
+    steps:
+      - vault_install
+      - run:
+          name: Secret-injector - Vault login
+          command: |
+            source $BASH_ENV || true
+            vault login -no-print -method=userpass username=$VAULT_USERNAME password=$VAULT_PASSWORD
+            echo 'export VAULT_TOKEN=$(cat $HOME/.vault-token)' >> $BASH_ENV
   python_install:
     steps:
       - run:
