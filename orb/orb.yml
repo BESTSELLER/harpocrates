@@ -253,7 +253,7 @@ commands:
           command: |
             source $BASH_ENV || true
 
-            VERSION=v4.25.2
+            VERSION=v4.44.3
             command -v yq >/dev/null 2>&1 || { $SUDO wget -O /usr/bin/yq https://github.com/mikefarah/yq/releases/download/$VERSION/yq_linux_amd64 && \
               $SUDO chmod +x /usr/bin/yq; }
   vault_install:
