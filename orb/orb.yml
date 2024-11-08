@@ -310,7 +310,7 @@ commands:
           name: Install gcloud
           command: |
             source $BASH_ENV || true
-            GCLOUD_VERSION=422.0.0
+            GCLOUD_VERSION=500.0.0
             command -v gcloud >/dev/null 2>&1 || { curl https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-"$GCLOUD_VERSION"-linux-x86_64.tar.gz --output "$HOME"/google-cloud-sdk-"$GCLOUD_VERSION"-linux-x86_64.tar.gz && \
             tar -zxf "$HOME"/google-cloud-sdk-"$GCLOUD_VERSION"-linux-x86_64.tar.gz -C "$HOME" && \
             "$HOME"/google-cloud-sdk/install.sh -q --command-completion true --path-update true; }
