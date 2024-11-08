@@ -1,9 +1,6 @@
 version: 2.1
 description: Secret-injector orb
 
-orbs:
-  cci-common: bestsellerit/cci-common@3.6.1
-
 executors:
   secret_image:
     docker:
@@ -268,6 +265,47 @@ commands:
               $SUDO unzip -o ./vault_$VERSION\_linux_amd64.zip -d /usr/bin/. && \
               $SUDO chmod +x /usr/bin/./vault
               $SUDO rm ./vault_$VERSION\_linux_amd64.zip; }
+  python_install:
+    steps:
+      - run:
+          name: Install Python
+          command: |
+            if cat /etc/issue | grep Alpine > /dev/null 2>&1; then
+              echo "Checking For python3: Alpine"
+              ( command -v python3 && command -v pip ) >/dev/null 2>&1 || { apk add --no-cache python3 py3-pip; }
+            elif cat /etc/issue | grep Debian > /dev/null 2>&1 || cat /etc/issue | grep Ubuntu > /dev/null 2>&1; then
+              echo "Checking For python3: Debian"
+              if [ "$(id -u)" = 0 ]; then export SUDO=""; else # Check if we're root
+                export SUDO="sudo";
+              fi
+              ( command -v python3 && command -v pip ) || $SUDO apt -qq update && $SUDO apt -qq install -y python3 python3-pip;
+            fi
+  curl_install:
+    steps:
+      - run:
+          name: Install curl
+          command: |
+            if cat /etc/issue | grep Alpine > /dev/null 2>&1; then
+              echo "Checking For curl: Alpine"
+              command -v curl >/dev/null 2>&1 || { apk add --no-cache curl; }
+            elif cat /etc/issue | grep Debian > /dev/null 2>&1 || cat /etc/issue | grep Ubuntu > /dev/null 2>&1; then
+              echo "Checking For curl: Debian"
+              if [ "$(id -u)" = 0 ]; then export SUDO=""; else # Check if we're root
+                export SUDO="sudo";
+              fi
+              command -v curl >/dev/null 2>&1 || { $SUDO apt -qq update && $SUDO apt -qq install -y curl; }
+            fi
+  gcloud_install:
+    steps:
+      - run:
+          name: Install gcloud
+          command: |
+            source $BASH_ENV || true
+            GCLOUD_VERSION=422.0.0
+            command -v gcloud >/dev/null 2>&1 || { curl https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-"$GCLOUD_VERSION"-linux-x86_64.tar.gz --output "$HOME"/google-cloud-sdk-"$GCLOUD_VERSION"-linux-x86_64.tar.gz && \
+            tar -zxf "$HOME"/google-cloud-sdk-"$GCLOUD_VERSION"-linux-x86_64.tar.gz -C "$HOME" && \
+            "$HOME"/google-cloud-sdk/install.sh -q --command-completion true --path-update true; }
+            echo 'export PATH="$HOME"/google-cloud-sdk/bin/:${PATH}' >> "$BASH_ENV"
 
   vault-login:
     steps:
@@ -300,7 +338,9 @@ commands:
         default: $VAULT_USERNAME
 
     steps:
-      - cci-common/install_gcloud
+      - python_install
+      - curl_install
+      - gcloud_install
       - run:
           name: Generate credential configuration for CircleCI OIDC Token
           command: |

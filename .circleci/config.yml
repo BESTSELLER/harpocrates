@@ -9,7 +9,7 @@ executors:
           password: $DOCKERHUB_PASS
 
 orbs:
-  secret-injector: bestsellerit/secret-injector@2.8.0
+  secret-injector: bestsellerit/secret-injector@2.8.1
   cci-common: bestsellerit/cci-common@3.6.1
 
 jobs:
@@ -152,8 +152,9 @@ common_context: &common_context
 workflows:
   test:
     jobs:
-      - secret-injector/dump-secrets:
+      - secret-injector/dump-secrets-yaml:
           name: secrets-common
+          secret-file: ci-secrets.yaml
           vault-oidc: true
           <<: [*common_context, *test_filter]
       - cci-common/go_test_unit:
@@ -198,12 +199,13 @@ workflows:
   test-build-release:
     jobs:
       - secret-injector/dump-secrets-yaml:
+          name: secrets-common
           secret-file: ci-secrets.yaml
           vault-oidc: true
           <<: [*common_context, *release_filter]
       - build-go:
           requires:
-            - secret-injector/dump-secrets-yaml
+            - secrets-common
           <<: [*common_context, *release_filter]
       - cci-common/build_n_push_docker:
           name: docker-build-n-push
