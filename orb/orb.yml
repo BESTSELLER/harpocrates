@@ -1,6 +1,9 @@
 version: 2.1
 description: Secret-injector orb
 
+orbs:
+  cci-common: bestsellerit/cci-common@3.6.1
+
 executors:
   secret_image:
     docker:
