@@ -316,17 +316,6 @@ commands:
             "$HOME"/google-cloud-sdk/install.sh -q --command-completion true --path-update true; }
             echo 'export PATH="$HOME"/google-cloud-sdk/bin/:${PATH}' >> "$BASH_ENV"
 
-  vault-login:
-    steps:
-      - vault_install
-      - run:
-          name: Secret-injector - Vault login
-          command: |
-            source $BASH_ENV || true
-
-            vault login -no-print -method=userpass username=$VAULT_USERNAME password=$VAULT_PASSWORD
-            echo 'export VAULT_TOKEN=$(cat $HOME/.vault-token)' >> $BASH_ENV
-
   vault_login_oidc:
     description: Login in to Vault using OIDC
     parameters:
