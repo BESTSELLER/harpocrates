@@ -39,7 +39,7 @@ func testReadSecretKey(path string, key string, expectedValue interface{}, t *te
 	assert.Equal(t, expectedValue, value)
 }
 
-// TestReadSecretKeyWithNumberAsValue tests that the function returns the correct secret key
+// TestReadSecretKeyWithNumberAsValue tests that the function returns the value as a number
 func TestReadSecretKeyWithNumberAsValue(t *testing.T) {
 	// arrange
 	path := "secret/data/secret"
@@ -49,7 +49,7 @@ func TestReadSecretKeyWithNumberAsValue(t *testing.T) {
 	testReadSecretKey(path, key, expectedValue, t)
 }
 
-// TestReadSecretKeyWithBooleanAsValue tests that the function returns the correct secret key
+// TestReadSecretKeyWithBooleanAsValue tests that the function returns the value as a boolean
 func TestReadSecretKeyWithBooleanAsValue(t *testing.T) {
 	// arrange
 	path := "secret/data/secret"
@@ -59,7 +59,7 @@ func TestReadSecretKeyWithBooleanAsValue(t *testing.T) {
 	testReadSecretKey(path, key, expectedValue, t)
 }
 
-// TestReadSecretKeyNotFound tests that the function returns the correct secret key
+// TestReadSecretKeyNotFound tests that the function will fail when trying to fetch an unknown key
 func TestReadSecretKeyNotFound(t *testing.T) {
 	// arrange
 	path := "secret/data/secret"
