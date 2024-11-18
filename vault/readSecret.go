@@ -70,6 +70,5 @@ func (client *API) ReadSecretKey(path string, key string) (interface{}, error) {
 		return "", fmt.Errorf(keyNotFound, key, path, err)
 	}
 
-	// return secretKey.(string), nil
 	return secretKey, nil
 }
