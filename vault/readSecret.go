@@ -57,7 +57,7 @@ func (client *API) ReadSecret(path string) (map[string]interface{}, error) {
 }
 
 // ReadSecretKey from Vault
-func (client *API) ReadSecretKey(path string, key string) (string, error) {
+func (client *API) ReadSecretKey(path string, key string) (interface{}, error) {
 	secret, err := client.ReadSecret(path)
 	if secret == nil {
 		return "", fmt.Errorf(keyNotFound, key, path, err)
@@ -70,5 +70,6 @@ func (client *API) ReadSecretKey(path string, key string) (string, error) {
 		return "", fmt.Errorf(keyNotFound, key, path, err)
 	}
 
-	return secretKey.(string), nil
+	// return secretKey.(string), nil
+	return secretKey, nil
 }

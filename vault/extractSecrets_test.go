@@ -45,7 +45,7 @@ func GetTestVaultServer(t *testing.T) vaultTest {
 
 	// put secrets
 	secretPath := "secret/data/secret"
-	secret := map[string]interface{}{"key1": "value1", "key2": "value2", "key3": "value3"}
+	secret := map[string]interface{}{"key1": "value1", "key2": "value2", "key3": "value3", "key4": 123, "key5": true}
 
 	_, err := client.Logical().Write(secretPath, secret)
 	if err != nil {
@@ -83,7 +83,7 @@ func TestExtractSecretsWithFormatAsExpected(t *testing.T) {
 	for _, v := range result {
 
 		// assert
-		expected := fmt.Sprintf("%v", map[string]interface{}{input.Prefix + "key1": "value1", input.Prefix + "key2": "value2", input.Prefix + "key3": "value3"})
+		expected := fmt.Sprintf("%v", map[string]interface{}{input.Prefix + "key1": "value1", input.Prefix + "key2": "value2", input.Prefix + "key3": "value3", input.Prefix + "key4": 123, input.Prefix + "key5": true})
 		actual := fmt.Sprintf("%v", v.Result)
 
 		assert.Equal(t, expected, actual)
@@ -113,7 +113,7 @@ func TestExtractSecretsAsExpected(t *testing.T) {
 	}
 	for _, v := range result {
 		// assert
-		expected := fmt.Sprintf("%v", map[string]interface{}{input.Prefix + "key1": "value1", input.Prefix + "key2": "value2", input.Prefix + "key3": "value3"})
+		expected := fmt.Sprintf("%v", map[string]interface{}{input.Prefix + "key1": "value1", input.Prefix + "key2": "value2", input.Prefix + "key3": "value3", input.Prefix + "key4": 123, input.Prefix + "key5": true})
 		actual := fmt.Sprintf("%v", v.Result)
 
 		assert.Equal(t, expected, actual)
