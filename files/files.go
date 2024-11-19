@@ -23,7 +23,7 @@ func Read(filePath string) string {
 }
 
 // Write will write some string data to a file
-func Write(output string, fileName string, content string, owner *int, append bool) {
+func Write(output string, fileName string, content interface{}, owner *int, append bool) {
 	fileName = fixFileName(fileName)
 	path := filepath.Join(output, fileName)
 
@@ -48,7 +48,7 @@ func Write(output string, fileName string, content string, owner *int, append bo
 
 	defer f.Close()
 
-	if _, err = f.WriteString(content); err != nil {
+	if _, err = f.WriteString(fmt.Sprintf("%v", content)); err != nil {
 		log.Fatal().Err(err).Msgf("Unable to write to file '%s'", path)
 		os.Exit(1)
 	}
