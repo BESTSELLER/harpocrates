@@ -8,7 +8,7 @@ require (
 	github.com/BESTSELLER/go-vault v0.1.5
 	github.com/go-viper/mapstructure/v2 v2.2.1
 	github.com/gookit/color v1.5.4
-	github.com/hashicorp/vault v1.18.1
+	github.com/hashicorp/vault v1.18.2
 	github.com/hashicorp/vault/api v1.15.0
 	github.com/rs/zerolog v1.33.0
 	github.com/spf13/cobra v1.8.1
