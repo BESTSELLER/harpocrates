@@ -103,8 +103,8 @@ github.com/AzureAD/microsoft-authentication-extensions-for-go/cache v0.1.1 h1:WJ
 github.com/AzureAD/microsoft-authentication-extensions-for-go/cache v0.1.1/go.mod h1:tCcJZ0uHAmvjsVYzEFivsRTN00oz5BEsRgQHu5JZ9WE=
 github.com/AzureAD/microsoft-authentication-library-for-go v1.3.3 h1:H5xDQaE3XowWfhZRUpnfC+rGZMEVoSiji+b+/HFAPU4=
 github.com/AzureAD/microsoft-authentication-library-for-go v1.3.3/go.mod h1:wP83P5OoQ5p6ip3ScPr0BAq0BvuPAvacpEuSzyouqAI=
-github.com/BESTSELLER/go-vault v0.1.5 h1:6gzI5WJxMQ9RZPYT5Vau+lncdP0cg4kGAG7NoVQ1W70=
-github.com/BESTSELLER/go-vault v0.1.5/go.mod h1:Bqj+Nlc36vroH+fsMkwLL3EayGbm2OSqKgPni/cZCVI=
+github.com/BESTSELLER/go-vault v0.2.0 h1:ARjdFiD6I7R2v8J0JUU0U7no56w019Wt60cAZg7/H5I=
+github.com/BESTSELLER/go-vault v0.2.0/go.mod h1:joynx1JVnp8QsM9SlqHHZXmvF+s7F+ILlyidKvLZA8A=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/toml v1.4.0 h1:kuoIxZQy2WRRk1pttg9asf+WVv6tWQuBNVmK8+nqPr0=
 github.com/BurntSushi/toml v1.4.0/go.mod h1:ukJfTF/6rtPPRCnwkur4qwRxa8vTRFBF0uk2lLoLwho=
