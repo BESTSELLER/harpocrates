@@ -58,14 +58,13 @@ func Login() {
 		return
 	}
 	if config.Config.GcpWorkloadID {
-		vaultToken, err := gcpss.FetchVaultToken(config.Config.VaultAddress, config.Config.AuthName)
+		login, err := gcpss.FetchVaultLogin(config.Config.VaultAddress, config.Config.AuthName)
 		if err != nil {
 			log.Fatal().Err(err).Msg("GcpWorkload Identity was enabled but auth failed")
 			os.Exit(1)
 		}
-		config.Config.VaultToken = vaultToken
-		// Assuming a default token lifetime is 1 hour
-		tokenExpiry = time.Now().Add(60 * time.Minute)
+		config.Config.VaultToken = login.Auth.ClientToken
+		tokenExpiry = time.Now().Add(time.Duration(login.Auth.LeaseDuration) * time.Second)
 		return
 	} else {
 		url := config.Config.VaultAddress + "/v1/auth/" + config.Config.AuthName + "/login"
@@ -77,7 +76,7 @@ func Login() {
 			os.Exit(1)
 		}
 
-		req, _ := http.NewRequest("POST", url, b)
+		req, _ := http.NewRequest(http.MethodPost, url, b)
 
 		res, err := http.DefaultClient.Do(req)
 		if err != nil {
