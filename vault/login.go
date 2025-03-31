@@ -4,13 +4,17 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"os"
+	"time"
+
 	"github.com/BESTSELLER/go-vault/gcpss"
 	"github.com/BESTSELLER/harpocrates/config"
 	"github.com/BESTSELLER/harpocrates/token"
 	"github.com/rs/zerolog/log"
-	"net/http"
-	"os"
 )
+
+var tokenExpiry time.Time
 
 // VaultLoginResult contains the result after logging in.
 type VaultLoginResult struct {
@@ -48,21 +52,21 @@ type JWTPayLoad struct {
 	Role string `json:"role"`
 }
 
-// Login will exchange the JWT token to a Vaul token
+// Login will exchange the JWT token for a Vault token and only refresh if less than 5 minutes remain
 func Login() {
-	if config.Config.VaultToken != "" {
+	if config.Config.VaultToken != "" && time.Now().Add(5*time.Minute).Before(tokenExpiry) {
 		return
 	}
 	if config.Config.GcpWorkloadID {
-		vaultToken, err := gcpss.FetchVaultToken(config.Config.VaultAddress, config.Config.AuthName)
+		login, err := gcpss.FetchVaultLogin(config.Config.VaultAddress, config.Config.AuthName)
 		if err != nil {
 			log.Fatal().Err(err).Msg("GcpWorkload Identity was enabled but auth failed")
 			os.Exit(1)
 		}
-		config.Config.VaultToken = vaultToken
+		config.Config.VaultToken = login.Auth.ClientToken
+		tokenExpiry = time.Now().Add(time.Duration(login.Auth.LeaseDuration) * time.Second)
 		return
 	} else {
-
 		url := config.Config.VaultAddress + "/v1/auth/" + config.Config.AuthName + "/login"
 
 		b := new(bytes.Buffer)
@@ -72,7 +76,7 @@ func Login() {
 			os.Exit(1)
 		}
 
-		req, _ := http.NewRequest("POST", url, b)
+		req, _ := http.NewRequest(http.MethodPost, url, b)
 
 		res, err := http.DefaultClient.Do(req)
 		if err != nil {
@@ -93,5 +97,6 @@ func Login() {
 		}
 
 		config.Config.VaultToken = returnPayload.Auth.ClientToken
+		tokenExpiry = time.Now().Add(time.Duration(returnPayload.Auth.LeaseDuration) * time.Second)
 	}
 }

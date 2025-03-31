@@ -1,10 +1,9 @@
 module github.com/BESTSELLER/harpocrates
 
-go 1.23.0
-toolchain go1.24.1
+go 1.24.1
 
 require (
-	github.com/BESTSELLER/go-vault v0.1.5
+	github.com/BESTSELLER/go-vault v0.2.0
 	github.com/go-viper/mapstructure/v2 v2.2.1
 	github.com/gookit/color v1.5.4
 	github.com/hashicorp/vault v1.19.0
