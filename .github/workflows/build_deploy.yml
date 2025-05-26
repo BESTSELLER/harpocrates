@@ -12,7 +12,7 @@ jobs:
   test-go:
     name: Test Go code
     if: ${{ startsWith(github.event_name, 'pull_request') }}
-    uses: BESTSELLER/actions/.github/workflows/go_test.yaml@2240df6fe211582d390fdff68c66c1003a20351a # v1.17.0
+    uses: BESTSELLER/actions/.github/workflows/go_test.yaml@6b624821607f531fb9f8fc19f9f4e92518700263 # v1.18.0
     with:
       environment: prod
 
@@ -57,7 +57,7 @@ jobs:
 
   build-deploy:
     name: Build Docker image
-    uses: BESTSELLER/actions/.github/workflows/build_deploy.yaml@2240df6fe211582d390fdff68c66c1003a20351a # v1.17.0
+    uses: BESTSELLER/actions/.github/workflows/build_deploy.yaml@6b624821607f531fb9f8fc19f9f4e92518700263 # v1.18.0
     needs: build-go
     secrets: inherit
     with:
@@ -67,7 +67,7 @@ jobs:
 
   build-deploy-ci:
     name: Build and Deploy CI
-    uses: BESTSELLER/actions/.github/workflows/build_deploy.yaml@2240df6fe211582d390fdff68c66c1003a20351a # v1.17.0
+    uses: BESTSELLER/actions/.github/workflows/build_deploy.yaml@6b624821607f531fb9f8fc19f9f4e92518700263 # v1.18.0
     needs: build-go
     secrets: inherit
     with:
