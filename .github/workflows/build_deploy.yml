@@ -11,13 +11,15 @@ on:
 jobs:
   test-go:
     name: Test Go code
-    if: ${{ startsWith(github.event_name, 'pull_request') }}
+    if: startsWith(github.event_name, 'pull_request') && github.event.pull_request.head.repo.full_name == github.repository
     uses: BESTSELLER/actions/.github/workflows/go_test.yaml@6b624821607f531fb9f8fc19f9f4e92518700263 # v1.18.0
+    secrets: inherit
     with:
       environment: prod
 
   build-go:
     name: Build Go binaries
+    if: (!startsWith(github.event_name, 'pull_request')) || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
