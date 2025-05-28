@@ -1,0 +1,25 @@
+# Exclude version control directories and files
+.git
+.gitignore
+.github
+
+# Exclude IDE and OS generated files
+.vscode
+.idea
+.DS_Store
+
+# Exclude Go dependency directories (if vendoring) and build artifacts
+/vendor
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Exclude logs, temporary files, and build output
+*.log
+tmp/
+build/
+*.tar.gz
+
+# Exclude files not needed in the build context
+*.md

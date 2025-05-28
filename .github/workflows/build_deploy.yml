@@ -3,7 +3,7 @@ name: Build and Deploy
 on:
   release:
     types: [published]
-  pull_request: # TODO: Change to pull_request_target:
+  pull_request_target:
     branches:
       - master
 
@@ -95,7 +95,7 @@ jobs:
             "gcloud=${{ steps.auth.outputs.credentials_file_path }}"
 
       - name: Push images
-        # TODO if: ${{ github.event_name == 'release' }}
+        if: ${{ github.event_name == 'release' }}
         run: docker push --all-tags ${{ steps.prepare_image_tag.outputs.DOCKER_FRIENDLY_IMAGE_TAG }}
 
       - name: Submit Datadog metrics
