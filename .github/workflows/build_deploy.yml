@@ -51,7 +51,7 @@ jobs:
       - name: Install linters
         run: go install golang.org/x/lint/golint@latest
 
-      - name: Go fmt and lint
+      - name: Go format and lint
         id: go_static_analysis
         run: |
           go fmt ./...
@@ -74,44 +74,6 @@ jobs:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
-
-      - name: Enable SonarCloud project
-        env:
-          SONAR_TOKEN: ${{ steps.vault_secrets.outputs.SONAR_TOKEN }}
-          SONAR_ORG: ${{ steps.vault_secrets.outputs.SONAR_ORG }}
-          SONAR_KEY: ${{ steps.vault_secrets.outputs.SONAR_KEY }}
-          SONAR_PROJECT: ${{ github.event.repository.name }}
-        run: |
-          VALID_TOKEN=$(curl --request GET -s --url 'https://sonarcloud.io/api/authentication/validate' --user "$SONAR_TOKEN:" | jq -r '.valid')
-          if [ "$VALID_TOKEN" == "false" ]; then
-            echo "Token is not valid."
-            exit 1
-          fi
-
-          ALL_REPOS=$(curl --request GET -s --url 'https://sonarcloud.io/api/alm_integration/list_repositories?organization='"$SONAR_ORG" --user "$SONAR_TOKEN:")
-          THIS_REPO=$(echo "$ALL_REPOS" | jq '.repositories[] | select(.label == "'"$SONAR_PROJECT"'")')
-          IS_LINKED=$(echo "$THIS_REPO" | jq -r '.linkedProjects | length')
-
-          if test "$IS_LINKED" -eq 0; then
-            echo "Repository is not linked to SonarCloud. Will link it now."
-            installationKey=$(echo "$THIS_REPO" | jq -r '.installationKey')
-
-            # Link the project to SonarCloud
-            curl --request POST -s \
-              --url https://sonarcloud.io/api/alm_integration/provision_projects \
-              --user "$SONAR_TOKEN:" \
-              --data 'installationKeys='"$installationKey" \
-              --data 'organization='"$SONAR_ORG"
-
-            # Disable SonarCloud Automatic Analysis
-            curl --request POST -s \
-              --url https://sonarcloud.io/api/autoscan/activation \
-              --user "$SONAR_TOKEN:" \
-              --data 'enable=false' \
-              --data 'projectKey='"$SONAR_KEY"'_'"$SONAR_PROJECT"
-          else
-            echo "Repository is already linked to SonarCloud. Will not link it again."
-          fi
 
       - name: SonarQube scan
         uses: SonarSource/sonarqube-scan-action@2500896589ef8f7247069a56136f8dc177c27ccf # v5.2.0
@@ -163,12 +125,9 @@ jobs:
     permissions:
       contents: read
       id-token: write
-      pull-requests: write
-      issues: write
-      security-events: write
-      actions: read
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           ref: ${{ startsWith(github.event_name, 'pull_request') && github.event.pull_request.head.sha || '' }}
 
