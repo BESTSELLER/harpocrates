@@ -1,9 +1,8 @@
 name: Build and Deploy
 
 on:
-  push:
-    tags:
-      - "[0-9]+.[0-9]+.[0-9]+*"
+  release:
+    types: [published]
   pull_request: # TODO: Change to pull_request_target:
     branches:
       - master
@@ -56,7 +55,7 @@ jobs:
       - name: Prepare image string
         id: prepare_image_tag
         run: |
-          image="${{ steps.cluster_creds.outputs.ARTIFACT_REGISTRY_URL }}/${{ steps.cluster_creds.outputs.ARTIFACT_REGISTRY_PROJECT }}/${{ vars.VAULT_SHORT }}-docker/${{ github.event.repository.name }}"
+          image="${{ steps.cluster_creds.outputs.ARTIFACT_REGISTRY_URL }}/${{ steps.cluster_creds.outputs.ARTIFACT_REGISTRY_PROJECT }}/public-docker/${{ github.event.repository.name }}"
           echo "DOCKER_FRIENDLY_IMAGE_TAG=${image,,}" >> $GITHUB_OUTPUT
 
       - name: Docker metadata
@@ -65,7 +64,7 @@ jobs:
         with:
           images: ${{ steps.prepare_image_tag.outputs.DOCKER_FRIENDLY_IMAGE_TAG }}
           tags: |
-            type=raw,value=latest,enable=${{ github.event_name == 'push' }}
+            type=raw,value=latest,enable=${{ github.event_name == 'release' }}
             type=raw,value=${{ github.sha }},enable=true
             type=ref,event=branch
             type=ref,event=pr
@@ -92,7 +91,7 @@ jobs:
             "gcloud=${{ steps.auth.outputs.credentials_file_path }}"
 
       - name: Push images
-        # TODO if: ${{ github.event_name == 'push' }}
+        # TODO if: ${{ github.event_name == 'release' }}
         run: docker push --all-tags ${{ steps.prepare_image_tag.outputs.DOCKER_FRIENDLY_IMAGE_TAG }}
 
       - name: Submit Datadog metrics
