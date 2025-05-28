@@ -170,20 +170,19 @@ jobs:
       - name: Build for Windows/amd64
         run: |
           CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -o harpocrates.exe
-          tar -czvf /tmp/harpocrates_${{ github.ref_name }}_windows_amd64.tar.gz harpocrates.exe
+          tar -czvf harpocrates_${{ github.ref_name }}_windows_amd64.tar.gz harpocrates.exe
           rm harpocrates.exe
 
       - name: Build for Darwin/amd64
         run: |
           CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w" -o harpocrates
-          tar -czvf /tmp/harpocrates_${{ github.ref_name }}_darwin_amd64.tar.gz harpocrates
+          tar -czvf harpocrates_${{ github.ref_name }}_darwin_amd64.tar.gz harpocrates
           rm harpocrates
 
       - name: Build for Linux/amd64
         run: |
           CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o harpocrates
-          tar -czvf /tmp/harpocrates_${{ github.ref_name }}_linux_amd64.tar.gz harpocrates
-          mv harpocrates /tmp
+          tar -czvf harpocrates_${{ github.ref_name }}_linux_amd64.tar.gz harpocrates
 
       - name: Upload artifacts
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
