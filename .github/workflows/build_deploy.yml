@@ -18,7 +18,11 @@ jobs:
     runs-on: ubuntu-24.04
     strategy:
       matrix:
-        docker_file_path: ["", Dockerfile.ci]
+        include:
+          - DOCKER_FILE_PATH: "Dockerfile"
+            ARTIFACT_REGISTRY_IMAGE: ${{ github.event.repository.name }}
+          - DOCKER_FILE_PATH: "Dockerfile.ci"
+            ARTIFACT_REGISTRY_REPOSITORY: ${{ github.event.repository.name }}-ci
     environment: prod
     permissions:
       contents: read
@@ -55,7 +59,7 @@ jobs:
       - name: Prepare image string
         id: prepare_image_tag
         run: |
-          image="${{ steps.cluster_creds.outputs.ARTIFACT_REGISTRY_URL }}/${{ steps.cluster_creds.outputs.ARTIFACT_REGISTRY_PROJECT }}/public-docker/${{ github.event.repository.name }}"
+          image="${{ steps.cluster_creds.outputs.ARTIFACT_REGISTRY_URL }}/${{ steps.cluster_creds.outputs.ARTIFACT_REGISTRY_PROJECT }}/public-docker/${{ matrix.ARTIFACT_REGISTRY_IMAGE }}"
           echo "DOCKER_FRIENDLY_IMAGE_TAG=${image,,}" >> $GITHUB_OUTPUT
 
       - name: Docker metadata
