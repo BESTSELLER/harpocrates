@@ -22,7 +22,7 @@ jobs:
           - DOCKER_FILE_PATH: "Dockerfile"
             ARTIFACT_REGISTRY_IMAGE: ${{ github.event.repository.name }}
           - DOCKER_FILE_PATH: "Dockerfile.ci"
-            ARTIFACT_REGISTRY_REPOSITORY: ${{ github.event.repository.name }}-ci
+            ARTIFACT_REGISTRY_IMAGE: ${{ github.event.repository.name }}-ci
     environment: prod
     permissions:
       contents: read
@@ -88,7 +88,7 @@ jobs:
           load: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          file: ${{ matrix.docker_file_path }}
+          file: ${{ matrix.DOCKER_FILE_PATH }}
           cache-from: type=gha
           cache-to: type=gha,mode=max}
           secret-files: |
