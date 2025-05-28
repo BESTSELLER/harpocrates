@@ -9,7 +9,7 @@ on:
       - master
 
 concurrency:
-  group: ${{ format('{0}-{1}', github.event.repository.name, github.head_ref || github.ref_name) }}
+  group: ${{ format('{0}-build-{1}', github.event.repository.name, github.head_ref || github.ref_name) }}
   cancel-in-progress: ${{ startsWith(github.event_name , 'pull_request')}}
 
 jobs:
@@ -92,7 +92,7 @@ jobs:
             "gcloud=${{ steps.auth.outputs.credentials_file_path }}"
 
       - name: Push images
-        if: ${{ github.event_name == 'push' }}
+        # TODO if: ${{ github.event_name == 'push' }}
         run: docker push --all-tags ${{ steps.prepare_image_tag.outputs.DOCKER_FRIENDLY_IMAGE_TAG }}
 
       - name: Submit Datadog metrics

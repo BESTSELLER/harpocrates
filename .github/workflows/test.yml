@@ -6,7 +6,7 @@ on:
       - master
 
 concurrency:
-  group: ${{ format('{0}-{1}', github.event.repository.name, github.head_ref || github.ref_name) }}
+  group: ${{ format('{0}-test-{1}', github.event.repository.name, github.head_ref || github.ref_name) }}
   cancel-in-progress: true
 
 jobs:
