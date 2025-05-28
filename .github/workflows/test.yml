@@ -1,18 +1,22 @@
-name: Build and Release
+name: Test and Build Docker Image
 
 on:
+  push:
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+*"
   pull_request: # TODO: Change to pull_request_target:
     branches:
       - master
 
 concurrency:
-  group: ${{ format('{0}-test-{1}', github.event.repository.name, github.head_ref || github.ref_name) }}
-  cancel-in-progress: true
+  group: ${{ format('{0}-{1}', github.event.repository.name, github.head_ref || github.ref_name) }}
+  cancel-in-progress: ${{ startsWith(github.event_name , 'pull_request')}}
 
 jobs:
   test:
     name: Go test
     runs-on: ubuntu-latest
+    if: ${{ startsWith(github.event_name , 'pull_request') && github.event.pull_request.head.repo.full_name == github.repository }}
     environment: prod
     permissions:
       id-token: write
@@ -152,7 +156,6 @@ jobs:
   build:
     name: Docker build
     runs-on: ubuntu-24.04
-    needs: test
     strategy:
       matrix:
         docker_file_path: ["", Dockerfile.ci]
@@ -167,7 +170,7 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ startsWith(github.event_name, 'pull_request') && github.event.pull_request.head.sha || '' }}
 
       - name: Get cluster credentials
         id: cluster_creds
@@ -178,7 +181,6 @@ jobs:
           path: ${{ vars.VAULT_AUTH_PATH }}
           role: ${{ vars.VAULT_ROLE }}
           secrets: |
-            ES/data/gke/${{ vars.CLUSTER_CREDENTIALS_NAME }} * ;
             SHARED/data/common artifact_registry_url | ARTIFACT_REGISTRY_URL ;
             SHARED/data/common artifact_registry_project | ARTIFACT_REGISTRY_PROJECT ;
             SHARED/data/common DATADOG_API_KEY | DATADOG_API_KEY ;
@@ -232,6 +234,7 @@ jobs:
             "gcloud=${{ steps.auth.outputs.credentials_file_path }}"
 
       - id: date
+        if: ${{ startsWith(github.event_name, 'pull_request')}}
         name: Get current date
         run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
 
@@ -334,7 +337,7 @@ jobs:
           echo "Vulnerabilities was found"
           exit 1
 
-      - name: push images
+      - name: Push images
         if: ${{ github.event_name == 'push' }}
         run: docker push --all-tags ${{ steps.prepare_image_tag.outputs.DOCKER_FRIENDLY_IMAGE_TAG }}
 
