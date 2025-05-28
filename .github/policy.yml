@@ -16,11 +16,9 @@ policy:
 approval_rules:
   - name: tests passed
     if:
-      has_successful_status:
-        - "test-go"
-        - "build-go"
-        - "build-deploy"
-        - "build-deploy-ci"
+      has_workflow_result:
+        workflows:
+          - ".github/workflows/build_deploy.yml"
     requires:
       count: 0
   - name: es has approved

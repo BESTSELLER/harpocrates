@@ -9,13 +9,143 @@ on:
       - master
 
 jobs:
-  test-go:
-    name: Test Go code
-    if: startsWith(github.event_name, 'pull_request') && github.event.pull_request.head.repo.full_name == github.repository
-    uses: BESTSELLER/actions/.github/workflows/go_test.yaml@6b624821607f531fb9f8fc19f9f4e92518700263 # v1.18.0
-    secrets: inherit
-    with:
-      environment: prod
+  test:
+    runs-on: ubuntu-latest
+    environment: prod
+    permissions:
+      id-token: write
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          fetch-depth: 0
+          ref: ${{ startsWith(github.event_name, 'pull_request') && github.event.pull_request.head.sha || '' }}
+
+      - name: Get vault secrets
+        id: vault_secrets
+        uses: hashicorp/vault-action@7709c609789c5e27b757a85817483caadbb5939a # v3.3.0
+        with:
+          method: jwt
+          url: ${{ vars.VAULT_ADDR }}
+          path: ${{ vars.VAULT_AUTH_PATH }}
+          role: ${{ vars.VAULT_ROLE }}
+          secrets: |
+            SHARED/data/common SONAR_ORG_GH | SONAR_ORG ;
+            SHARED/data/common SONAR_LOGIN_GH | SONAR_TOKEN ;
+            SHARED/data/common SONAR_KEY_GH | SONAR_KEY ;
+            SHARED/data/common SONAR_HOST | SONAR_HOST ;
+            SHARED/data/common DATADOG_API_KEY | DATADOG_API_KEY ;
+
+      - name: Setup Go
+        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
+        with:
+          go-version-file: "go.mod"
+
+      - name: Install linters
+        run: go install golang.org/x/lint/golint@latest
+
+      - name: Go fmt and lint
+        id: go_static_analysis
+        run: |
+          go fmt ./...
+          golint ./...
+          go vet ./...
+
+      - name: Suggest changes
+        if: always()
+        uses: reviewdog/action-suggester@4747dbc9f9e37adba0943e681cc20db466642158 # v1.21.0
+        with:
+          tool_name: go static analysis
+
+      - name: Test
+        if: always()
+        uses: robherley/go-test-action@b19f6aadabfb1ad85079065b21aa2af132466468 # v0.6.0
+
+      - name: Cache SonarQube packages
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 #v4.2.3
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Enable SonarCloud project
+        env:
+          SONAR_TOKEN: ${{ steps.vault_secrets.outputs.SONAR_TOKEN }}
+          SONAR_ORG: ${{ steps.vault_secrets.outputs.SONAR_ORG }}
+          SONAR_KEY: ${{ steps.vault_secrets.outputs.SONAR_KEY }}
+          SONAR_PROJECT: ${{ github.event.repository.name }}
+        run: |
+          VALID_TOKEN=$(curl --request GET -s --url 'https://sonarcloud.io/api/authentication/validate' --user "$SONAR_TOKEN:" | jq -r '.valid')
+          if [ "$VALID_TOKEN" == "false" ]; then
+            echo "Token is not valid."
+            exit 1
+          fi
+
+          ALL_REPOS=$(curl --request GET -s --url 'https://sonarcloud.io/api/alm_integration/list_repositories?organization='"$SONAR_ORG" --user "$SONAR_TOKEN:")
+          THIS_REPO=$(echo "$ALL_REPOS" | jq '.repositories[] | select(.label == "'"$SONAR_PROJECT"'")')
+          IS_LINKED=$(echo "$THIS_REPO" | jq -r '.linkedProjects | length')
+
+          if test "$IS_LINKED" -eq 0; then
+            echo "Repository is not linked to SonarCloud. Will link it now."
+            installationKey=$(echo "$THIS_REPO" | jq -r '.installationKey')
+
+            # Link the project to SonarCloud
+            curl --request POST -s \
+              --url https://sonarcloud.io/api/alm_integration/provision_projects \
+              --user "$SONAR_TOKEN:" \
+              --data 'installationKeys='"$installationKey" \
+              --data 'organization='"$SONAR_ORG"
+
+            # Disable SonarCloud Automatic Analysis
+            curl --request POST -s \
+              --url https://sonarcloud.io/api/autoscan/activation \
+              --user "$SONAR_TOKEN:" \
+              --data 'enable=false' \
+              --data 'projectKey='"$SONAR_KEY"'_'"$SONAR_PROJECT"
+          else
+            echo "Repository is already linked to SonarCloud. Will not link it again."
+          fi
+
+      - name: SonarQube scan
+        uses: SonarSource/sonarqube-scan-action@2500896589ef8f7247069a56136f8dc177c27ccf # v5.2.0
+        with:
+          args: >
+            -Dsonar.host.url=${{ steps.vault_secrets.outputs.SONAR_HOST }}
+            -Dsonar.token=${{ steps.vault_secrets.outputs.SONAR_TOKEN }}
+            -Dsonar.organization=${{ steps.vault_secrets.outputs.SONAR_ORG }}
+            -Dsonar.projectKey=${{ steps.vault_secrets.outputs.SONAR_KEY }}_${{ github.event.repository.name }}
+            -Dsonar.projectName=${{ github.event.repository.name }}
+            -Dsonar.links.scm="https://github.com/${{ github.repository }}"
+            -Dsonar.scm.provider=git
+            ${{ startsWith(github.event_name, 'pull_request') && format('-Dsonar.pullrequest.branch={0} -Dsonar.pullrequest.key={1}', github.head_ref || github.ref_name, github.event.pull_request.number) || format('-Dsonar.branch.name={0}', github.head_ref || github.ref_name) }}
+
+      - name: Submit Datadog metrics
+        if: success() || failure()
+        run: |
+          current_time=$(date +%s)
+
+          curl -X POST -s "https://api.datadoghq.eu/api/v2/series" \
+            -H "Accept: application/json" \
+            -H "Content-Type: application/json" \
+            -H "DD-API-KEY: ${{ steps.vault_secrets.outputs.DATADOG_API_KEY }}" \
+            -d @- << EOF
+          {
+            "series": [
+              {
+                "metric": "github.job.${{ job.status }}",
+                "type": 1,
+                "points": [
+                  {
+                    "timestamp": $current_time,
+                    "value": 1
+                  }
+                ],
+                "tags": ["job:go_test","repository:${{ github.event.repository.name }}"]
+              }
+            ]
+          }
+          EOF
 
   build-go:
     name: Build Go binaries
@@ -59,7 +189,7 @@ jobs:
 
   build-deploy:
     name: Build Docker image
-    uses: BESTSELLER/actions/.github/workflows/build_deploy.yaml@6b624821607f531fb9f8fc19f9f4e92518700263 # v1.18.0
+    uses: BESTSELLER/harpocrates/.github/workflows/reusable_build_deploy.yml@migrate-to-gh-actions # TODO: Change to a master
     needs: build-go
     secrets: inherit
     with:
@@ -69,7 +199,7 @@ jobs:
 
   build-deploy-ci:
     name: Build and Deploy CI
-    uses: BESTSELLER/actions/.github/workflows/build_deploy.yaml@6b624821607f531fb9f8fc19f9f4e92518700263 # v1.18.0
+    uses: BESTSELLER/harpocrates/.github/workflows/reusable_build_deploy.yml@migrate-to-gh-actions # TODO: Change to a master
     needs: build-go
     secrets: inherit
     with:
