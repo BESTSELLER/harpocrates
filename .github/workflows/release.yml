@@ -1,0 +1,101 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+*"
+
+concurrency:
+  group: ${{ format('{0}-release', github.event.repository.name) }}
+
+jobs:
+  build-go:
+    name: Build Go binaries
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Set up Go
+        uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
+        with:
+          go-version: "1.24.1"
+
+      - name: Build for Windows/amd64
+        run: |
+          CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -o harpocrates.exe
+          tar -czvf harpocrates_${{ github.ref_name }}_windows_amd64.tar.gz harpocrates.exe
+          rm harpocrates.exe
+
+      - name: Build for Darwin/amd64
+        run: |
+          CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -ldflags="-s -w" -o harpocrates
+          tar -czvf harpocrates_${{ github.ref_name }}_darwin_amd64.tar.gz harpocrates
+          rm harpocrates
+
+      - name: Build for Linux/amd64
+        run: |
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o harpocrates
+          tar -czvf harpocrates_${{ github.ref_name }}_linux_amd64.tar.gz harpocrates
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: binaries
+          if-no-files-found: error
+          path: |
+            harpocrates_*
+            harpocrates
+
+  publish:
+    name: Publish release
+    if: ${{ github.event_name == 'push' }}
+    needs: build-go
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Download artifacts
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: binaries
+          path: releases/
+
+      - name: Get vault secrets
+        id: vault_secrets
+        uses: hashicorp/vault-action@7709c609789c5e27b757a85817483caadbb5939a # v3.3.0
+        with:
+          method: jwt
+          url: ${{ vars.VAULT_ADDR }}
+          path: ${{ vars.VAULT_AUTH_PATH }}
+          role: ${{ vars.VAULT_ROLE }}
+          secrets: |
+            ${{ vars.VAULT_SHORT }}/data/${{ github.event.repository.name }} GITHUB_TOKEN
+
+      - name: Update templates with git tag
+        run: |
+          mkdir -p releases
+          sed -i -e "s?\$HARPOCRATES_VERSION?${{ github.ref_name }}?g" orb/orb.yml
+          sed -i -e "s?\$HARPOCRATES_VERSION?${{ github.ref_name }}?g" orb/CronJob.yml
+          sed -i -e "s?\$HARPOCRATES_VERSION?${{ github.ref_name }}?g" orb/CronJob-sidecar.yml
+          sed -i -e "s?\$HARPOCRATES_VERSION?${{ github.ref_name }}?g" orb/Deployment.yml
+          sed -i -e "s?\$HARPOCRATES_VERSION?${{ github.ref_name }}?g" orb/Deployment-sidecar.yml
+          sed -i -e "s?\$HARPOCRATES_VERSION?${{ github.ref_name }}?g" orb/StatefulSet.yml
+          sed -i -e "s?\$HARPOCRATES_VERSION?${{ github.ref_name }}?g" orb/StatefulSet-sidecar.yml
+          cp orb/CronJob.yml ./releases
+          cp orb/CronJob-sidecar.yml ./releases
+          cp orb/Deployment.yml ./releases
+          cp orb/Deployment-sidecar.yml ./releases
+          cp orb/StatefulSet.yml ./releases
+          cp orb/StatefulSet-sidecar.yml ./releases
+          cp orb/kustomization.yml ./releases
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@da05d552573ad5aba039eaac05058a918a7bf631 # v2.2.2
+        with:
+          files: releases/*
+          tag_name: ${{ github.ref_name }}
+          token: ${{ steps.vault_secrets.outputs.GITHUB_TOKEN }}
