@@ -19,6 +19,7 @@ approval_rules:
       has_workflow_result:
         workflows:
           - ".github/workflows/build_deploy.yml"
+          - ".github/workflows/test.yml"
     requires:
       count: 0
   - name: es has approved
