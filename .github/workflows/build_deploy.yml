@@ -16,13 +16,6 @@ jobs:
     name: Docker build
     if: ${{ startsWith(github.event_name, 'pull_request') && github.event.pull_request.head.repo.full_name == github.repository }}
     runs-on: ubuntu-24.04
-    strategy:
-      matrix:
-        include:
-          - DOCKER_FILE_PATH: "Dockerfile"
-            ARTIFACT_REGISTRY_IMAGE: ${{ github.event.repository.name }}
-          - DOCKER_FILE_PATH: "Dockerfile.ci"
-            ARTIFACT_REGISTRY_IMAGE: ${{ github.event.repository.name }}-ci
     environment: prod
     permissions:
       contents: read
@@ -44,7 +37,6 @@ jobs:
           secrets: |
             SHARED/data/common artifact_registry_url | ARTIFACT_REGISTRY_URL ;
             SHARED/data/common artifact_registry_project | ARTIFACT_REGISTRY_PROJECT ;
-            SHARED/data/common DATADOG_API_KEY | DATADOG_API_KEY ;
 
       - id: "auth"
         name: Auth GCloud
@@ -59,7 +51,7 @@ jobs:
       - name: Prepare image string
         id: prepare_image_tag
         run: |
-          image="${{ steps.cluster_creds.outputs.ARTIFACT_REGISTRY_URL }}/${{ steps.cluster_creds.outputs.ARTIFACT_REGISTRY_PROJECT }}/public-docker/${{ matrix.ARTIFACT_REGISTRY_IMAGE }}"
+          image="${{ steps.cluster_creds.outputs.ARTIFACT_REGISTRY_URL }}/${{ steps.cluster_creds.outputs.ARTIFACT_REGISTRY_PROJECT }}/public-docker/${{ github.event.repository.name }}"
           echo "DOCKER_FRIENDLY_IMAGE_TAG=${image,,}" >> $GITHUB_OUTPUT
 
       - name: Docker metadata
@@ -88,7 +80,7 @@ jobs:
           load: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          file: ${{ matrix.DOCKER_FILE_PATH }}
+          file: Dockerfile
           cache-from: type=gha
           cache-to: type=gha,mode=max}
           secret-files: |
@@ -97,31 +89,3 @@ jobs:
       - name: Push images
         if: ${{ github.event_name == 'release' }}
         run: docker push --all-tags ${{ steps.prepare_image_tag.outputs.DOCKER_FRIENDLY_IMAGE_TAG }}
-
-      - name: Submit Datadog metrics
-        if: success() || failure()
-        continue-on-error: true
-        run: |
-          current_time=$(date +%s)
-
-          curl -X POST -s "https://api.datadoghq.eu/api/v2/series" \
-            -H "Accept: application/json" \
-            -H "Content-Type: application/json" \
-            -H "DD-API-KEY: ${{ steps.cluster_creds.outputs.DATADOG_API_KEY }}" \
-            -d @- << EOF
-          {
-            "series": [
-              {
-                "metric": "github.job.${{ job.status }}",
-                "type": 1,
-                "points": [
-                  {
-                    "timestamp": $current_time,
-                    "value": 1
-                  }
-                ],
-                "tags": ["job:docker_build","repository:${{ github.event.repository.name }}"]
-              }
-            ]
-          }
-          EOF

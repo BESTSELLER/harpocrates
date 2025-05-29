@@ -39,7 +39,6 @@ jobs:
             SHARED/data/common SONAR_LOGIN_GH | SONAR_TOKEN ;
             SHARED/data/common SONAR_KEY_GH | SONAR_KEY ;
             SHARED/data/common SONAR_HOST | SONAR_HOST ;
-            SHARED/data/common DATADOG_API_KEY | DATADOG_API_KEY ;
 
       - name: Setup Go
         uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
@@ -82,30 +81,3 @@ jobs:
             -Dsonar.links.scm="https://github.com/${{ github.repository }}"
             -Dsonar.scm.provider=git
             ${{ format('-Dsonar.pullrequest.branch={0} -Dsonar.pullrequest.key={1}', github.head_ref || github.ref_name, github.event.pull_request.number) }}
-
-      - name: Submit Datadog metrics
-        if: success() || failure()
-        run: |
-          current_time=$(date +%s)
-
-          curl -X POST -s "https://api.datadoghq.eu/api/v2/series" \
-            -H "Accept: application/json" \
-            -H "Content-Type: application/json" \
-            -H "DD-API-KEY: ${{ steps.vault_secrets.outputs.DATADOG_API_KEY }}" \
-            -d @- << EOF
-          {
-            "series": [
-              {
-                "metric": "github.job.${{ job.status }}",
-                "type": 1,
-                "points": [
-                  {
-                    "timestamp": $current_time,
-                    "value": 1
-                  }
-                ],
-                "tags": ["job:go_test","repository:${{ github.event.repository.name }}"]
-              }
-            ]
-          }
-          EOF
