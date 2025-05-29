@@ -14,7 +14,7 @@ concurrency:
 jobs:
   build:
     name: Docker build
-    if: ${{ startsWith(github.event_name, 'pull_request') && github.event.pull_request.head.repo.full_name == github.repository }}
+    if: ${{ (github.event.pull_request.head.repo.full_name == github.repository) || (github.event_name == 'release') }}
     runs-on: ubuntu-24.04
     environment: prod
     permissions:
@@ -82,7 +82,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           file: Dockerfile
           cache-from: type=gha
-          cache-to: type=gha,mode=max}
+          cache-to: type=gha,mode=max
           secret-files: |
             "gcloud=${{ steps.auth.outputs.credentials_file_path }}"
 
