@@ -1,14 +1,14 @@
 policy:
   approval:
     - or:
-      - and:
-          - tests passed
-          - es has approved
-      - and:
-          - dependabot is making the PR
-          - or:
-              - tests passed
-              - es has approved
+        - and:
+            - tests passed
+            - es has approved
+        - and:
+            - dependabot is making the PR
+            - or:
+                - tests passed
+                - es has approved
   disapproval:
     requires:
       organizations:
@@ -16,8 +16,10 @@ policy:
 approval_rules:
   - name: tests passed
     if:
-      has_successful_status:
-        - "test"
+      has_workflow_result:
+        workflows:
+          - ".github/workflows/build_deploy.yml"
+          - ".github/workflows/test.yml"
     requires:
       count: 0
   - name: es has approved
@@ -30,6 +32,5 @@ approval_rules:
       has_author_in:
         users:
           - "dependabot[bot]"
-          - "dependabot-circleci[bot]"
     requires:
       count: 0

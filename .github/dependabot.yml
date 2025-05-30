@@ -12,8 +12,6 @@ updates:
     labels:
       - automerge
       - dependencies
-    reviewers:
-      - BESTSELLER/engineering-services
   - package-ecosystem: "docker" # See documentation for possible values
     directory: "/" # Location of package manifests
     schedule:
@@ -21,8 +19,6 @@ updates:
     labels:
       - automerge
       - dependencies
-    reviewers:
-      - BESTSELLER/engineering-services
   - package-ecosystem: "github-actions" # See documentation for possible values
     directory: "/" # Location of package manifests
     schedule:
@@ -30,5 +26,3 @@ updates:
     labels:
       - automerge
       - dependencies
-    reviewers:
-      - BESTSELLER/engineering-services

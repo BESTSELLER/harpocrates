@@ -1,0 +1,91 @@
+name: Build and Deploy
+
+on:
+  release:
+    types: [published]
+  pull_request_target:
+    branches:
+      - master
+
+concurrency:
+  group: ${{ format('{0}-build-{1}', github.event.repository.name, github.head_ref || github.ref_name) }}
+  cancel-in-progress: ${{ startsWith(github.event_name , 'pull_request')}}
+
+jobs:
+  build:
+    name: Docker build
+    if: ${{ (github.event.pull_request.head.repo.full_name == github.repository) || (github.event_name == 'release') }}
+    runs-on: ubuntu-24.04
+    environment: prod
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ startsWith(github.event_name, 'pull_request') && github.event.pull_request.head.sha || '' }}
+
+      - name: Get cluster credentials
+        id: cluster_creds
+        uses: hashicorp/vault-action@7709c609789c5e27b757a85817483caadbb5939a # v3.3.0
+        with:
+          method: jwt
+          url: ${{ vars.VAULT_ADDR }}
+          path: ${{ vars.VAULT_AUTH_PATH }}
+          role: ${{ vars.VAULT_ROLE }}
+          secrets: |
+            SHARED/data/common artifact_registry_url | ARTIFACT_REGISTRY_URL ;
+            SHARED/data/common artifact_registry_project | ARTIFACT_REGISTRY_PROJECT ;
+
+      - id: "auth"
+        name: Auth GCloud
+        uses: google-github-actions/auth@ba79af03959ebeac9769e648f473a284504d9193 # v2.1.10
+        with:
+          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_POOL_PROVIDER_NAME }}
+          service_account: ${{ secrets.WORKLOAD_IDENTITY_SA_EMAIL }}
+
+      - name: "Configure docker"
+        run: "gcloud auth configure-docker ${{ steps.cluster_creds.outputs.ARTIFACT_REGISTRY_URL }}"
+
+      - name: Prepare image string
+        id: prepare_image_tag
+        run: |
+          image="${{ steps.cluster_creds.outputs.ARTIFACT_REGISTRY_URL }}/${{ steps.cluster_creds.outputs.ARTIFACT_REGISTRY_PROJECT }}/public-docker/${{ github.event.repository.name }}"
+          echo "DOCKER_FRIENDLY_IMAGE_TAG=${image,,}" >> $GITHUB_OUTPUT
+
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # v5.7.0
+        with:
+          images: ${{ steps.prepare_image_tag.outputs.DOCKER_FRIENDLY_IMAGE_TAG }}
+          tags: |
+            type=raw,value=latest,enable=${{ github.event_name == 'release' }}
+            type=raw,value=${{ github.sha }},enable=true
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{major}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{version}}
+            type=schedule
+            type=sha,format=long,prefix=
+
+      - id: buildx
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # v3.10.0
+
+      - name: Build and push
+        uses: docker/build-push-action@1dc73863535b631f98b2378be8619f83b136f4a0 # v6.17.0
+        with:
+          load: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          file: Dockerfile
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          secret-files: |
+            "gcloud=${{ steps.auth.outputs.credentials_file_path }}"
+
+      - name: Push images
+        if: ${{ github.event_name == 'release' }}
+        run: docker push --all-tags ${{ steps.prepare_image_tag.outputs.DOCKER_FRIENDLY_IMAGE_TAG }}
