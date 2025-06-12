@@ -70,10 +70,9 @@ var (
 				}
 			}
 
-			continuous := false
 			envVar, ok := os.LookupEnv("CONTINUOUS")
 			if ok && strings.ToLower(envVar) == "true" {
-				continuous = true
+				config.Config.Continuous = true
 
 				interval, _ := os.LookupEnv("INTERVAL")
 
@@ -139,7 +138,7 @@ var (
 				}
 				success = true
 
-				if !continuous {
+				if !config.Config.Continuous {
 					break
 				}
 
