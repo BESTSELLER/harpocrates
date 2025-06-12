@@ -54,7 +54,7 @@ type JWTPayLoad struct {
 
 // Login will exchange the JWT token for a Vault token and only refresh if less than 5 minutes remain
 func Login() {
-	if config.Config.VaultToken != "" || (config.Config.Continuous && time.Now().Add(5*time.Minute).Before(tokenExpiry)) {
+	if config.Config.VaultToken != "" && (!config.Config.Continuous || time.Now().Add(5*time.Minute).Before(tokenExpiry)) {
 		return
 	}
 	if config.Config.GcpWorkloadID {
