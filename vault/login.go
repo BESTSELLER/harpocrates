@@ -61,7 +61,7 @@ func Login() {
 	// 1. Continuous mode is disabled (in this case, we don't proactively refresh based on the 5-minute window).
 	// OR
 	// 2. Continuous mode is enabled, AND the token is not about to expire within the next 5 minutes.
-	canReuseExistingToken := config.Config.Continuous == true || tokenIsNotAboutToExpire
+	canReuseExistingToken := !config.Config.Continuous || tokenIsNotAboutToExpire
 
 	// If a token exists and it meets the conditions for reuse, skip the login.
 	if config.Config.VaultToken != "" && canReuseExistingToken {
