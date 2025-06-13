@@ -54,9 +54,20 @@ type JWTPayLoad struct {
 
 // Login will exchange the JWT token for a Vault token and only refresh if less than 5 minutes remain
 func Login() {
-	if config.Config.VaultToken != "" && (!config.Config.Continuous || time.Now().Add(5*time.Minute).Before(tokenExpiry)) {
+	// tokenIsNotAboutToExpire is true if the token's expiry is more than 5 minutes away.
+	tokenIsNotAboutToExpire := time.Now().Add(5 * time.Minute).Before(tokenExpiry)
+
+	// We can reuse the existing token if:
+	// 1. Continuous mode is disabled (in this case, we don't proactively refresh based on the 5-minute window).
+	// OR
+	// 2. Continuous mode is enabled, AND the token is not about to expire within the next 5 minutes.
+	canReuseExistingToken := config.Config.Continuous == true || tokenIsNotAboutToExpire
+
+	// If a token exists and it meets the conditions for reuse, skip the login.
+	if config.Config.VaultToken != "" && canReuseExistingToken {
 		return
 	}
+
 	if config.Config.GcpWorkloadID {
 		login, err := gcpss.FetchVaultLogin(config.Config.VaultAddress, config.Config.AuthName)
 		if err != nil {
