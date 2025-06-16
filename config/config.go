@@ -2,9 +2,10 @@ package config
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
 	"os"
 	"strings"
+
+	"github.com/spf13/cobra"
 )
 
 // GlobalConfig defines the structure of the global configuration parameters
@@ -24,6 +25,7 @@ type GlobalConfig struct {
 	VaultAddress  string `required:"false"`
 	VaultToken    string `required:"false"`
 	GcpWorkloadID bool   `required:"false"`
+	Continuous    bool   `required:"false"`
 }
 
 // Config stores the Global Configuration.
