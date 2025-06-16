@@ -65,8 +65,14 @@ func TestExtractSecretsWithFormatAsExpected(t *testing.T) {
 	// arrange
 
 	// define input
-	data := files.Read("../test_data/two_secrets_with_format.yaml")
-	input := util.ReadInput(data)
+	data, err := files.Read("../test_data/two_secrets_with_format.yaml")
+	if err != nil {
+		t.Fatalf("Failed to read test data: %v", err)
+	}
+	input, err := util.ReadInput(data)
+	if err != nil {
+		t.Fatalf("Failed to parse test input: %v", err)
+	}
 
 	// mock prefix
 	config.Config.Prefix = input.Prefix
@@ -96,8 +102,14 @@ func TestExtractSecretsAsExpected(t *testing.T) {
 	// arrange
 
 	// define input
-	data := files.Read("../test_data/single_secret.yaml")
-	input := util.ReadInput(data)
+	data, err := files.Read("../test_data/single_secret.yaml")
+	if err != nil {
+		t.Fatalf("Failed to read test data: %v", err)
+	}
+	input, err := util.ReadInput(data)
+	if err != nil {
+		t.Fatalf("Failed to parse test input: %v", err)
+	}
 
 	// mock prefix
 	config.Config.Prefix = input.Prefix
@@ -126,8 +138,14 @@ func TestExtractSecretsWithPrefixAsExpected(t *testing.T) {
 	// arrange
 
 	// define input
-	data := files.Read("../test_data/keys_with_prefix.yaml")
-	input := util.ReadInput(data)
+	data, err := files.Read("../test_data/keys_with_prefix.yaml")
+	if err != nil {
+		t.Fatalf("Failed to read test data: %v", err)
+	}
+	input, err := util.ReadInput(data)
+	if err != nil {
+		t.Fatalf("Failed to parse test input: %v", err)
+	}
 
 	// mock prefix
 	config.Config.Prefix = input.Prefix
@@ -157,29 +175,41 @@ func TestExtractSecretsSaveAsFileAsExpected(t *testing.T) {
 	// arrange
 
 	// define input
-	data := files.Read("../test_data/save_as_file.yaml")
-	input := util.ReadInput(data)
+	data, err := files.Read("../test_data/save_as_file.yaml")
+	if err != nil {
+		t.Fatalf("Failed to read test data: %v", err)
+	}
+	input, err := util.ReadInput(data)
+	if err != nil {
+		t.Fatalf("Failed to parse test input: %v", err)
+	}
 
 	// mock prefix
 	config.Config.Prefix = input.Prefix
+	// Override output directory for this test
+	originalOutput := config.Config.Output
+	tempDir := t.TempDir()
+	config.Config.Output = tempDir
+	defer func() { config.Config.Output = originalOutput }() // Restore original output path
 
 	vaultClient := &API{
 		Client: testVault.Client,
 	}
 
 	// act
-	_, err := vaultClient.ExtractSecrets(input, false)
+	_, err = vaultClient.ExtractSecrets(input, false)
 	if err != nil {
-		t.Error(err)
+		t.Errorf("ExtractSecrets failed: %v", err)
 	}
 
-	// clean up
-	defer os.Remove("../.tmp/TEST_key1")
-
 	// assert
-	content, err := os.ReadFile("../.tmp/TEST_key1")
+	// Construct expected file path using TempDir
+	// The filename "TEST_key1" is derived from the input "save_as_file.yaml"
+	// specifically from: `keys: - key1: { prefix: "TEST_", saveAsFile: true }`
+	expectedFilePath := fmt.Sprintf("%s/TEST_key1", tempDir)
+	content, err := os.ReadFile(expectedFilePath)
 	if err != nil {
-		t.Errorf("could not read file: %v", err)
+		t.Errorf("could not read file %s: %v", expectedFilePath, err)
 	}
 
 	expected := "value1"

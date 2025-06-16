@@ -3,7 +3,7 @@ package secrets
 import (
 	"encoding/json"
 	"fmt"
-	"os"
+	// "os" // Removed unused import
 	"regexp"
 	"strings"
 
@@ -19,15 +19,15 @@ func (result Result) Add(key string, value interface{}, prefix string, upperCase
 	result[ToUpperOrNotToUpper(fmt.Sprintf("%s%s", prefix, key), &upperCase)] = value
 }
 
-// ToJSON will format a map[string]interface{} to json
-func (result Result) ToJSON() string {
+// ToJSON will format a map[string]interface{} to json.
+// It returns the JSON string or an error if marshalling fails.
+func (result Result) ToJSON() (string, error) {
 	log.Debug().Msg("Exporting as JSON")
-	jsonString, err := json.Marshal(result)
+	jsonBytes, err := json.Marshal(result)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Unable to convert result to json")
-		os.Exit(1)
+		return "", fmt.Errorf("unable to convert result to JSON: %w", err)
 	}
-	return string(jsonString)
+	return string(jsonBytes), nil
 }
 
 func (result Result) toKV(prefix string) string {
@@ -65,15 +65,15 @@ func (result Result) ToK8sSecret() string {
 	return result.toSecretKV()
 }
 
-// ToYaml exports secrets as yaml
-func (result Result) ToYAML() string {
+// ToYAML exports secrets as yaml.
+// It returns the YAML string or an error if marshalling fails.
+func (result Result) ToYAML() (string, error) {
 	log.Debug().Msg("Exporting as YAML")
-	yamlString, err := yaml.Marshal(result)
+	yamlBytes, err := yaml.Marshal(result)
 	if err != nil {
-		log.Fatal().Err(err).Msg("Unable to convert result to yaml")
-		os.Exit(1)
+		return "", fmt.Errorf("unable to convert result to YAML: %w", err)
 	}
-	return string(yamlString)
+	return string(yamlBytes), nil
 }
 
 // fixEnvName replaces all unsported env characters with "_"
@@ -85,7 +85,8 @@ func fixEnvName(currentName string) string {
 }
 
 func ToUpperOrNotToUpper(something string, currentUpper *bool) string {
-	if *currentUpper {
+	// Check if the pointer is nil before dereferencing
+	if currentUpper != nil && *currentUpper {
 		return strings.ToUpper(something)
 	}
 	return something

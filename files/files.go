@@ -11,70 +11,77 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// Read will read the the content of a file and return it as a string.
-func Read(filePath string) string {
+// Read will read the content of a file and return it as a string.
+func Read(filePath string) (string, error) {
 	data, err := ioutil.ReadFile(filePath)
 	if err != nil {
-		log.Fatal().Err(err).Msgf("Unable to read the file at path '%s'", filePath)
-		os.Exit(1)
+		return "", fmt.Errorf("unable to read file at path '%s': %w", filePath, err)
 	}
-
-	return fmt.Sprint(string(data))
+	return string(data), nil // Removed fmt.Sprint, as string(data) is already a string
 }
 
-// Write will write some string data to a file
-func Write(output string, fileName string, content interface{}, owner *int, append bool) {
+// Write will write string data to a file.
+func Write(outputDir string, fileName string, content interface{}, owner *int, appendToFile bool) error {
 	fileName = fixFileName(fileName)
-	path := filepath.Join(output, fileName)
+	filePath := filepath.Join(outputDir, fileName)
 
-	if _, err := os.Stat(output); os.IsNotExist(err) {
-		err = os.MkdirAll(output, 0700)
-		if err != nil {
-			log.Fatal().Err(err).Msgf("Unable to create dir at path '%s'", output)
-			os.Exit(1)
+	// Ensure the output directory exists.
+	if _, err := os.Stat(outputDir); os.IsNotExist(err) {
+		if err := os.MkdirAll(outputDir, 0700); err != nil {
+			return fmt.Errorf("unable to create dir at path '%s': %w", outputDir, err)
 		}
 	}
 
-	overWriteOrAppend := os.O_TRUNC
-	if append {
-		overWriteOrAppend = os.O_APPEND
+	// Determine file opening mode (truncate or append).
+	fileFlags := os.O_CREATE | os.O_WRONLY
+	if appendToFile {
+		fileFlags |= os.O_APPEND
+	} else {
+		fileFlags |= os.O_TRUNC
 	}
 
-	f, err := os.OpenFile(path, overWriteOrAppend|os.O_CREATE|os.O_WRONLY, 0600)
+	f, err := os.OpenFile(filePath, fileFlags, 0600)
 	if err != nil {
-		log.Fatal().Err(err).Msgf("An error happened while trying to open file %s", path)
-		os.Exit(1)
+		return fmt.Errorf("failed to open file %s: %w", filePath, err)
 	}
-
 	defer f.Close()
 
+	// Write content to the file.
 	if _, err = f.WriteString(fmt.Sprintf("%v", content)); err != nil {
-		log.Fatal().Err(err).Msgf("Unable to write to file '%s'", path)
-		os.Exit(1)
+		return fmt.Errorf("unable to write to file '%s': %w", filePath, err)
 	}
-	log.Debug().Msgf("Wrote file '%s'", path)
+	log.Debug().Msgf("Wrote file '%s'", filePath)
 
-	// set permissions on file and folder
+	// Set permissions on the file and folder.
+	effectiveOwner := -1 // Default to no change if not specified.
 	if owner != nil {
-		setPermissions(f, path, output, *owner)
-		return
+		effectiveOwner = *owner
+	} else if config.Config.Owner != -1 {
+		effectiveOwner = config.Config.Owner
 	}
-	if config.Config.Owner != -1 {
-		setPermissions(f, path, output, config.Config.Owner)
-		return
+
+	if effectiveOwner != -1 {
+		if err := setPermissions(f, filePath, outputDir, effectiveOwner); err != nil {
+			return fmt.Errorf("failed to set permissions: %w", err)
+		}
 	}
+	return nil
 }
 
-func setPermissions(f *os.File, path string, output string, owner int) {
-	if err := os.Chown(output, owner, -1); err != nil {
-		log.Fatal().Err(err).Msgf("Unable to set permissions to folder '%s'", path)
-		os.Exit(1)
+// setPermissions applies ownership to the file and its output directory.
+func setPermissions(f *os.File, filePath string, outputDir string, ownerUID int) error {
+	// Set ownership for the output directory.
+	// Note: Chown changes the numeric uid and gid of the named file.
+	// For directories, it's common to only change UID if GID isn't specified (-1 means no change).
+	if err := os.Chown(outputDir, ownerUID, -1); err != nil {
+		return fmt.Errorf("unable to set permissions for folder '%s': %w", outputDir, err)
 	}
 
-	if err := f.Chown(owner, -1); err != nil {
-		log.Fatal().Err(err).Msgf("Unable to set permissions to file '%s'", path)
-		os.Exit(1)
+	// Set ownership for the file.
+	if err := f.Chown(ownerUID, -1); err != nil {
+		return fmt.Errorf("unable to set permissions for file '%s': %w", filePath, err)
 	}
+	return nil
 }
 
 func fixFileName(name string) string {

@@ -3,7 +3,7 @@ package util
 import (
 	"encoding/json"
 	"fmt"
-	"os"
+	// "os" // Removed unused import
 
 	"github.com/BESTSELLER/harpocrates/config"
 	"gopkg.in/yaml.v3"
@@ -38,54 +38,67 @@ type SecretKeys struct {
 	SaveAsFile *bool  `json:"saveAsFile,omitempty"     yaml:"saveAsFile,omitempty"`
 }
 
-// ReadInput will read the input given to Harpocrates and try to parse it to SecretJSON
-// Will also set some default values
-func ReadInput(input string) SecretJSON {
-	secretJSON := SecretJSON{}
-	err := json.Unmarshal([]byte(input), &secretJSON)
-	if err == nil {
-		goto MoveOn
-	}
-	err = yaml.Unmarshal([]byte(input), &secretJSON)
-	if err != nil {
-		fmt.Printf("Your secret file contains an error, please refer to the documentation\n%v\n", err)
-		os.Exit(1)
-	}
+// ReadInput will read the input given to Harpocrates and try to parse it to SecretJSON.
+// It also sets some default values and updates the global config.
+// TODO: Consider separating config update from parsing.
+func ReadInput(input string) (SecretJSON, error) {
+	var secretJSON SecretJSON
+	var jsonErr, yamlErr error
 
-MoveOn:
-	if secretJSON.Format != "" {
-		config.Config.Format = secretJSON.Format
+	// Try unmarshalling as JSON first.
+	jsonErr = json.Unmarshal([]byte(input), &secretJSON)
+	if jsonErr == nil {
+		// Successfully parsed as JSON, proceed to apply defaults and update config.
+		return applyDefaultsAndValidate(secretJSON)
 	}
 
-	if secretJSON.Output == "" {
-		secretJSON.Output = "/secrets"
-	}
-	config.Config.Output = secretJSON.Output
-
-	if secretJSON.Owner == nil {
-		value := -1
-		secretJSON.Owner = &value
-	}
-	config.Config.Owner = *secretJSON.Owner
-
-	if len(secretJSON.Secrets) == 0 {
-		fmt.Println("No secrets provided")
-		os.Exit(1)
+	// If JSON failed, try unmarshalling as YAML.
+	yamlErr = yaml.Unmarshal([]byte(input), &secretJSON)
+	if yamlErr == nil {
+		// Successfully parsed as YAML, proceed to apply defaults and update config.
+		return applyDefaultsAndValidate(secretJSON)
 	}
 
-	config.Config.Prefix = secretJSON.Prefix
+	// Both JSON and YAML parsing failed.
+	// Return a consolidated error message.
+	return secretJSON, fmt.Errorf("failed to parse input as JSON or YAML. JSON error: %v, YAML error: %w", jsonErr, yamlErr)
+}
 
-	if secretJSON.UpperCase != nil {
-		config.Config.UpperCase = *secretJSON.UpperCase
+// applyDefaultsAndValidate applies default values to the SecretJSON and validates required fields.
+// It also updates the global config.Config with values from SecretJSON.
+func applyDefaultsAndValidate(sj SecretJSON) (SecretJSON, error) {
+	if sj.Format != "" {
+		config.Config.Format = sj.Format
 	}
 
-	if secretJSON.Append != nil {
-		config.Config.Append = *secretJSON.Append
+	if sj.Output == "" {
+		sj.Output = "/secrets" // Default output path
+	}
+	config.Config.Output = sj.Output
+
+	if sj.Owner == nil {
+		defaultValue := -1
+		sj.Owner = &defaultValue
+	}
+	config.Config.Owner = *sj.Owner
+
+	if len(sj.Secrets) == 0 {
+		return sj, fmt.Errorf("no secrets provided in the input")
 	}
 
-	if secretJSON.GcpWorkloadID {
-		config.Config.GcpWorkloadID = secretJSON.GcpWorkloadID
+	config.Config.Prefix = sj.Prefix
+
+	if sj.UpperCase != nil {
+		config.Config.UpperCase = *sj.UpperCase
 	}
 
-	return secretJSON
+	if sj.Append != nil {
+		config.Config.Append = *sj.Append
+	}
+
+	if sj.GcpWorkloadID {
+		config.Config.GcpWorkloadID = sj.GcpWorkloadID
+	}
+
+	return sj, nil
 }

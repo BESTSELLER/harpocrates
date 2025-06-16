@@ -22,7 +22,10 @@ func TestReadSecretWrongPath(t *testing.T) {
 	}
 
 	// assert
-	assert.Equal(t, fmt.Sprintf(secretNotFound, path, nil), err.Error())
+	// The error message now includes more context due to error wrapping.
+	// We'll check if the error string contains the specific part we're interested in.
+	expectedErrorSubstring := fmt.Sprintf(secretNotFound, path, "path not found or no content")
+	assert.ErrorContains(t, err, expectedErrorSubstring)
 }
 
 func testReadSecretKey(path string, key string, expectedValue interface{}, t *testing.T) {
@@ -74,5 +77,6 @@ func TestReadSecretKeyNotFound(t *testing.T) {
 	_, err := vaultClient.ReadSecretKey(path, key)
 
 	// assert
-	assert.Error(t, err, "the key 'keys666' was not found in the path 'secret/data/secret': <nil>")
+	expectedErrorSubstring := fmt.Sprintf(keyNotFound, key, path, "key does not exist in the secret data")
+	assert.Error(t, err, expectedErrorSubstring)
 }

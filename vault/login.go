@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
+	// "os" // Removed unused import
 	"time"
 
 	"github.com/BESTSELLER/go-vault/gcpss"
@@ -52,8 +52,9 @@ type JWTPayLoad struct {
 	Role string `json:"role"`
 }
 
-// Login will exchange the JWT token for a Vault token and only refresh if less than 5 minutes remain
-func Login() {
+// Login will exchange the JWT token for a Vault token and only refresh if less than 5 minutes remain.
+// It returns an error if any step of the login process fails.
+func Login() error {
 	// tokenIsNotAboutToExpire is true if the token's expiry is more than 5 minutes away.
 	tokenIsNotAboutToExpire := time.Now().Add(5 * time.Minute).Before(tokenExpiry)
 
@@ -65,49 +66,61 @@ func Login() {
 
 	// If a token exists and it meets the conditions for reuse, skip the login.
 	if config.Config.VaultToken != "" && canReuseExistingToken {
-		return
+		return nil
 	}
 
 	if config.Config.GcpWorkloadID {
 		login, err := gcpss.FetchVaultLogin(config.Config.VaultAddress, config.Config.AuthName)
 		if err != nil {
-			log.Fatal().Err(err).Msg("GcpWorkload Identity was enabled but auth failed")
-			os.Exit(1)
+			return fmt.Errorf("GcpWorkload Identity auth failed: %w", err)
 		}
 		config.Config.VaultToken = login.Auth.ClientToken
 		tokenExpiry = time.Now().Add(time.Duration(login.Auth.LeaseDuration) * time.Second)
-		return
-	} else {
-		url := config.Config.VaultAddress + "/v1/auth/" + config.Config.AuthName + "/login"
-
-		b := new(bytes.Buffer)
-		err := json.NewEncoder(b).Encode(JWTPayLoad{Jwt: token.Read(), Role: config.Config.RoleName})
-		if err != nil {
-			log.Fatal().Err(err).Msg("Unable to prepare jwt token")
-			os.Exit(1)
-		}
-
-		req, _ := http.NewRequest(http.MethodPost, url, b)
-
-		res, err := http.DefaultClient.Do(req)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Unable to make login call to Vault")
-			os.Exit(1)
-		}
-
-		returnPayload := VaultLoginResult{}
-		err = json.NewDecoder(res.Body).Decode(&returnPayload)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Unexpected response from Vault")
-			os.Exit(1)
-		}
-
-		if len(returnPayload.Errors) != 0 {
-			log.Fatal().Err(fmt.Errorf("%s", returnPayload.Errors)).Msg("API call to Vault failed")
-			os.Exit(1)
-		}
-
-		config.Config.VaultToken = returnPayload.Auth.ClientToken
-		tokenExpiry = time.Now().Add(time.Duration(returnPayload.Auth.LeaseDuration) * time.Second)
+		return nil
 	}
+
+	// Proceed with standard JWT/K8s login
+	url := config.Config.VaultAddress + "/v1/auth/" + config.Config.AuthName + "/login"
+
+	jwtToken, err := token.Read()
+	if err != nil {
+		// token.Read() now returns an error, so we propagate it.
+		return fmt.Errorf("failed to read JWT token: %w", err)
+	}
+
+	payload := JWTPayLoad{Jwt: jwtToken, Role: config.Config.RoleName}
+	b := new(bytes.Buffer)
+	if err := json.NewEncoder(b).Encode(payload); err != nil {
+		return fmt.Errorf("unable to prepare JWT payload: %w", err)
+	}
+
+	req, err := http.NewRequest(http.MethodPost, url, b)
+	if err != nil {
+		return fmt.Errorf("unable to create Vault login request: %w", err)
+	}
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("unable to make login call to Vault: %w", err)
+	}
+	defer res.Body.Close()
+
+	var returnPayload VaultLoginResult
+	if err := json.NewDecoder(res.Body).Decode(&returnPayload); err != nil {
+		return fmt.Errorf("unexpected response from Vault, failed to decode JSON: %w", err)
+	}
+
+	if len(returnPayload.Errors) != 0 {
+		// Consider joining multiple errors if that's a possibility.
+		return fmt.Errorf("API call to Vault failed: %v", returnPayload.Errors)
+	}
+
+	if returnPayload.Auth.ClientToken == "" {
+		return fmt.Errorf("Vault login successful but client token is empty")
+	}
+
+	config.Config.VaultToken = returnPayload.Auth.ClientToken
+	tokenExpiry = time.Now().Add(time.Duration(returnPayload.Auth.LeaseDuration) * time.Second)
+	log.Debug().Msg("Successfully logged into Vault.")
+	return nil
 }
