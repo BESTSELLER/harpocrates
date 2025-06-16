@@ -10,8 +10,6 @@ metadata:
     - vault
   annotations:
     github.com/project-slug: BESTSELLER/harpocrates
-    circleci.com/project-slug: github/BESTSELLER/harpocrates
-    google.com/artifact-slug: public-docker/harpocrates
 spec:
   type: service
   lifecycle: production

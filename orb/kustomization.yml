@@ -1,9 +1,0 @@
-resources:
-- $DEPLOY_FILE
-patchesStrategicMerge:
-- CronJob.yml
-- CronJob-sidecar.yml
-- Deployment.yml
-- Deployment-sidecar.yml
-- StatefulSet.yml
-- StatefulSet-sidecar.yml
