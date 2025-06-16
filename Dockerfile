@@ -7,7 +7,7 @@ RUN go mod download
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -buildvcs=false -ldflags="-w -s" -o /tmp/harpocrates
 
-FROM alpine:3.22.0
+FROM alpine:3.22.0@sha256:8a1f59ffb675680d47db6337b49d22281a139e9d709335b492be023728e11715
 RUN apk add --no-cache bash
 COPY --from=builder /tmp/harpocrates /harpocrates
 COPY docker-entrypoint.sh /
