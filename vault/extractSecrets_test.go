@@ -22,7 +22,7 @@ func setupVault(t *testing.T) {
 	vaultContainer, err := vault.Run(ctx,
 		"hashicorp/vault:latest",
 		vault.WithToken("unittesttoken"),
-		vault.WithInitCommand("secrets enable -path=secret kv-v2"),
+		// vault.WithInitCommand("secrets enable -path=secret kv-v2"),
 	)
 	if err != nil {
 		t.Fatalf("failed to start container: %s", err)
