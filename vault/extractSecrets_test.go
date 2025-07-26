@@ -10,7 +10,6 @@ import (
 	"github.com/BESTSELLER/harpocrates/files"
 	"github.com/BESTSELLER/harpocrates/util"
 	"github.com/hashicorp/vault/api"
-	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/vault"
 	"gotest.tools/v3/assert"
 )
@@ -20,8 +19,8 @@ var testClient *api.Client
 func setupVault(t *testing.T) {
 	ctx := context.Background()
 
-	vaultContainer, err := vault.RunContainer(ctx,
-		testcontainers.WithImage("hashicorp/vault:latest"),
+	vaultContainer, err := vault.Run(ctx,
+		"hashicorp/vault:latest",
 		vault.WithToken("unittesttoken"),
 		vault.WithInitCommand("secrets enable -path=secret kv-v2"),
 	)
@@ -40,24 +39,24 @@ func setupVault(t *testing.T) {
 		t.Fatalf("failed to get http host address: %s", err)
 	}
 
-	c, err := api.NewClient(&api.Config{
+	client, err := api.NewClient(&api.Config{
 		Address: httpHostAddress,
 	})
 	if err != nil {
 		t.Fatalf("failed to create client: %s", err)
 	}
-	c.SetToken("unittesttoken")
+	client.SetToken("unittesttoken")
 
 	// put secrets
 	secretPath := "secret/data/secret"
 	secret := map[string]interface{}{"data": map[string]interface{}{"key1": "value1", "key2": "value2", "key3": "value3", "key4": 123, "key5": true}}
 
-	_, err = c.Logical().Write(secretPath, secret)
+	_, err = client.Logical().Write(secretPath, secret)
 	if err != nil {
 		t.Fatalf("failed to write secret: %s", err)
 	}
 
-	testClient = c
+	testClient = client
 }
 
 // TestExtractSecretsWithFormatAsExpected tests if a two secrets one with a format is extracted correct
