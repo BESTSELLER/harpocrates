@@ -4,7 +4,7 @@ go 1.24.4
 
 require (
 	github.com/BESTSELLER/go-vault v0.2.0
-	github.com/go-viper/mapstructure/v2 v2.3.0
+	github.com/go-viper/mapstructure/v2 v2.4.0
 	github.com/gookit/color v1.5.4
 	github.com/hashicorp/vault v1.19.3
 	github.com/hashicorp/vault/api v1.20.0
