@@ -1,6 +1,7 @@
 package vault
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"testing"
@@ -9,60 +10,63 @@ import (
 	"github.com/BESTSELLER/harpocrates/files"
 	"github.com/BESTSELLER/harpocrates/util"
 	"github.com/hashicorp/vault/api"
-	vaulthttp "github.com/hashicorp/vault/http"
-	hashivault "github.com/hashicorp/vault/vault"
+	"github.com/testcontainers/testcontainers-go"
+	"github.com/testcontainers/testcontainers-go/modules/vault"
 	"gotest.tools/v3/assert"
 )
 
-var testVault vaultTest
+var testClient *api.Client
 
-// rootVaultToken is the Vault token used for tests
-var rootVaultToken = "unittesttoken"
+func setupVault(t *testing.T) {
+	ctx := context.Background()
 
-type vaultTest struct {
-	Cluster *hashivault.TestCluster
-	Client  *api.Client
-}
+	vaultContainer, err := vault.RunContainer(ctx,
+		testcontainers.WithImage("hashicorp/vault:latest"),
+		vault.WithToken("unittesttoken"),
+		vault.WithInitCommand("secrets enable -path=secret kv-v2"),
+	)
+	if err != nil {
+		t.Fatalf("failed to start container: %s", err)
+	}
 
-func TestMain(t *testing.T) {
-	testVault = GetTestVaultServer(t)
-}
-
-// GetTestVaultServer creates the test server
-func GetTestVaultServer(t *testing.T) vaultTest {
-	t.Helper()
-
-	cluster := hashivault.NewTestCluster(t, &hashivault.CoreConfig{
-		DevToken: rootVaultToken,
-	}, &hashivault.TestClusterOptions{
-		HandlerFunc: vaulthttp.Handler,
+	t.Cleanup(func() {
+		if err := vaultContainer.Terminate(ctx); err != nil {
+			t.Fatalf("failed to terminate container: %s", err)
+		}
 	})
-	cluster.Start()
 
-	core := cluster.Cores[0].Core
-	hashivault.TestWaitActive(t, core)
-	client := cluster.Cores[0].Client
+	httpHostAddress, err := vaultContainer.HttpHostAddress(ctx)
+	if err != nil {
+		t.Fatalf("failed to get http host address: %s", err)
+	}
+
+	c, err := api.NewClient(&api.Config{
+		Address: httpHostAddress,
+	})
+	if err != nil {
+		t.Fatalf("failed to create client: %s", err)
+	}
+	c.SetToken("unittesttoken")
 
 	// put secrets
 	secretPath := "secret/data/secret"
-	secret := map[string]interface{}{"key1": "value1", "key2": "value2", "key3": "value3", "key4": 123, "key5": true}
+	secret := map[string]interface{}{"data": map[string]interface{}{"key1": "value1", "key2": "value2", "key3": "value3", "key4": 123, "key5": true}}
 
-	_, err := client.Logical().Write(secretPath, secret)
+	_, err = c.Logical().Write(secretPath, secret)
 	if err != nil {
-		panic(err)
+		t.Fatalf("failed to write secret: %s", err)
 	}
 
-	// return server
-	return vaultTest{
-		Cluster: cluster,
-		Client:  client,
-	}
-
+	testClient = c
 }
 
 // TestExtractSecretsWithFormatAsExpected tests if a two secrets one with a format is extracted correct
 func TestExtractSecretsWithFormatAsExpected(t *testing.T) {
 	// arrange
+	setupVault(t)
+	t.Cleanup(func() {
+		testClient = nil
+	})
 
 	// define input
 	data := files.Read("../test_data/two_secrets_with_format.yaml")
@@ -72,7 +76,7 @@ func TestExtractSecretsWithFormatAsExpected(t *testing.T) {
 	config.Config.Prefix = input.Prefix
 
 	vaultClient := &API{
-		Client: testVault.Client,
+		Client: testClient,
 	}
 
 	// act
@@ -83,7 +87,7 @@ func TestExtractSecretsWithFormatAsExpected(t *testing.T) {
 	for _, v := range result {
 
 		// assert
-		expected := fmt.Sprintf("%v", map[string]interface{}{input.Prefix + "key1": "value1", input.Prefix + "key2": "value2", input.Prefix + "key3": "value3", input.Prefix + "key4": 123, input.Prefix + "key5": true})
+		expected := fmt.Sprintf("%v", map[string]interface{}{input.Prefix + "key1": "value1", input.Prefix + "key2": "value2", input.Prefix + "key3": "value3", input.Prefix + "key4": float64(123), input.Prefix + "key5": true})
 		actual := fmt.Sprintf("%v", v.Result)
 
 		assert.Equal(t, expected, actual)
@@ -94,6 +98,10 @@ func TestExtractSecretsWithFormatAsExpected(t *testing.T) {
 // TestExtractSecretsAsExpected tests if a simple secret is extracted correct
 func TestExtractSecretsAsExpected(t *testing.T) {
 	// arrange
+	setupVault(t)
+	t.Cleanup(func() {
+		testClient = nil
+	})
 
 	// define input
 	data := files.Read("../test_data/single_secret.yaml")
@@ -103,7 +111,7 @@ func TestExtractSecretsAsExpected(t *testing.T) {
 	config.Config.Prefix = input.Prefix
 
 	vaultClient := &API{
-		Client: testVault.Client,
+		Client: testClient,
 	}
 
 	// act
@@ -113,7 +121,7 @@ func TestExtractSecretsAsExpected(t *testing.T) {
 	}
 	for _, v := range result {
 		// assert
-		expected := fmt.Sprintf("%v", map[string]interface{}{input.Prefix + "key1": "value1", input.Prefix + "key2": "value2", input.Prefix + "key3": "value3", input.Prefix + "key4": 123, input.Prefix + "key5": true})
+		expected := fmt.Sprintf("%v", map[string]interface{}{input.Prefix + "key1": "value1", input.Prefix + "key2": "value2", input.Prefix + "key3": "value3", input.Prefix + "key4": float64(123), input.Prefix + "key5": true})
 		actual := fmt.Sprintf("%v", v.Result)
 
 		assert.Equal(t, expected, actual)
@@ -124,6 +132,10 @@ func TestExtractSecretsAsExpected(t *testing.T) {
 // TestExtractSecretsWithPrefixAsExpected tests if a simple secret is extracted correct
 func TestExtractSecretsWithPrefixAsExpected(t *testing.T) {
 	// arrange
+	setupVault(t)
+	t.Cleanup(func() {
+		testClient = nil
+	})
 
 	// define input
 	data := files.Read("../test_data/keys_with_prefix.yaml")
@@ -133,7 +145,7 @@ func TestExtractSecretsWithPrefixAsExpected(t *testing.T) {
 	config.Config.Prefix = input.Prefix
 
 	vaultClient := &API{
-		Client: testVault.Client,
+		Client: testClient,
 	}
 
 	// act
@@ -155,6 +167,10 @@ func TestExtractSecretsWithPrefixAsExpected(t *testing.T) {
 // TestExtractSecretsSaveAsFileAsExpected tests if a simple secret is extracted correct
 func TestExtractSecretsSaveAsFileAsExpected(t *testing.T) {
 	// arrange
+	setupVault(t)
+	t.Cleanup(func() {
+		testClient = nil
+	})
 
 	// define input
 	data := files.Read("../test_data/save_as_file.yaml")
@@ -164,7 +180,7 @@ func TestExtractSecretsSaveAsFileAsExpected(t *testing.T) {
 	config.Config.Prefix = input.Prefix
 
 	vaultClient := &API{
-		Client: testVault.Client,
+		Client: testClient,
 	}
 
 	// act
