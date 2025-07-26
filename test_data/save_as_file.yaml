@@ -1,0 +1,10 @@
+format: env
+output: ../.tmp/
+prefix: TEST_
+secrets:
+  - secret/data/secret:
+      keys:
+        - key1:
+            saveAsFile: true
+        - key2:
+            saveAsFile: false
