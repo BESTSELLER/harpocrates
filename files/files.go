@@ -46,7 +46,11 @@ func Write(output string, fileName string, content interface{}, owner *int, appe
 		os.Exit(1)
 	}
 
-	defer f.Close()
+	defer func() {
+		if err := f.Close(); err != nil {
+			log.Error().Err(err).Msgf("Failed to close file '%s'", path)
+		}
+	}()
 
 	if _, err = f.WriteString(fmt.Sprintf("%v", content)); err != nil {
 		log.Fatal().Err(err).Msgf("Unable to write to file '%s'", path)
