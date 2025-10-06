@@ -34,20 +34,6 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.sha }}
 
-      - name: Get vault secrets
-        id: vault_secrets
-        uses: hashicorp/vault-action@4c06c5ccf5c0761b6029f56cfb1dcf5565918a3b # v3.4.0
-        with:
-          method: jwt
-          url: ${{ vars.VAULT_ADDR }}
-          path: ${{ vars.VAULT_AUTH_PATH }}
-          role: ${{ vars.VAULT_ROLE }}
-          secrets: |
-            SHARED/data/common SONAR_ORG_GH | SONAR_ORG ;
-            SHARED/data/common SONAR_LOGIN_GH | SONAR_TOKEN ;
-            SHARED/data/common SONAR_KEY_GH | SONAR_KEY ;
-            SHARED/data/common SONAR_HOST | SONAR_HOST ;
-
       - name: Setup Go
         uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6.0.0
         with:
@@ -69,23 +55,3 @@ jobs:
 
       - name: Test
         uses: robherley/go-test-action@b19f6aadabfb1ad85079065b21aa2af132466468 # v0.6.0
-
-      - name: Cache SonarQube packages
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 #v4.3.0
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-
-      - name: SonarQube scan
-        uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602 # v6.0.0
-        with:
-          args: >
-            -Dsonar.host.url=${{ steps.vault_secrets.outputs.SONAR_HOST }}
-            -Dsonar.token=${{ steps.vault_secrets.outputs.SONAR_TOKEN }}
-            -Dsonar.organization=${{ steps.vault_secrets.outputs.SONAR_ORG }}
-            -Dsonar.projectKey=${{ steps.vault_secrets.outputs.SONAR_KEY }}_${{ github.event.repository.name }}
-            -Dsonar.projectName=${{ github.event.repository.name }}
-            -Dsonar.links.scm="https://github.com/${{ github.repository }}"
-            -Dsonar.scm.provider=git
-            ${{ format('-Dsonar.pullrequest.branch={0} -Dsonar.pullrequest.key={1}', github.head_ref || github.ref_name, github.event.pull_request.number) }}
