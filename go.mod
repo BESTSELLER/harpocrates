@@ -6,7 +6,7 @@ require (
 	github.com/BESTSELLER/go-vault v0.2.0
 	github.com/go-viper/mapstructure/v2 v2.4.0
 	github.com/gookit/color v1.6.0
-	github.com/hashicorp/vault/api v1.21.0
+	github.com/hashicorp/vault/api v1.22.0
 	github.com/rs/zerolog v1.34.0
 	github.com/spf13/cobra v1.10.1
 	github.com/testcontainers/testcontainers-go/modules/vault v0.39.0
