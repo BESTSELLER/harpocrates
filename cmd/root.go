@@ -2,19 +2,12 @@ package cmd
 
 import (
 	"fmt"
-	"net/http"
-	"os"
 	"strings"
 	"time"
 
 	"github.com/BESTSELLER/harpocrates/config"
-	"github.com/BESTSELLER/harpocrates/files"
-	"github.com/BESTSELLER/harpocrates/util"
-	"github.com/BESTSELLER/harpocrates/validate"
-	"github.com/BESTSELLER/harpocrates/vault"
 	"github.com/gookit/color"
 	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -27,125 +20,7 @@ var (
 
 	rootCmd = &cobra.Command{
 		Run: func(cmd *cobra.Command, args []string) {
-			var data string
-			var input util.SecretJSON
-
-			if secretFile != "" { // --file is being used
-				data = files.Read(secretFile)
-				validFile := validate.SecretsFile(data)
-				if !validFile {
-					log.Fatal().Msg("Invalid file")
-				}
-				if config.Config.Validate {
-					return
-				}
-				input = util.ReadInput(data)
-			} else if len(*secret) > 0 { // Parameters is being used
-				if config.Config.Output == "" {
-					log.Error().Msg("Output is required!")
-					cmd.Usage()
-					return
-				}
-
-				y := make([]interface{}, len(*secret))
-				// range secrets and assign
-				for i, s := range *secret {
-					y[i] = s
-				}
-
-				input = util.SecretJSON{
-					Secrets: y,
-				}
-			} else { // inline secret is being used
-				if len(args) == 0 {
-					cmd.Help()
-					return
-				}
-
-				if validate.SecretsFile(args[0]) {
-					input = util.ReadInput(args[0])
-				}
-				if config.Config.Validate {
-					return
-				}
-			}
-
-			envVar, ok := os.LookupEnv("CONTINUOUS")
-			if ok && strings.ToLower(envVar) == "true" {
-				config.Config.Continuous = true
-
-				interval, _ := os.LookupEnv("INTERVAL")
-
-				durationParsed, err := time.ParseDuration(interval)
-				if err != nil {
-					log.Fatal().Err(err).Msgf("%s", err)
-				}
-
-				if durationParsed < (1 * time.Minute) {
-					log.Fatal().Msg("Interval must be at least 1 minute")
-				}
-
-				duration = &durationParsed
-				log.Debug().Msgf("Continuous mode enabled, will run every %s", durationParsed)
-
-				// If we are in continuous mode, we want to overwrite to the file
-				config.Config.Append = false
-				http.Handle("/status", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-					if success {
-						w.WriteHeader(http.StatusOK)
-					} else {
-						w.WriteHeader(http.StatusTooEarly)
-					}
-				}))
-				go func() {
-					http.ListenAndServe(":8000", nil)
-				}()
-			}
-
-			for {
-				vault.Login()
-
-				vaultClient := vault.NewClient()
-
-				allSecrets, err := vaultClient.ExtractSecrets(input, config.Config.Append)
-				if err != nil {
-					success = false
-					log.Fatal().Err(err).Msgf("%s", err)
-				}
-
-				if cmd.Flags().Changed("format") && (config.Config.Format != "json" && config.Config.Format != "env" && config.Config.Format != "secret") {
-					log.Error().Msg("Please a valid format of either: json, env or secret")
-					cmd.Help()
-					return
-				}
-
-				for _, v := range allSecrets {
-					fileName := config.Config.FileName
-					if v.Filename != "" {
-						fileName = v.Filename
-					}
-
-					if v.Format == "json" {
-						files.Write(config.Config.Output, fileName, v.Result.ToJSON(), v.Owner, config.Config.Append)
-					} else if v.Format == "env" {
-						files.Write(config.Config.Output, fileName, v.Result.ToENV(), v.Owner, config.Config.Append)
-					} else if v.Format == "secret" {
-						files.Write(config.Config.Output, fileName, v.Result.ToK8sSecret(), v.Owner, config.Config.Append)
-					} else if v.Format == "yaml" {
-						files.Write(config.Config.Output, fileName, v.Result.ToYAML(), v.Owner, config.Config.Append)
-					}
-					log.Debug().Msgf("Secrets written to file: %s/%s", config.Config.Output, fileName)
-				}
-				success = true
-
-				if !config.Config.Continuous {
-					break
-				}
-
-				log.Debug().Msgf("Sleeping for %s", duration)
-				time.Sleep(*duration)
-			}
-
+			doIt(cmd, args, false)
 		},
 		Use:   "harpocrates",
 		Short: fmt.Sprintf("%sThis application will fetch secrets from Hashicorp Vault", color.Blue.Sprintf("\"Harpocrates was the god of silence, secrets and confidentiality\"\n")),
