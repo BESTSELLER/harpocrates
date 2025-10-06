@@ -45,7 +45,7 @@ func (result Result) ToKVarray(prefix string) (returnString []string) {
 	for key, val := range result {
 		leKey := fixEnvName(key)
 		log.Info().Msgf("Exporting key: %s", leKey)
-		returnString = append(returnString, fmt.Sprintf("%s%s=%s", prefix, leKey, getStringRepresentation(val)))
+		returnString = append(returnString, fmt.Sprintf("%s%s=%s", prefix, leKey, val))
 	}
 	return returnString
 }
