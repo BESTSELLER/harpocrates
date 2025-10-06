@@ -10,11 +10,15 @@ import (
 // TestReadSecretWrongPath tests that the function fails on unknown secret path
 func TestReadSecretWrongPath(t *testing.T) {
 	// arrange
+	setupVault(t)
+	t.Cleanup(func() {
+		testClient = nil
+	})
 	path := "somepath"
 
 	// act
 	vaultClient := &API{
-		Client: testVault.Client,
+		Client: testClient,
 	}
 	_, err := vaultClient.ReadSecret(path)
 	if err == nil {
@@ -28,7 +32,7 @@ func TestReadSecretWrongPath(t *testing.T) {
 func testReadSecretKey(path string, key string, expectedValue interface{}, t *testing.T) {
 	// mock the ReadSecret function
 	vaultClient := &API{
-		Client: testVault.Client,
+		Client: testClient,
 	}
 
 	// act
@@ -42,6 +46,10 @@ func testReadSecretKey(path string, key string, expectedValue interface{}, t *te
 // TestReadSecretKeyWithNumberAsValue tests that the function returns the value as a number
 func TestReadSecretKeyWithNumberAsValue(t *testing.T) {
 	// arrange
+	setupVault(t)
+	t.Cleanup(func() {
+		testClient = nil
+	})
 	path := "secret/data/secret"
 	key := "key4"
 	expectedValue := float64(123)
@@ -52,6 +60,10 @@ func TestReadSecretKeyWithNumberAsValue(t *testing.T) {
 // TestReadSecretKeyWithBooleanAsValue tests that the function returns the value as a boolean
 func TestReadSecretKeyWithBooleanAsValue(t *testing.T) {
 	// arrange
+	setupVault(t)
+	t.Cleanup(func() {
+		testClient = nil
+	})
 	path := "secret/data/secret"
 	key := "key5"
 	expectedValue := true
@@ -62,12 +74,16 @@ func TestReadSecretKeyWithBooleanAsValue(t *testing.T) {
 // TestReadSecretKeyNotFound tests that the function will fail when trying to fetch an unknown key
 func TestReadSecretKeyNotFound(t *testing.T) {
 	// arrange
+	setupVault(t)
+	t.Cleanup(func() {
+		testClient = nil
+	})
 	path := "secret/data/secret"
 	key := "keys666"
 
 	// mock the ReadSecret function
 	vaultClient := &API{
-		Client: testVault.Client,
+		Client: testClient,
 	}
 
 	// act
