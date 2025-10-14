@@ -173,6 +173,7 @@ func doIt(cmd *cobra.Command, args []string, tmp bool) {
 		// cmd := exec.CommandContext(ctx, "bash", "-c", "echo $HEJSA")
 		fmt.Println("args:", args)
 		cmd := exec.CommandContext(ctx, "bash", "-c", strings.Join(args, " "))
+		finalEnv = append(finalEnv, fmt.Sprintf("SECRET_PATH=%s", config.Config.Output))
 		cmd.Env = finalEnv
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
