@@ -21,7 +21,25 @@ import (
 	"github.com/spf13/cobra"
 )
 
+func loadLocalVaultToken() {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		log.Debug().Err(err).Msg("unable to get home directory")
+		return
+	}
+
+	vaultTokenFile := path.Join(homeDir, ".vault-token")
+	token, err := os.ReadFile(vaultTokenFile)
+	if err == nil {
+		config.Config.VaultToken = strings.TrimSpace(string(token))
+		log.Debug().Msg("using vault token from ~/.vault-token")
+	}
+
+}
+
 func doIt(cmd *cobra.Command, args []string, tmp bool) {
+	loadLocalVaultToken()
+
 	finalEnv := os.Environ()
 
 	var data string
@@ -69,7 +87,7 @@ func doIt(cmd *cobra.Command, args []string, tmp bool) {
 
 	if tmp {
 		// Create temporary directory and file
-		dir, err := os.MkdirTemp("", "prefix")
+		dir, err := os.MkdirTemp("", "harpocrates")
 		if err != nil {
 			panic(err)
 		}
