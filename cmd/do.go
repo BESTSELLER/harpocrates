@@ -22,6 +22,10 @@ import (
 )
 
 func loadLocalVaultToken() {
+	if config.Config.VaultToken != "" {
+		return
+	}
+
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		log.Debug().Err(err).Msg("unable to get home directory")
