@@ -4,6 +4,7 @@ on:
   release:
     types: [published]
   pull_request_target:
+    types: [opened, synchronize, reopened, labeled]
     branches:
       - master
 
@@ -95,5 +96,5 @@ jobs:
             "gcloud=${{ steps.auth.outputs.credentials_file_path }}"
 
       - name: Push images
-        if: ${{ github.event_name == 'release' }}
+        if: ${{ github.event_name == 'release' || contains(github.event.pull_request.labels.*.name, 'deploy') }}
         run: docker push --all-tags ${{ steps.prepare_image_tag.outputs.DOCKER_FRIENDLY_IMAGE_TAG }}
