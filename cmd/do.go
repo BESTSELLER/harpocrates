@@ -1,15 +1,10 @@
 package cmd
 
 import (
-	"context"
-	"fmt"
 	"net/http"
 	"os"
-	"os/exec"
-	"os/signal"
 	"path"
 	"strings"
-	"syscall"
 	"time"
 
 	"github.com/BESTSELLER/harpocrates/config"
@@ -41,10 +36,10 @@ func loadLocalVaultToken() {
 
 }
 
-func doIt(cmd *cobra.Command, args []string, tmp bool) {
+func doIt(cmd *cobra.Command, args []string, tmp bool) []string {
 	loadLocalVaultToken()
 
-	finalEnv := os.Environ()
+	secretEnvs := []string{}
 
 	var data string
 	var input util.SecretJSON
@@ -56,14 +51,14 @@ func doIt(cmd *cobra.Command, args []string, tmp bool) {
 			log.Fatal().Msg("Invalid file")
 		}
 		if config.Config.Validate {
-			return
+			return secretEnvs
 		}
 		input = util.ReadInput(data)
 	} else if len(*secret) > 0 {
 		if config.Config.Output == "" {
 			log.Error().Msg("Output is required!")
 			cmd.Usage()
-			return
+			return secretEnvs
 		}
 
 		y := make([]interface{}, len(*secret))
@@ -78,28 +73,15 @@ func doIt(cmd *cobra.Command, args []string, tmp bool) {
 	} else {
 		if len(args) == 0 {
 			cmd.Help()
-			return
+			return secretEnvs
 		}
 
 		if validate.SecretsFile(args[0]) {
 			input = util.ReadInput(args[0])
 		}
 		if config.Config.Validate {
-			return
+			return secretEnvs
 		}
-	}
-
-	if tmp {
-		// Create temporary directory and file
-		dir, err := os.MkdirTemp("", "harpocrates")
-		if err != nil {
-			panic(err)
-		}
-		defer os.RemoveAll(dir)
-
-		config.Config.Output = path.Join(dir, config.Config.Output)
-
-		fmt.Println("output:", config.Config.Output)
 	}
 
 	envVar, ok := os.LookupEnv("CONTINUOUS")
@@ -147,7 +129,7 @@ func doIt(cmd *cobra.Command, args []string, tmp bool) {
 		if cmd.Flags().Changed("format") && (config.Config.Format != "json" && config.Config.Format != "env" && config.Config.Format != "secret") {
 			log.Error().Msg("Please a valid format of either: json, env or secret")
 			cmd.Help()
-			return
+			return secretEnvs
 		}
 
 		for _, v := range allSecrets {
@@ -161,7 +143,7 @@ func doIt(cmd *cobra.Command, args []string, tmp bool) {
 				files.Write(config.Config.Output, fileName, v.Result.ToJSON(), v.Owner, config.Config.Append)
 			case "env":
 				files.Write(config.Config.Output, fileName, v.Result.ToENV(), v.Owner, config.Config.Append)
-				finalEnv = append(finalEnv, v.Result.ToKVarray("")...)
+				secretEnvs = append(secretEnvs, v.Result.ToKVarray("")...)
 			case "secret":
 				files.Write(config.Config.Output, fileName, v.Result.ToK8sSecret(), v.Owner, config.Config.Append)
 			case "yaml":
@@ -179,35 +161,5 @@ func doIt(cmd *cobra.Command, args []string, tmp bool) {
 		time.Sleep(*duration)
 	}
 
-	if tmp {
-		// Set up cancellable context and signal handling for ctrl+c
-		ctx, cancel := context.WithCancel(context.Background())
-		defer cancel()
-		signals := make(chan os.Signal, 1)
-		signal.Notify(signals, os.Interrupt, syscall.SIGTERM)
-		go func() {
-			<-signals
-			cancel()
-		}()
-
-		fmt.Println(config.Config.Output)
-		// 4. Start the child application with the temporary file path using the context
-		// cmd := exec.CommandContext(ctx, "bash", "-c", "echo $HEJSA")
-		fmt.Println("args:", args)
-		cmd := exec.CommandContext(ctx, "bash", "-c", strings.Join(args, " "))
-		finalEnv = append(finalEnv, fmt.Sprintf("SECRET_PATH=%s", config.Config.Output))
-		cmd.Env = finalEnv
-		cmd.Stdin = os.Stdin
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-
-		if err := cmd.Run(); err != nil {
-			if ctx.Err() != nil || err == context.Canceled {
-				// Context cancelled (e.g., ctrl+c)
-				return
-			}
-			panic(err)
-		}
-	}
-
+	return secretEnvs
 }

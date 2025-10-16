@@ -19,7 +19,12 @@
       "env": {
         "VAULT_ADDRESS": "https://vault.bestsellerit.com"
       },
-      "args": ["-f", "./secrets-local.yaml"]
+      "args": [
+        "dev",
+        "-f",
+        "./secrets-local.yaml",
+        "echo \"The value of GithubOrganization is $GithubOrganization\""
+      ]
     }
   ]
 }
