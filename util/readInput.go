@@ -60,7 +60,9 @@ MoveOn:
 	if secretJSON.Output == "" {
 		secretJSON.Output = "/secrets"
 	}
-	config.Config.Output = secretJSON.Output
+	if config.Config.Output == "" {
+		config.Config.Output = secretJSON.Output
+	}
 
 	if secretJSON.Owner == nil {
 		value := -1
