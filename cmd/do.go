@@ -36,7 +36,7 @@ func loadLocalVaultToken() {
 
 }
 
-func doIt(cmd *cobra.Command, args []string, tmp bool) []string {
+func doIt(cmd *cobra.Command, args []string) []string {
 	loadLocalVaultToken()
 
 	secretEnvs := []string{}

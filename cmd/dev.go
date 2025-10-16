@@ -36,7 +36,7 @@ This is useful for local development, where you want to run an application with 
 
 		fmt.Println("output:", config.Config.Output)
 
-		secretEnvs := doIt(cmd, args, true)
+		secretEnvs := doIt(cmd, args)
 
 		// Set up cancellable context and signal handling for ctrl+c
 		ctx, cancel := context.WithCancel(context.Background())

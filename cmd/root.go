@@ -20,7 +20,7 @@ var (
 
 	rootCmd = &cobra.Command{
 		Run: func(cmd *cobra.Command, args []string) {
-			doIt(cmd, args, false)
+			doIt(cmd, args)
 		},
 		Use:   "harpocrates",
 		Short: fmt.Sprintf("%sThis application will fetch secrets from Hashicorp Vault", color.Blue.Sprintf("\"Harpocrates was the god of silence, secrets and confidentiality\"\n")),
