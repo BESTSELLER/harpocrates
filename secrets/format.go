@@ -41,6 +41,15 @@ func (result Result) toKV(prefix string) string {
 	return resturnString
 }
 
+func (result Result) ToKVarray(prefix string) (returnString []string) {
+	for key, val := range result {
+		leKey := fixEnvName(key)
+		log.Debug().Msgf("Exporting key: %s", leKey)
+		returnString = append(returnString, fmt.Sprintf("%s%s=%v", prefix, leKey, val))
+	}
+	return returnString
+}
+
 func (result Result) toSecretKV() string {
 	var resturnString string
 
