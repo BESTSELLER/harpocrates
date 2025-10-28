@@ -70,7 +70,7 @@ jobs:
           images: ${{ steps.prepare_image_tag.outputs.DOCKER_FRIENDLY_IMAGE_TAG }}
           tags: |
             type=raw,value=latest,enable=${{ github.event_name == 'release' }}
-            type=raw,value=${{ github.sha }},enable=true
+            type=raw,value=${{ github.event.pull_request.head.sha || github.sha }},enable=true
             type=ref,event=branch
             type=ref,event=pr
             type=semver,pattern={{major}}
@@ -92,6 +92,7 @@ jobs:
           file: Dockerfile
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          context: "."
           secret-files: |
             "gcloud=${{ steps.auth.outputs.credentials_file_path }}"
 
