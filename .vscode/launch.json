@@ -5,31 +5,26 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "type": "java",
+      "request": "attach",
+      "name": "Attach by Process ID",
+      "processId": "${command:PickJavaProcess}"
+    },
+    {
       "name": "Launch",
       "type": "go",
       "request": "launch",
       "mode": "auto",
       "program": "${workspaceFolder}/main.go",
       "env": {
-        "VAULT_ADDRESS": "https://vault.bestsellerit.com",
-        "TOKEN_PATH": "/Users/lasse.gaardsholt/olympus-core.token",
-        "ROLE_NAME": "olympus01-dev-core",
-        "AUTH_NAME": "olympus01-dev",
-        "CONTINUOUS": "true",
-        "INTERVAL": "1m"
+        "VAULT_ADDRESS": "https://vault.bestsellerit.com"
       },
       "args": [
+        "dev",
         "-f",
-        "./secret.yml"
+        "./secrets-local.yaml",
+        "echo \"The value of GithubOrganization is $GithubOrganization\""
       ]
-      // "args": [
-      //   "--secret",
-      //   "ES/data/cci-api/prod",
-      //   "--output",
-      //   "./.secrets",
-      //   "--prefix",
-      //   "SOME_"
-      // ]
     }
   ]
 }
