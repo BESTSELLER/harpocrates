@@ -208,6 +208,126 @@ To run harpocrates as a sidecar you have to set the `CONTINUOUS` env var to true
 
 <br/>
 
+## Local Secrets
+
+Harpocrates can also help you running secrets for local development. Using harpocrates for handeling the secrets for local development has some key benifits.
+
+- Secrets are stored in the vault
+- Secrets only live run time of your development cycle.
+
+### Prerequisites
+
+Go installed
+
+vault cli tool installed
+
+harpocrates cli tool installed
+
+```
+go install github.com/BESTSELLER/harpocrates@latest
+```
+
+### How to
+
+Step one in getting this to work, make a new secrets file in the desired format. Place it the same place as your secrets files we recconment you call it local-secrets.yaml/json
+
+```yaml
+format: env
+output: "/secrets"
+secrets:
+  - secret/data/application/dev:
+```
+
+Specify the desired path where the secrets will be pulled from. This works like harpocrates normally works. 
+
+You are now set to start using harpocrates to get your secrets for local development.
+
+login to vault
+
+```bash
+vault login -method=oidc
+```
+
+run your program
+
+```bash
+harpocrates dev -f secrets-local.yaml '<args to run your application>'
+```
+
+### Example
+```bash
+harpocrates dev -f secrets-local.yaml 'mvn spring-boot:run'
+```
+
+### Setup For IDE
+
+We have tried to cover some of the IDE setup and making a good experince and giving you modern convience of a debugger.
+
+
+#### VS CODE
+
+launch.json
+
+```json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "INTERNAL - Start App with Secrets",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "./.vscode/start-debug.sh"
+    },
+    {
+      "name": "INTERNAL - Attach Debugger",
+      "type": "java",
+      "request": "attach",
+      "hostName": "localhost",
+      "port": 5005,
+      "projectName": "service",
+      "preLaunchTask": "wait-for-startup"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Run and Debug OrbisApplication",
+      "configurations": [
+        "INTERNAL - Start App with Secrets",
+        "INTERNAL - Attach Debugger"
+      ]
+    }
+  ]
+}
+```
+
+start-debug.sh
+
+```sh
+#!/bin/bash
+
+echo "Fetching secrets and starting application in debug mode..."
+harpocrates dev -f secrets-local.yaml 'mvn spring-boot:run'
+```
+
+tasks.json
+
+```json
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "wait-for-startup",
+      "type": "shell",
+      "command": "echo 'Waiting for application to start on port 5005...'; for i in {1..30}; do nc -z localhost 5005 && exit 0; sleep 1; done; echo 'Application did not start in time.'; exit 1"
+    }
+  ]
+}
+```
+
+the start-debug.sh is where you would change your harpocrates command based on what arguments you want to pass to your program.
+
+#### INTELLIJ
+
 ## Contribution
 
 Issues and pull requests are more than welcome.
