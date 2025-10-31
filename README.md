@@ -210,26 +210,25 @@ To run harpocrates as a sidecar you have to set the `CONTINUOUS` env var to true
 
 ## Local Secrets
 
-Harpocrates can also help you running secrets for local development. Using harpocrates for handeling the secrets for local development has some key benifits.
+Harpocrates can also help you manage secrets for local development. Using Harpocrates for handling secrets in local development has some key benefits:
 
-- Secrets are stored in the vault
-- Secrets only live run time of your development cycle.
+- Secrets are securely stored in Vault
+- Secrets only exist during the runtime of your development cycle
+- Consistent secret management across development and production environments
 
 ### Prerequisites
 
-Go installed
-
-vault cli tool installed
-
-harpocrates cli tool installed
+- Go installed
+- Vault CLI tool installed
+- Harpocrates CLI tool installed
 
 ```
 go install github.com/BESTSELLER/harpocrates@latest
 ```
 
-### How to
+### How to Use
 
-Step one in getting this to work, make a new secrets file in the desired format. Place it the same place as your secrets files we recconment you call it local-secrets.yaml/json
+**Step 1:** Create a new secrets file in the desired format. Place it in the same location as your other secrets files. We recommend naming it `local-secrets.yaml` or `local-secrets.json`.
 
 ```yaml
 format: env
@@ -238,35 +237,35 @@ secrets:
   - secret/data/application/dev:
 ```
 
-Specify the desired path where the secrets will be pulled from. This works like harpocrates normally works. 
+**Step 2:** Specify the desired path where the secrets will be pulled from. This works the same way as Harpocrates normally operates.
 
-You are now set to start using harpocrates to get your secrets for local development.
+You are now ready to start using Harpocrates to manage your secrets for local development.
 
-login to vault
+**Step 3:** Login to Vault:
 
 ```bash
 vault login -method=oidc
 ```
 
-run your program
+**Step 4:** Run your program:
 
 ```bash
 harpocrates dev -f secrets-local.yaml '<args to run your application>'
 ```
 
 ### Example
+
 ```bash
 harpocrates dev -f secrets-local.yaml 'mvn spring-boot:run'
 ```
 
-### Setup For IDE
+### IDE Setup
 
-We have tried to cover some of the IDE setup and making a good experince and giving you modern convience of a debugger.
+We have provided IDE setup configurations to enhance the development experience and give you the modern convenience of a debugger.
 
+#### VS Code
 
-#### VS CODE
-
-launch.json
+**launch.json**
 
 ```json
 {
@@ -300,7 +299,7 @@ launch.json
 }
 ```
 
-start-debug.sh
+**start-debug.sh**
 
 ```sh
 #!/bin/bash
@@ -309,7 +308,7 @@ echo "Fetching secrets and starting application in debug mode..."
 harpocrates dev -f secrets-local.yaml 'mvn spring-boot:run'
 ```
 
-tasks.json
+**tasks.json**
 
 ```json
 {
@@ -324,9 +323,11 @@ tasks.json
 }
 ```
 
-the start-debug.sh is where you would change your harpocrates command based on what arguments you want to pass to your program.
+**Note:** The `start-debug.sh` script is where you would modify your Harpocrates command based on the arguments you want to pass to your program.
 
-#### INTELLIJ
+#### IntelliJ
+
+Configuration for IntelliJ IDEA is coming soon.
 
 ## Contribution
 
