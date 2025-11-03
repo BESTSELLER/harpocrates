@@ -213,13 +213,14 @@ To run harpocrates as a sidecar you have to set the `CONTINUOUS` env var to true
 Harpocrates can also help you manage secrets for local development. Using Harpocrates for handling secrets in local development has some key benefits:
 
 - Secrets are securely stored in Vault
-- Secrets only exist during the runtime of your development cycle
+- Secrets only exist during the runtime of your development life cycle
 - Consistent secret management across development and production environments
 
 ### Prerequisites
 
 - Go installed
-- Vault CLI tool installed
+- Vault installed
+  https://developer.hashicorp.com/vault/install
 - Harpocrates CLI tool installed
 
 ```
