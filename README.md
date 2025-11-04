@@ -328,7 +328,54 @@ harpocrates dev -f secrets-local.yaml 'mvn spring-boot:run'
 
 #### IntelliJ
 
-Configuration for IntelliJ IDEA is coming soon.
+For intellij we can make this possible with to seperate configuration that is place in the .run folder.
+
+running_with_hapocrates_debug.run.xml
+
+```xml
+<component name="ProjectRunConfigurationManager">
+    <configuration default="false" name="running_with_hapocrates_debug" type="ShConfigurationType">
+        <option name="SCRIPT_TEXT" value="harpocrates dev -f secrets-local.yaml 'mvn spring-boot:run -Dspring-boot.run.jvmArguments=&quot;-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005&quot; -Dspring-boot.run.profiles=local' " />
+        <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
+        <option name="SCRIPT_PATH" value="" />
+        <option name="SCRIPT_OPTIONS" value="" />
+        <option name="INDEPENDENT_SCRIPT_WORKING_DIRECTORY" value="true" />
+        <option name="SCRIPT_WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+        <option name="INDEPENDENT_INTERPRETER_PATH" value="true" />
+        <option name="INTERPRETER_PATH" value="/bin/zsh" />
+        <option name="INTERPRETER_OPTIONS" value="" />
+        <option name="EXECUTE_IN_TERMINAL" value="true" />
+        <option name="EXECUTE_SCRIPT_FILE" value="false" />
+        <envs />
+        <method v="2" />
+    </configuration>
+</component>
+```
+
+running_with_hapocrates
+
+```xml
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="running_with_hapocrates" type="ShConfigurationType">
+    <option name="SCRIPT_TEXT" value="harpocrates dev -f secrets-local.yaml 'mvn spring-boot:run -Dspring-boot.run.jvmArguments=&quot;-Dspring-boot.run.profiles=local' " />
+    <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
+    <option name="SCRIPT_PATH" value="" />
+    <option name="SCRIPT_OPTIONS" value="" />
+    <option name="INDEPENDENT_SCRIPT_WORKING_DIRECTORY" value="true" />
+    <option name="SCRIPT_WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+    <option name="INDEPENDENT_INTERPRETER_PATH" value="true" />
+    <option name="INTERPRETER_PATH" value="/bin/zsh" />
+    <option name="INTERPRETER_OPTIONS" value="" />
+    <option name="EXECUTE_IN_TERMINAL" value="true" />
+    <option name="EXECUTE_SCRIPT_FILE" value="false" />
+    <envs />
+    <method v="2" />
+  </configuration>
+</component>
+```
+
+These will load and you will be able to select these within the drop down in where you normally run your program.
+You will ofc need to control the jvmArguments you want to pass to your environment.
 
 ## Contribution
 
