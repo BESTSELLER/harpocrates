@@ -357,7 +357,7 @@ running_with_hapocrates
 ```xml
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="running_with_hapocrates" type="ShConfigurationType">
-    <option name="SCRIPT_TEXT" value="harpocrates dev -f secrets-local.yaml 'mvn spring-boot:run -Dspring-boot.run.jvmArguments=&quot;-Dspring-boot.run.profiles=local' " />
+    <option name="SCRIPT_TEXT" value="harpocrates dev -f secrets-local.yaml 'mvn spring-boot:run -Dspring-boot.run.jvmArguments=&quot;-Dspring-boot.run.profiles=local&quot;'" />
     <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
     <option name="SCRIPT_PATH" value="" />
     <option name="SCRIPT_OPTIONS" value="" />
