@@ -235,7 +235,7 @@ go install github.com/BESTSELLER/harpocrates@latest
 format: env
 output: "/secrets"
 secrets:
-  - secret/data/application/dev:
+  - secret-engine/data/application/dev:
 ```
 
 **Step 2:** Specify the desired path where the secrets will be pulled from. This works the same way as Harpocrates normally operates.
