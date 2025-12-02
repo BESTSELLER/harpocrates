@@ -51,7 +51,7 @@ This requires that the [Kubernetes Auth Method](https://www.vaultproject.io/docs
 The easiest way to authenticate is to use your Vault token:
 
 ```bash
-harpocrates --vault-token "sometoken"
+harpocrates fetch --vault-token "sometoken"
 ```
 
 This can also be specified as the environment var `VAULT_TOKEN`
@@ -92,10 +92,10 @@ Example yaml file at [examples/secret.yaml](examples/secret.yaml)
 
 <br/>
 
-run harpocrates with the `-f` flag to fetch secrets from your yaml spec.
+Run harpocrates with the subcommand `fetch` and the `-f` flag to fetch secrets from your yaml spec.
 
 ```bash
-harpocrates -f /path/to/file.yaml
+harpocrates fetch -f /path/to/file.yaml
 ```
 
 <br/>
@@ -106,7 +106,7 @@ You can specify the exact same options in inline json/yaml as in the yaml spec.
 Mostly for programmatic use, as readability is way worse than the yaml spec.
 
 ```bash
-harpocrates '{"format":"env","output":"/secrets","prefix":"PREFIX_","secrets":["secret/data/secret/dev",{"secret/data/foo":{"keys":["APIKEY"]}}]}'
+harpocrates fetch '{"format":"env","output":"/secrets","prefix":"PREFIX_","secrets":["secret/data/secret/dev",{"secret/data/foo":{"keys":["APIKEY"]}}]}'
 ```
 
 Or if you prefer you can do it like this:
@@ -158,7 +158,7 @@ secrets:
 The third option is to specify the options as parameters in the cli.
 
 ```bash
-harpocrates --format "env" --secret "/secret/data/somesecret" --prefix "PREFIX_" --output "/secrets"
+harpocrates fetch --format "env" --secret "/secret/data/somesecret" --prefix "PREFIX_" --output "/secrets"
 ```
 
 There is not the same granularity as in the json and yaml specs. e.g. prefix can only exist on the top level.
