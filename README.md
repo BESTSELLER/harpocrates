@@ -229,30 +229,30 @@ go install github.com/BESTSELLER/harpocrates@latest
 
 ### How to Use
 
-**Step 1:** Create a new secrets file in the desired format. Place it in the same location as your other secret files. We recommend naming it `local-secrets.yaml` or `local-secrets.json`.
+1. Create a new secrets file in the desired format. Place it in the same location as your other secret files. We recommend naming it `local-secrets.yaml` or `local-secrets.json`.
 
-```yaml
-format: env
-output: "/secrets"
-secrets:
-  - secret-engine/data/application/dev
-```
+   ```yaml
+   format: env
+   output: "/secrets"
+   secrets:
+     - secret-engine/data/application/dev
+   ```
 
-**Step 2:** Specify the desired path where the secrets will be pulled from. This works the same way as Harpocrates normally operates.
+2. Specify the desired path where the secrets will be pulled from. This works the same way as Harpocrates normally operates.
 
-You are now ready to start using Harpocrates to manage your secrets for local development.
+   You are now ready to start using Harpocrates to manage your secrets for local development.
 
-**Step 3:** Login to Vault:
+3. Login to Vault:
 
-```bash
-vault login -method=oidc
-```
+   ```bash
+   vault login -method=oidc
+   ```
 
-**Step 4:** Run your program:
+4. Run your program:
 
-```bash
-harpocrates dev -f secrets-local.yaml '<args to run your application>'
-```
+   ```bash
+   harpocrates dev -f secrets-local.yaml '<args to run your application>'
+   ```
 
 ### Example
 
