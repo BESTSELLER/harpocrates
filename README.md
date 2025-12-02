@@ -112,7 +112,7 @@ harpocrates fetch '{"format":"env","output":"/secrets","prefix":"PREFIX_","secre
 Or if you prefer you can do it like this:
 
 ```bash
-harpocrates '{
+harpocrates fetch '{
   "format": "env",
   "output": "/secrets",
   "prefix": "PREFIX_",
@@ -132,7 +132,7 @@ harpocrates '{
 Or as yaml
 
 ```bash
-harpocrates 'format: env
+harpocrates fetch 'format: env
 output: "/secrets"
 prefix: PREFIX_
 secrets:
