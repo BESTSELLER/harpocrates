@@ -223,19 +223,19 @@ Harpocrates can also help you manage secrets for local development. Using Harpoc
   https://developer.hashicorp.com/vault/install
 - Harpocrates CLI tool installed
 
-```
+```bash
 go install github.com/BESTSELLER/harpocrates@latest
 ```
 
 ### How to Use
 
-**Step 1:** Create a new secrets file in the desired format. Place it in the same location as your other secrets files. We recommend naming it `local-secrets.yaml` or `local-secrets.json`.
+**Step 1:** Create a new secrets file in the desired format. Place it in the same location as your other secret files. We recommend naming it `local-secrets.yaml` or `local-secrets.json`.
 
 ```yaml
 format: env
 output: "/secrets"
 secrets:
-  - secret-engine/data/application/dev:
+  - secret-engine/data/application/dev
 ```
 
 **Step 2:** Specify the desired path where the secrets will be pulled from. This works the same way as Harpocrates normally operates.
@@ -262,7 +262,7 @@ harpocrates dev -f secrets-local.yaml 'mvn spring-boot:run'
 
 ### IDE Setup
 
-We have provided IDE setup configurations to enhance the development experience and give you the modern convenience of a debugger.
+We have provided IDE setup configurations to enhance your development experience and offer the modern convenience of a debugger.
 
 #### VS Code
 
@@ -302,7 +302,7 @@ We have provided IDE setup configurations to enhance the development experience 
 
 **start-debug.sh**
 
-```sh
+```bash
 #!/bin/bash
 
 echo "Fetching secrets and starting application in debug mode..."
@@ -335,7 +335,7 @@ running_with_hapocrates_debug.run.xml
 ```xml
 <component name="ProjectRunConfigurationManager">
     <configuration default="false" name="running_with_hapocrates_debug" type="ShConfigurationType">
-        <option name="SCRIPT_TEXT" value="harpocrates dev -f secrets-local.yaml 'mvn spring-boot:run -Dspring-boot.run.jvmArguments=&quot;-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005&quot; -Dspring-boot.run.profiles=local' " />
+        <option name="SCRIPT_TEXT" value="harpocrates dev -f secrets-local.yaml 'mvn spring-boot:run -Dspring-boot.run.jvmArguments=&quot;-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005&quot; -Dspring-boot.run.profiles=local'" />
         <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
         <option name="SCRIPT_PATH" value="" />
         <option name="SCRIPT_OPTIONS" value="" />
