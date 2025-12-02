@@ -51,7 +51,7 @@ This requires that the [Kubernetes Auth Method](https://www.vaultproject.io/docs
 The easiest way to authenticate is to use your Vault token:
 
 ```bash
-harpocrates --vault-token "sometoken"
+harpocrates fetch --vault-token "sometoken"
 ```
 
 This can also be specified as the environment var `VAULT_TOKEN`
@@ -92,10 +92,10 @@ Example yaml file at [examples/secret.yaml](examples/secret.yaml)
 
 <br/>
 
-run harpocrates with the `-f` flag to fetch secrets from your yaml spec.
+Run harpocrates with the subcommand `fetch` and the `-f` flag to fetch secrets from your yaml spec.
 
 ```bash
-harpocrates -f /path/to/file.yaml
+harpocrates fetch -f /path/to/file.yaml
 ```
 
 <br/>
@@ -106,13 +106,13 @@ You can specify the exact same options in inline json/yaml as in the yaml spec.
 Mostly for programmatic use, as readability is way worse than the yaml spec.
 
 ```bash
-harpocrates '{"format":"env","output":"/secrets","prefix":"PREFIX_","secrets":["secret/data/secret/dev",{"secret/data/foo":{"keys":["APIKEY"]}}]}'
+harpocrates fetch '{"format":"env","output":"/secrets","prefix":"PREFIX_","secrets":["secret/data/secret/dev",{"secret/data/foo":{"keys":["APIKEY"]}}]}'
 ```
 
 Or if you prefer you can do it like this:
 
 ```bash
-harpocrates '{
+harpocrates fetch '{
   "format": "env",
   "output": "/secrets",
   "prefix": "PREFIX_",
@@ -132,7 +132,7 @@ harpocrates '{
 Or as yaml
 
 ```bash
-harpocrates 'format: env
+harpocrates fetch 'format: env
 output: "/secrets"
 prefix: PREFIX_
 secrets:
@@ -158,7 +158,7 @@ secrets:
 The third option is to specify the options as parameters in the cli.
 
 ```bash
-harpocrates --format "env" --secret "/secret/data/somesecret" --prefix "PREFIX_" --output "/secrets"
+harpocrates fetch --format "env" --secret "/secret/data/somesecret" --prefix "PREFIX_" --output "/secrets"
 ```
 
 There is not the same granularity as in the json and yaml specs. e.g. prefix can only exist on the top level.
@@ -207,6 +207,175 @@ To run harpocrates as a sidecar you have to set the `CONTINUOUS` env var to true
 ---
 
 <br/>
+
+## Local Secrets
+
+Harpocrates can also help you manage secrets for local development. Using Harpocrates for handling secrets in local development has some key benefits:
+
+- Secrets are securely stored in Vault
+- Secrets only exist during the runtime of your development life cycle
+- Consistent secret management across development and production environments
+
+### Prerequisites
+
+- Go installed
+- Vault installed
+  https://developer.hashicorp.com/vault/install
+- Harpocrates CLI tool installed
+
+```bash
+go install github.com/BESTSELLER/harpocrates@latest
+```
+
+### How to Use
+
+1. Create a new secrets file in the desired format. Place it in the same location as your other secret files. We recommend naming it `local-secrets.yaml` or `local-secrets.json`.
+
+   ```yaml
+   format: env
+   output: "/secrets"
+   secrets:
+     - secret-engine/data/application/dev
+   ```
+
+2. Specify the desired path where the secrets will be pulled from. This works the same way as Harpocrates normally operates.
+
+   You are now ready to start using Harpocrates to manage your secrets for local development.
+
+3. Login to Vault:
+
+   ```bash
+   vault login -method=oidc
+   ```
+
+4. Run your program:
+
+   ```bash
+   harpocrates dev -f secrets-local.yaml '<args to run your application>'
+   ```
+
+### Example
+
+```bash
+harpocrates dev -f secrets-local.yaml 'mvn spring-boot:run'
+```
+
+### IDE Setup
+
+We have provided IDE setup configurations to enhance your development experience and offer the modern convenience of a debugger.
+
+#### VS Code
+
+**launch.json**
+
+```json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "INTERNAL - Start App with Secrets",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "./.vscode/start-debug.sh"
+    },
+    {
+      "name": "INTERNAL - Attach Debugger",
+      "type": "java",
+      "request": "attach",
+      "hostName": "localhost",
+      "port": 5005,
+      "projectName": "service",
+      "preLaunchTask": "wait-for-startup"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Run and Debug OrbisApplication",
+      "configurations": [
+        "INTERNAL - Start App with Secrets",
+        "INTERNAL - Attach Debugger"
+      ]
+    }
+  ]
+}
+```
+
+**start-debug.sh**
+
+```bash
+#!/bin/bash
+
+echo "Fetching secrets and starting application in debug mode..."
+harpocrates dev -f secrets-local.yaml 'mvn spring-boot:run'
+```
+
+**tasks.json**
+
+```json
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "wait-for-startup",
+      "type": "shell",
+      "command": "echo 'Waiting for application to start on port 5005...'; for i in {1..30}; do nc -z localhost 5005 && exit 0; sleep 1; done; echo 'Application did not start in time.'; exit 1"
+    }
+  ]
+}
+```
+
+**Note:** The `start-debug.sh` script is where you would modify your Harpocrates command based on the arguments you want to pass to your program.
+
+#### IntelliJ
+
+For intellij we can make this possible with to seperate configuration that is place in the .run folder.
+
+running_with_hapocrates_debug.run.xml
+
+```xml
+<component name="ProjectRunConfigurationManager">
+    <configuration default="false" name="running_with_hapocrates_debug" type="ShConfigurationType">
+        <option name="SCRIPT_TEXT" value="harpocrates dev -f secrets-local.yaml 'mvn spring-boot:run -Dspring-boot.run.jvmArguments=&quot;-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005&quot; -Dspring-boot.run.profiles=local'" />
+        <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
+        <option name="SCRIPT_PATH" value="" />
+        <option name="SCRIPT_OPTIONS" value="" />
+        <option name="INDEPENDENT_SCRIPT_WORKING_DIRECTORY" value="true" />
+        <option name="SCRIPT_WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+        <option name="INDEPENDENT_INTERPRETER_PATH" value="true" />
+        <option name="INTERPRETER_PATH" value="/bin/zsh" />
+        <option name="INTERPRETER_OPTIONS" value="" />
+        <option name="EXECUTE_IN_TERMINAL" value="true" />
+        <option name="EXECUTE_SCRIPT_FILE" value="false" />
+        <envs />
+        <method v="2" />
+    </configuration>
+</component>
+```
+
+running_with_hapocrates
+
+```xml
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="running_with_hapocrates" type="ShConfigurationType">
+    <option name="SCRIPT_TEXT" value="harpocrates dev -f secrets-local.yaml 'mvn spring-boot:run -Dspring-boot.run.jvmArguments=&quot;-Dspring-boot.run.profiles=local&quot;'" />
+    <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
+    <option name="SCRIPT_PATH" value="" />
+    <option name="SCRIPT_OPTIONS" value="" />
+    <option name="INDEPENDENT_SCRIPT_WORKING_DIRECTORY" value="true" />
+    <option name="SCRIPT_WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+    <option name="INDEPENDENT_INTERPRETER_PATH" value="true" />
+    <option name="INTERPRETER_PATH" value="/bin/zsh" />
+    <option name="INTERPRETER_OPTIONS" value="" />
+    <option name="EXECUTE_IN_TERMINAL" value="true" />
+    <option name="EXECUTE_SCRIPT_FILE" value="false" />
+    <envs />
+    <method v="2" />
+  </configuration>
+</component>
+```
+
+These will load and you will be able to select these within the drop down in where you normally run your program.
+You will ofc need to control the jvmArguments you want to pass to your environment.
 
 ## Contribution
 
