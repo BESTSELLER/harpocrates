@@ -328,7 +328,7 @@ harpocrates dev -f secrets-local.yaml 'mvn spring-boot:run'
 
 #### IntelliJ
 
-For intellij we can make this possible with to seperate configuration that is place in the .run folder.
+For IntelliJ, we can make this possible with two separate configurations that are placed in the .run folder.
 
 running_with_hapocrates_debug.run.xml
 
