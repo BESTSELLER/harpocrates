@@ -8,7 +8,7 @@ require (
 	github.com/gookit/color v1.6.0
 	github.com/hashicorp/vault/api v1.22.0
 	github.com/rs/zerolog v1.34.0
-	github.com/spf13/cobra v1.10.1
+	github.com/spf13/cobra v1.10.2
 	github.com/testcontainers/testcontainers-go/modules/vault v0.40.0
 	github.com/xeipuuv/gojsonschema v1.2.0
 	gopkg.in/yaml.v3 v3.0.1
