@@ -375,7 +375,7 @@ running_with_hapocrates
 ```
 
 These will load and you will be able to select these within the drop down in where you normally run your program.
-You will ofc need to control the jvmArguments you want to pass to your environment.
+You will of course need to control the jvmArguments you want to pass to your environment.
 
 ## Contribution
 
