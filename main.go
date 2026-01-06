@@ -1,7 +1,14 @@
 package main
 
-import "github.com/BESTSELLER/harpocrates/cmd"
+import (
+	"os"
+
+	"github.com/BESTSELLER/harpocrates/cmd"
+)
 
 func main() {
-	cmd.Execute()
+	err := cmd.Execute()
+	if err != nil {
+		os.Exit(1)
+	}
 }
