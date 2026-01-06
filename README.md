@@ -73,7 +73,7 @@ In harpocrates you can specify which secrets to pull in 3 different ways.
 
 ### YAML file
 
-yaml is a great options for readability and replication of configs. yaml options are:
+YAML is a great option for readability and replication of configs. YAML options are:
 
 | Option        | Required | Value                                                        | default      |
 | ------------- | -------- | ------------------------------------------------------------ | ------------ |
