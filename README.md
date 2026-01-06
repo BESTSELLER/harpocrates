@@ -202,7 +202,7 @@ An example can be found at [examples/deployment.yaml](examples/deployment.yaml)
 
 ### Sidecar
 
-To run harpocrates as a sidecar you have to set the `CONTINUOUS` env var to true. Harpocrates will then run in a loop and fetch secrets every 1 minute. The shortest secret refresh interval is 1 minute and can be increased using the `INTERVAL` variable.
+To run harpocrates as a sidecar, you have to set the `CONTINUOUS` env var to true. Harpocrates will then run in a loop and fetch secrets every 1 minute. The shortest secret refresh interval is 1 minute and can be increased by setting the `INTERVAL` variable (in minutes).
 
 ---
 
