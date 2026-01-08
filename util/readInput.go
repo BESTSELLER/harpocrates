@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/BESTSELLER/harpocrates/config"
-	"gopkg.in/yaml.v3"
+	"go.yaml.in/yaml/v4"
 )
 
 // SecretJSON holds the information about which secrets to fetch and how to save them again
