@@ -73,7 +73,7 @@ In harpocrates you can specify which secrets to pull in 3 different ways.
 
 ### YAML file
 
-yaml is a great options for readability and replication of configs. yaml options are:
+YAML is a great option for readability and replication of configs. YAML options are:
 
 | Option        | Required | Value                                                        | default      |
 | ------------- | -------- | ------------------------------------------------------------ | ------------ |
@@ -202,7 +202,7 @@ An example can be found at [examples/deployment.yaml](examples/deployment.yaml)
 
 ### Sidecar
 
-To run harpocrates as a sidecar you have to set the `CONTINUOUS` env var to true. Harpocrates will then run in a loop and fetch secrets every 1 minute. The shortest secret refresh interval is 1 minute and can be increased using the `INTERVAL` variable.
+To run harpocrates as a sidecar, you have to set the `CONTINUOUS` env var to true. Harpocrates will then run in a loop and fetch secrets every 1 minute. The shortest secret refresh interval is 1 minute and can be increased by setting the `INTERVAL` variable (in minutes).
 
 ---
 
@@ -328,7 +328,7 @@ harpocrates dev -f secrets-local.yaml 'mvn spring-boot:run'
 
 #### IntelliJ
 
-For intellij we can make this possible with to seperate configuration that is place in the .run folder.
+For IntelliJ, we can make this possible with two separate configurations that are placed in the .run folder.
 
 running_with_hapocrates_debug.run.xml
 
@@ -375,7 +375,7 @@ running_with_hapocrates
 ```
 
 These will load and you will be able to select these within the drop down in where you normally run your program.
-You will ofc need to control the jvmArguments you want to pass to your environment.
+You will of course need to control the jvmArguments you want to pass to your environment.
 
 ## Contribution
 
