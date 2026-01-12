@@ -3,8 +3,6 @@ package vault
 import (
 	"fmt"
 	"testing"
-
-	"gotest.tools/v3/assert"
 )
 
 // TestReadSecretWrongPath tests that the function fails on unknown secret path
@@ -26,7 +24,10 @@ func TestReadSecretWrongPath(t *testing.T) {
 	}
 
 	// assert
-	assert.Equal(t, fmt.Sprintf(secretNotFound, path, nil), err.Error())
+	expected := fmt.Sprintf(secretNotFound, path, nil)
+	if err.Error() != expected {
+		t.Errorf("expected error message %q, got %q", expected, err.Error())
+	}
 }
 
 func testReadSecretKey(path string, key string, expectedValue interface{}, t *testing.T) {
@@ -39,8 +40,12 @@ func testReadSecretKey(path string, key string, expectedValue interface{}, t *te
 	value, err := vaultClient.ReadSecretKey(path, key)
 
 	// assert
-	assert.NilError(t, err)
-	assert.Equal(t, expectedValue, value)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
+	if value != expectedValue {
+		t.Errorf("expected value %v, got %v", expectedValue, value)
+	}
 }
 
 // TestReadSecretKeyWithNumberAsValue tests that the function returns the value as a number
@@ -90,5 +95,12 @@ func TestReadSecretKeyNotFound(t *testing.T) {
 	_, err := vaultClient.ReadSecretKey(path, key)
 
 	// assert
-	assert.Error(t, err, "the key 'keys666' was not found in the path 'secret/data/secret': <nil>")
+	if err == nil {
+		t.Error("expected error got nil")
+	} else {
+		expectedMsg := "the key 'keys666' was not found in the path 'secret/data/secret': <nil>"
+		if err.Error() != expectedMsg {
+			t.Errorf("expected error message %q, got %q", expectedMsg, err.Error())
+		}
+	}
 }

@@ -11,7 +11,6 @@ import (
 	"github.com/BESTSELLER/harpocrates/util"
 	"github.com/hashicorp/vault/api"
 	"github.com/testcontainers/testcontainers-go/modules/vault"
-	"gotest.tools/v3/assert"
 )
 
 var testClient *api.Client
@@ -88,7 +87,9 @@ func TestExtractSecretsWithFormatAsExpected(t *testing.T) {
 		expected := fmt.Sprintf("%v", map[string]interface{}{input.Prefix + "key1": "value1", input.Prefix + "key2": "value2", input.Prefix + "key3": "value3", input.Prefix + "key4": float64(123), input.Prefix + "key5": true})
 		actual := fmt.Sprintf("%v", v.Result)
 
-		assert.Equal(t, expected, actual)
+		if expected != actual {
+			t.Errorf("expected %q, got %q", expected, actual)
+		}
 	}
 
 }
@@ -122,7 +123,9 @@ func TestExtractSecretsAsExpected(t *testing.T) {
 		expected := fmt.Sprintf("%v", map[string]interface{}{input.Prefix + "key1": "value1", input.Prefix + "key2": "value2", input.Prefix + "key3": "value3", input.Prefix + "key4": float64(123), input.Prefix + "key5": true})
 		actual := fmt.Sprintf("%v", v.Result)
 
-		assert.Equal(t, expected, actual)
+		if expected != actual {
+			t.Errorf("expected %q, got %q", expected, actual)
+		}
 	}
 
 }
@@ -157,7 +160,9 @@ func TestExtractSecretsWithPrefixAsExpected(t *testing.T) {
 		expected := fmt.Sprintf("%v", map[string]interface{}{"PRE_key1": "value1", "FIX_key2": "value2", input.Prefix + "key3": "value3"})
 		actual := fmt.Sprintf("%v", v.Result)
 
-		assert.Equal(t, expected, actual)
+		if expected != actual {
+			t.Errorf("expected %q, got %q", expected, actual)
+		}
 	}
 
 }
@@ -199,6 +204,8 @@ func TestExtractSecretsSaveAsFileAsExpected(t *testing.T) {
 	expected := "value1"
 	actual := string(content)
 
-	assert.Equal(t, expected, actual)
+	if expected != actual {
+		t.Errorf("expected %q, got %q", expected, actual)
+	}
 
 }
