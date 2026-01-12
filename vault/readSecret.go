@@ -3,6 +3,7 @@ package vault
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -65,10 +66,34 @@ func (client *API) ReadSecretKey(path string, key string) (interface{}, error) {
 	if err != nil {
 		return "", err
 	}
-	secretKey := secret[key]
-	if secretKey == nil {
-		return "", fmt.Errorf(keyNotFound, key, path, err)
+
+	// 1. Literal match
+	if val, ok := secret[key]; ok {
+		return val, nil
 	}
 
-	return secretKey, nil
+	// 2. Traversal
+	normalizedKey := strings.ReplaceAll(key, "[", ".")
+	normalizedKey = strings.ReplaceAll(normalizedKey, "]", "")
+	keys := strings.Split(normalizedKey, ".")
+
+	var current interface{} = secret
+	for _, k := range keys {
+		if m, ok := current.(map[string]interface{}); ok {
+			if val, exists := m[k]; exists {
+				current = val
+				continue
+			}
+		}
+		if a, ok := current.([]interface{}); ok {
+			if i, err := strconv.Atoi(k); err == nil {
+				if i >= 0 && i < len(a) {
+					current = a[i]
+					continue
+				}
+			}
+		}
+		return "", fmt.Errorf(keyNotFound, key, path, nil)
+	}
+	return current, nil
 }

@@ -104,3 +104,59 @@ func TestReadSecretKeyNotFound(t *testing.T) {
 		}
 	}
 }
+
+// TestReadSecretKeyNested tests nested key fetching scenarios
+func TestReadSecretKeyNested(t *testing.T) {
+	// arrange
+	setupVault(t)
+	t.Cleanup(func() {
+		testClient = nil
+	})
+
+	path := "secret/data/complex"
+
+	// Define the complex secret structure matching your requirements
+	secretData := map[string]interface{}{
+		"globalSecrets": map[string]interface{}{
+			"theSecretINeed": "HelloThere!",
+		},
+		"list": []interface{}{"item1", "item2"},
+		"users": []interface{}{
+			map[string]interface{}{"name": "Alice"},
+			map[string]interface{}{"name": "Bob"},
+		},
+		"key[with]brackets": "literalValue",
+		"a": map[string]interface{}{
+			"b": map[string]interface{}{
+				"c": "deepValue",
+			},
+		},
+	}
+
+	// Write the secret to Vault
+	// We wrap secretData in "data" because the test setup uses KV v2 secret engine
+	_, err := testClient.Logical().Write(path, map[string]interface{}{
+		"data": secretData,
+	})
+	if err != nil {
+		t.Fatalf("failed to write secret data to vault: %v", err)
+	}
+
+	// Act & Assert
+
+	// 1. Nested map access: globalSecrets.theSecretINeed
+	testReadSecretKey(path, "globalSecrets.theSecretINeed", "HelloThere!", t)
+
+	// 2. Array access: list[0]
+	testReadSecretKey(path, "list[0]", "item1", t)
+
+	// 3. Nested array access: users[0].name
+	testReadSecretKey(path, "users[0].name", "Alice", t)
+	testReadSecretKey(path, "users.0.name", "Alice", t)
+
+	// 4. Literal key with brackets (regression/feature): "key[with]brackets"
+	testReadSecretKey(path, "key[with]brackets", "literalValue", t)
+
+	// 5. Deep nesting: a.b.c
+	testReadSecretKey(path, "a.b.c", "deepValue", t)
+}
