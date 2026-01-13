@@ -41,11 +41,13 @@ type VaultLoginResult struct {
 	Errors []string `json:"errors"`
 }
 
+// fetchJWT retrieves a Workload Identity Token from the GCP Metadata API.
 func fetchJWT(vaultRole string) (jwt string, err error) {
 	client := metadata.NewClient(http.DefaultClient)
 	return client.GetWithContext(context.Background(), "instance/service-accounts/default/identity?audience=http://vault/"+vaultRole+"&format=full")
 }
 
+// fetchVaultLogin uses the provided JWT to authenticate with Vault and retrieve a VaultLoginResult.
 func fetchVaultLogin(vaultAddr string, jwt string, vaultRole string) (VaultLoginResult, error) {
 	var login VaultLoginResult
 	client := http.DefaultClient
