@@ -10,7 +10,7 @@ import (
 
 	"github.com/BESTSELLER/harpocrates/config"
 	"github.com/BESTSELLER/harpocrates/token"
-	"github.com/BESTSELLER/harpocrates/vault/gcpss"
+	"github.com/BESTSELLER/harpocrates/vault/gcp"
 	"github.com/rs/zerolog/log"
 )
 
@@ -39,7 +39,7 @@ func Login() {
 	}
 
 	if config.Config.GcpWorkloadID {
-		login, err := gcpss.FetchVaultLogin(config.Config.VaultAddress, config.Config.AuthName)
+		login, err := gcp.FetchVaultLogin(config.Config.VaultAddress, config.Config.AuthName)
 		if err != nil {
 			log.Fatal().Err(err).Msg("GcpWorkload Identity was enabled but auth failed")
 			os.Exit(1)
@@ -65,7 +65,7 @@ func Login() {
 			os.Exit(1)
 		}
 
-		returnPayload := gcpss.VaultLoginResult{}
+		returnPayload := gcp.VaultLoginResult{}
 		err = json.NewDecoder(res.Body).Decode(&returnPayload)
 		if err != nil {
 			log.Fatal().Err(err).Msg("Unexpected response from Vault")
