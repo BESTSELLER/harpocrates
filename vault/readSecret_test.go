@@ -160,3 +160,44 @@ func TestReadSecretKeyNested(t *testing.T) {
 	// 5. Deep nesting: a.b.c
 	testReadSecretKey(path, "a.b.c", "deepValue", t)
 }
+
+// TestReadSecretKeyDeeplyNested tests retrieval of a key nested 7 levels deep with mixed maps and lists
+func TestReadSecretKeyDeeplyNested(t *testing.T) {
+	// arrange
+	setupVault(t)
+	t.Cleanup(func() {
+		testClient = nil
+	})
+
+	path := "secret/data/deep"
+
+	// Construct 7 levels of nesting (mixed maps and lists)
+	// Path: level1[0].level3.level4[1].level6.final
+	secretData := map[string]interface{}{
+		"level1": []interface{}{
+			map[string]interface{}{
+				"level3": map[string]interface{}{
+					"level4": []interface{}{
+						"dummy", // index 0
+						map[string]interface{}{ // index 1
+							"level6": map[string]interface{}{
+								"final": "FoundIt",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	// Write the secret to Vault
+	_, err := testClient.Logical().Write(path, map[string]interface{}{
+		"data": secretData,
+	})
+	if err != nil {
+		t.Fatalf("failed to write secret data to vault: %v", err)
+	}
+
+	// act & assert
+	testReadSecretKey(path, "level1[0].level3.level4[1].level6.final", "FoundIt", t)
+}
