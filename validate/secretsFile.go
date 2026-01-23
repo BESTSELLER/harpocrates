@@ -12,7 +12,7 @@ import (
 //go:embed schema.json
 var schema string
 
-// Validate secrets file and returns true or false depending on the validation result.
+// SecretsFile validates the secrets file and returns true or false depending on the validation result.
 // Outputs error message if validation fails including what the issue is.
 // Debug message is logged if debug is true and validation succeeded.
 func SecretsFile(fileToValidate string) bool {
