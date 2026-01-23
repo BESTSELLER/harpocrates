@@ -75,7 +75,7 @@ func (result Result) ToK8sSecret() string {
 	return result.toSecretKV()
 }
 
-// ToYaml exports secrets as yaml
+// ToYAML exports secrets as yaml
 func (result Result) ToYAML() string {
 	log.Debug().Msg("Exporting as YAML")
 	yamlString, err := yaml.Marshal(result)
