@@ -21,6 +21,7 @@ type SecretJSON struct {
 	GcpWorkloadID bool          `json:"gcpWorkloadID,omitempty"     yaml:"gcpWorkloadID,omitempty"`
 }
 
+// Secret holds the configuration for a secret
 type Secret struct {
 	Append    *bool         `json:"append,omitempty"      yaml:"append,omitempty"`
 	Prefix    string        `json:"prefix,omitempty"      yaml:"prefix,omitempty"`
@@ -31,6 +32,7 @@ type Secret struct {
 	Owner     *int          `json:"owner,omitempty"       yaml:"owner,omitempty"`
 }
 
+// SecretKeys holds the configuration for secret keys
 type SecretKeys struct {
 	Append     *bool  `json:"append,omitempty"         yaml:"append,omitempty"`
 	Prefix     string `json:"prefix,omitempty"         yaml:"prefix,omitempty"      mapstructure:"prefix,omitempty"`
