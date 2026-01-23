@@ -1,6 +1,7 @@
 package validate
 
 import (
+	// Used for embedding the schema
 	_ "embed"
 
 	"github.com/rs/zerolog"
