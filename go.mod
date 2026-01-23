@@ -11,7 +11,7 @@ require (
 	github.com/spf13/cobra v1.10.2
 	github.com/testcontainers/testcontainers-go/modules/vault v0.40.0
 	github.com/xeipuuv/gojsonschema v1.2.0
-	go.yaml.in/yaml/v4 v4.0.0-rc.3
+	go.yaml.in/yaml/v4 v4.0.0-rc.4
 	sigs.k8s.io/yaml v1.6.0
 )
 
