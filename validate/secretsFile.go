@@ -32,12 +32,13 @@ func SecretsFile(fileToValidate string) bool {
 	if result.Valid() {
 		log.Debug().Msg("Secrets file validated successfully!")
 		return true
-	} else {
-		logArr := zerolog.Arr()
-		for _, desc := range result.Errors() {
-			logArr.Str(desc.String())
-		}
-		log.Error().Array("validation_errors", logArr).Msg("Secrets file failed validation")
-		return false
 	}
+
+	logArr := zerolog.Arr()
+	for _, desc := range result.Errors() {
+		logArr.Str(desc.String())
+	}
+	log.Error().Array("validation_errors", logArr).Msg("Secrets file failed validation")
+	return false
+
 }
