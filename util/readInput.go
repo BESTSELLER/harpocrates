@@ -45,16 +45,14 @@ type SecretKeys struct {
 func ReadInput(input string) SecretJSON {
 	secretJSON := SecretJSON{}
 	err := json.Unmarshal([]byte(input), &secretJSON)
-	if err == nil {
-		goto MoveOn
-	}
-	err = yaml.Unmarshal([]byte(input), &secretJSON)
 	if err != nil {
-		fmt.Printf("Your secret file contains an error, please refer to the documentation\n%v\n", err)
-		os.Exit(1)
+		err = yaml.Unmarshal([]byte(input), &secretJSON)
+		if err != nil {
+			fmt.Printf("Your secret file contains an error, please refer to the documentation\n%v\n", err)
+			os.Exit(1)
+		}
 	}
 
-MoveOn:
 	if secretJSON.Format != "" {
 		config.Config.Format = secretJSON.Format
 	}
