@@ -4,7 +4,7 @@ go 1.25.3
 
 require (
 	cloud.google.com/go/compute/metadata v0.9.0
-	github.com/go-viper/mapstructure/v2 v2.4.0
+	github.com/go-viper/mapstructure/v2 v2.5.0
 	github.com/gookit/color v1.6.0
 	github.com/hashicorp/vault/api v1.22.0
 	github.com/rs/zerolog v1.34.0
