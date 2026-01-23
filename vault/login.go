@@ -58,7 +58,11 @@ func Login() {
 		os.Exit(1)
 	}
 
-	req, _ := http.NewRequest(http.MethodPost, url, b)
+	req, err := http.NewRequest(http.MethodPost, url, b)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Unable to create login request to Vault")
+		os.Exit(1)
+	}
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
