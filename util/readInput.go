@@ -21,6 +21,7 @@ type SecretJSON struct {
 	GcpWorkloadID bool          `json:"gcpWorkloadID,omitempty"     yaml:"gcpWorkloadID,omitempty"`
 }
 
+// Secret holds the configuration for a secret
 type Secret struct {
 	Append    *bool         `json:"append,omitempty"      yaml:"append,omitempty"`
 	Prefix    string        `json:"prefix,omitempty"      yaml:"prefix,omitempty"`
@@ -31,6 +32,7 @@ type Secret struct {
 	Owner     *int          `json:"owner,omitempty"       yaml:"owner,omitempty"`
 }
 
+// SecretKeys holds the configuration for secret keys
 type SecretKeys struct {
 	Append     *bool  `json:"append,omitempty"         yaml:"append,omitempty"`
 	Prefix     string `json:"prefix,omitempty"         yaml:"prefix,omitempty"      mapstructure:"prefix,omitempty"`
@@ -43,16 +45,14 @@ type SecretKeys struct {
 func ReadInput(input string) SecretJSON {
 	secretJSON := SecretJSON{}
 	err := json.Unmarshal([]byte(input), &secretJSON)
-	if err == nil {
-		goto MoveOn
-	}
-	err = yaml.Unmarshal([]byte(input), &secretJSON)
 	if err != nil {
-		fmt.Printf("Your secret file contains an error, please refer to the documentation\n%v\n", err)
-		os.Exit(1)
+		err = yaml.Unmarshal([]byte(input), &secretJSON)
+		if err != nil {
+			fmt.Printf("Your secret file contains an error, please refer to the documentation\n%v\n", err)
+			os.Exit(1)
+		}
 	}
 
-MoveOn:
 	if secretJSON.Format != "" {
 		config.Config.Format = secretJSON.Format
 	}

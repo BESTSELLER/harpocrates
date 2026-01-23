@@ -10,6 +10,7 @@ import (
 	"github.com/go-viper/mapstructure/v2"
 )
 
+// Outputs represents the output format for secrets
 type Outputs struct {
 	Format   string         `json:"format,omitempty"    yaml:"format,omitempty"`
 	Filename string         `json:"filename,omitempty"  yaml:"filename,omitempty"`
