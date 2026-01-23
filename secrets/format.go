@@ -41,6 +41,7 @@ func (result Result) toKV(prefix string) string {
 	return resturnString
 }
 
+// ToKVarray converts the result to a key=value array
 func (result Result) ToKVarray(prefix string) (returnString []string) {
 	for key, val := range result {
 		leKey := fixEnvName(key)
@@ -93,6 +94,7 @@ func fixEnvName(currentName string) string {
 	return envVar
 }
 
+// ToUpperOrNotToUpper changes the case of a string depending on the value of currentUpper
 func ToUpperOrNotToUpper(something string, currentUpper *bool) string {
 	if *currentUpper {
 		return strings.ToUpper(something)
