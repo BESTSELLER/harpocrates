@@ -47,37 +47,37 @@ func Login() {
 		config.Config.VaultToken = login.Auth.ClientToken
 		tokenExpiry = time.Now().Add(time.Duration(login.Auth.LeaseDuration) * time.Second)
 		return
-	} else {
-		url := config.Config.VaultAddress + "/v1/auth/" + config.Config.AuthName + "/login"
-
-		b := new(bytes.Buffer)
-		err := json.NewEncoder(b).Encode(JWTPayLoad{Jwt: token.Read(), Role: config.Config.RoleName})
-		if err != nil {
-			log.Fatal().Err(err).Msg("Unable to prepare jwt token")
-			os.Exit(1)
-		}
-
-		req, _ := http.NewRequest(http.MethodPost, url, b)
-
-		res, err := http.DefaultClient.Do(req)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Unable to make login call to Vault")
-			os.Exit(1)
-		}
-
-		returnPayload := gcp.VaultLoginResult{}
-		err = json.NewDecoder(res.Body).Decode(&returnPayload)
-		if err != nil {
-			log.Fatal().Err(err).Msg("Unexpected response from Vault")
-			os.Exit(1)
-		}
-
-		if len(returnPayload.Errors) != 0 {
-			log.Fatal().Err(fmt.Errorf("%s", returnPayload.Errors)).Msg("API call to Vault failed")
-			os.Exit(1)
-		}
-
-		config.Config.VaultToken = returnPayload.Auth.ClientToken
-		tokenExpiry = time.Now().Add(time.Duration(returnPayload.Auth.LeaseDuration) * time.Second)
 	}
+
+	url := config.Config.VaultAddress + "/v1/auth/" + config.Config.AuthName + "/login"
+
+	b := new(bytes.Buffer)
+	err := json.NewEncoder(b).Encode(JWTPayLoad{Jwt: token.Read(), Role: config.Config.RoleName})
+	if err != nil {
+		log.Fatal().Err(err).Msg("Unable to prepare jwt token")
+		os.Exit(1)
+	}
+
+	req, _ := http.NewRequest(http.MethodPost, url, b)
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Unable to make login call to Vault")
+		os.Exit(1)
+	}
+
+	returnPayload := gcp.VaultLoginResult{}
+	err = json.NewDecoder(res.Body).Decode(&returnPayload)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Unexpected response from Vault")
+		os.Exit(1)
+	}
+
+	if len(returnPayload.Errors) != 0 {
+		log.Fatal().Err(fmt.Errorf("%s", returnPayload.Errors)).Msg("API call to Vault failed")
+		os.Exit(1)
+	}
+
+	config.Config.VaultToken = returnPayload.Auth.ClientToken
+	tokenExpiry = time.Now().Add(time.Duration(returnPayload.Auth.LeaseDuration) * time.Second)
 }
