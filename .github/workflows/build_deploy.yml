@@ -3,7 +3,7 @@ name: Build and Deploy
 on:
   release:
     types: [published]
-  pull_request_target:
+  pull_request:
     types: [opened, synchronize, reopened, labeled]
     branches:
       - master
@@ -51,8 +51,8 @@ jobs:
         name: Auth GCloud
         uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
         with:
-          workload_identity_provider: ${{ secrets.WORKLOAD_IDENTITY_POOL_PROVIDER_NAME }}
-          service_account: ${{ secrets.WORKLOAD_IDENTITY_SA_EMAIL }}
+          workload_identity_provider: ${{ vars.WORKLOAD_IDENTITY_POOL_PROVIDER_NAME }}
+          service_account: ${{ vars.WORKLOAD_IDENTITY_SA_EMAIL }}
 
       - name: "Configure docker"
         run: "gcloud auth configure-docker ${{ steps.cluster_creds.outputs.ARTIFACT_REGISTRY_URL }}"
