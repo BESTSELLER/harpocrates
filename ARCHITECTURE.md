@@ -102,4 +102,4 @@ To add a new secret store (e.g., AWS Secrets Manager):
    service := services.NewSecretService(awsAdapter, filesystemAdapter, authAdapter)
    ```
 
-3. No changes needed to business logic!
+3. No changes needed to core domain logic (ports and services), but you may still need to update integration/wiring code (e.g., where adapters and services are constructed) until full dependency injection is in place.
