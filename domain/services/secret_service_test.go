@@ -29,7 +29,7 @@ func (m *mockSecretFetcher) ReadSecret(path string) (map[string]interface{}, err
 	return map[string]interface{}{"key": "value"}, nil
 }
 
-func (m *mockSecretFetcher) ReadSecretKey(path string, key string) (string, error) {
+func (m *mockSecretFetcher) ReadSecretKey(path string, key string) (interface{}, error) {
 	return "value", nil
 }
 

@@ -49,16 +49,27 @@ func (a *Adapter) Write(output string, fileName string, content interface{}, own
 	if err != nil {
 		return fmt.Errorf("an error happened while trying to open file %s: %w", path, err)
 	}
-	defer f.Close()
 
 	if _, err = f.WriteString(fmt.Sprintf("%v", content)); err != nil {
+		if cerr := f.Close(); cerr != nil {
+			log.Error().Err(cerr).Msgf("unable to close file '%s' after write failure", path)
+		}
 		return fmt.Errorf("unable to write to file '%s': %w", path, err)
 	}
 	log.Debug().Msgf("Wrote file '%s'", path)
 
 	// set permissions on file and folder
 	if owner != nil {
-		return a.setPermissions(f, path, output, *owner)
+		if err := a.setPermissions(f, path, output, *owner); err != nil {
+			if cerr := f.Close(); cerr != nil {
+				log.Error().Err(cerr).Msgf("unable to close file '%s' after permission failure", path)
+			}
+			return err
+		}
+	}
+
+	if err := f.Close(); err != nil {
+		return fmt.Errorf("unable to close file '%s': %w", path, err)
 	}
 
 	return nil

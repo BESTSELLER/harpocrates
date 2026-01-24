@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/BESTSELLER/harpocrates/config"
 	"github.com/BESTSELLER/harpocrates/domain/ports"
 	"github.com/BESTSELLER/harpocrates/token"
 	"github.com/BESTSELLER/harpocrates/vault/gcp"
@@ -26,16 +25,18 @@ type Adapter struct {
 	roleName      string
 	tokenPath     string
 	gcpWorkloadID bool
+	continuous    bool
 }
 
 // NewAdapter creates a new auth adapter
-func NewAdapter(vaultAddress, authName, roleName, tokenPath string, gcpWorkloadID bool) ports.Authenticator {
+func NewAdapter(vaultAddress, authName, roleName, tokenPath string, gcpWorkloadID bool, continuous bool) ports.Authenticator {
 	return &Adapter{
 		vaultAddress:  vaultAddress,
 		authName:      authName,
 		roleName:      roleName,
 		tokenPath:     tokenPath,
 		gcpWorkloadID: gcpWorkloadID,
+		continuous:    continuous,
 	}
 }
 
@@ -61,7 +62,7 @@ func (a *Adapter) IsTokenValid(token string, expiry time.Time) bool {
 	// 1. Continuous mode is disabled (in this case, we don't proactively refresh based on the 5-minute window).
 	// OR
 	// 2. Continuous mode is enabled, AND the token is not about to expire within the next 5 minutes.
-	return !config.Config.Continuous || tokenIsNotAboutToExpire
+	return !a.continuous || tokenIsNotAboutToExpire
 }
 
 func (a *Adapter) loginWithGCP() (*ports.AuthResult, error) {
