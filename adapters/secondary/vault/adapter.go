@@ -50,7 +50,7 @@ func (a *Adapter) ReadSecret(path string) (map[string]interface{}, error) {
 			pathWithData := append(appendData, splitPath[1:]...)
 			return a.ReadSecret(strings.Join(pathWithData, "/"))
 		}
-		return nil, fmt.Errorf("no data recieved")
+		return nil, fmt.Errorf("no data received")
 	}
 
 	b, err := json.Marshal(secretData)
@@ -64,7 +64,10 @@ func (a *Adapter) ReadSecret(path string) (map[string]interface{}, error) {
 		return nil, fmt.Errorf("unable to unmarshal response from Vault")
 	}
 
-	myMap := f.(map[string]interface{})
+	myMap, ok := f.(map[string]interface{})
+	if !ok {
+		return nil, fmt.Errorf("unexpected secret format: expected map[string]interface{}")
+	}
 
 	return myMap, nil
 }
