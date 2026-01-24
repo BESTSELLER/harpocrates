@@ -16,7 +16,7 @@ Ports are interfaces that define contracts for interacting with external systems
 
 - **`SecretFetcher`**: Interface for fetching secrets from a secret store
   - `ReadSecret(path string) (map[string]interface{}, error)`
-  - `ReadSecretKey(path string, key string) (string, error)`
+  - `ReadSecretKey(path string, key string) (interface{}, error)`
 
 - **`SecretWriter`**: Interface for writing secrets to storage
   - `Write(output, fileName string, content interface{}, owner *int, append bool) error`
