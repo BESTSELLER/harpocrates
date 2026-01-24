@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/BESTSELLER/harpocrates/config"
+	"github.com/BESTSELLER/harpocrates/domain/models"
 	"github.com/BESTSELLER/harpocrates/domain/ports"
 	"github.com/BESTSELLER/harpocrates/secrets"
 	"github.com/BESTSELLER/harpocrates/util"
@@ -26,17 +27,9 @@ func NewSecretService(fetcher ports.SecretFetcher, writer ports.SecretWriter, au
 	}
 }
 
-// Outputs represents the output format for secrets
-type Outputs struct {
-	Format   string         `json:"format,omitempty"    yaml:"format,omitempty"`
-	Filename string         `json:"filename,omitempty"  yaml:"filename,omitempty"`
-	Result   secrets.Result `json:"result,omitempty"    yaml:"result,omitempty"`
-	Owner    *int           `json:"owner,omitempty"     yaml:"owner,omitempty"`
-}
-
 // ExtractSecrets extracts secrets based on the input configuration
-func (s *SecretService) ExtractSecrets(input util.SecretJSON, appendToFile bool) ([]Outputs, error) {
-	var finalResult []Outputs
+func (s *SecretService) ExtractSecrets(input util.SecretJSON, appendToFile bool) ([]models.SecretOutput, error) {
+	var finalResult []models.SecretOutput
 	var result = make(secrets.Result)
 	var currentPrefix = config.Config.Prefix
 	var currentUpperCase = config.Config.UpperCase
@@ -69,7 +62,7 @@ func (s *SecretService) ExtractSecrets(input util.SecretJSON, appendToFile bool)
 						thisResult.Add(k, v, currentPrefix, currentUpperCase)
 					}
 
-					finalResult = append(finalResult, Outputs{Format: currentFormat, Filename: d.FileName, Result: thisResult, Owner: d.Owner})
+					finalResult = append(finalResult, models.SecretOutput{Format: currentFormat, Filename: d.FileName, Result: thisResult, Owner: d.Owner})
 					continue
 				}
 
@@ -130,7 +123,7 @@ func (s *SecretService) ExtractSecrets(input util.SecretJSON, appendToFile bool)
 		}
 	}
 
-	finalResult = append(finalResult, Outputs{Format: config.Config.Format, Filename: "", Result: result})
+	finalResult = append(finalResult, models.SecretOutput{Format: config.Config.Format, Filename: "", Result: result})
 	return finalResult, nil
 }
 

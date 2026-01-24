@@ -6,6 +6,7 @@ import (
 	"github.com/BESTSELLER/harpocrates/adapters/secondary/filesystem"
 	vaultadapter "github.com/BESTSELLER/harpocrates/adapters/secondary/vault"
 	"github.com/BESTSELLER/harpocrates/config"
+	"github.com/BESTSELLER/harpocrates/domain/models"
 	"github.com/BESTSELLER/harpocrates/domain/services"
 	"github.com/BESTSELLER/harpocrates/files"
 	"github.com/BESTSELLER/harpocrates/secrets"
@@ -13,17 +14,9 @@ import (
 	"github.com/go-viper/mapstructure/v2"
 )
 
-// Outputs represents the output format for secrets
-type Outputs struct {
-	Format   string         `json:"format,omitempty"    yaml:"format,omitempty"`
-	Filename string         `json:"filename,omitempty"  yaml:"filename,omitempty"`
-	Result   secrets.Result `json:"result,omitempty"    yaml:"result,omitempty"`
-	Owner    *int           `json:"owner,omitempty"     yaml:"owner,omitempty"`
-}
-
 // ExtractSecrets will loop through all those damn interfaces
 // This method now delegates to the hexagonal architecture service layer
-func (vaultClient *API) ExtractSecrets(input util.SecretJSON, appendToFile bool) ([]Outputs, error) {
+func (vaultClient *API) ExtractSecrets(input util.SecretJSON, appendToFile bool) ([]models.SecretOutput, error) {
 	// Create adapters
 	vaultAdapter := vaultadapter.NewAdapter(vaultClient.Client)
 	filesystemAdapter := filesystem.NewAdapter()
@@ -31,29 +24,13 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON, appendToFile bool)
 	// Create service with adapters
 	secretService := services.NewSecretService(vaultAdapter, filesystemAdapter, nil)
 	
-	// Delegate to service
-	serviceOutputs, err := secretService.ExtractSecrets(input, appendToFile)
-	if err != nil {
-		return nil, err
-	}
-	
-	// Convert service outputs to vault outputs (they have the same structure)
-	result := make([]Outputs, len(serviceOutputs))
-	for i, out := range serviceOutputs {
-		result[i] = Outputs{
-			Format:   out.Format,
-			Filename: out.Filename,
-			Result:   out.Result,
-			Owner:    out.Owner,
-		}
-	}
-	
-	return result, nil
+	// Delegate to service - now returns models.SecretOutput directly
+	return secretService.ExtractSecrets(input, appendToFile)
 }
 
 // ExtractSecretsLegacy is the old implementation kept for reference
-func (vaultClient *API) ExtractSecretsLegacy(input util.SecretJSON, appendToFile bool) ([]Outputs, error) {
-	var finalResult []Outputs
+func (vaultClient *API) ExtractSecretsLegacy(input util.SecretJSON, appendToFile bool) ([]models.SecretOutput, error) {
+	var finalResult []models.SecretOutput
 	var result = make(secrets.Result)
 	var currentPrefix = config.Config.Prefix
 	var currentUpperCase = config.Config.UpperCase
@@ -86,7 +63,7 @@ func (vaultClient *API) ExtractSecretsLegacy(input util.SecretJSON, appendToFile
 						thisResult.Add(k, v, currentPrefix, currentUpperCase)
 					}
 
-					finalResult = append(finalResult, Outputs{Format: currentFormat, Filename: d.FileName, Result: thisResult, Owner: d.Owner})
+					finalResult = append(finalResult, models.SecretOutput{Format: currentFormat, Filename: d.FileName, Result: thisResult, Owner: d.Owner})
 					continue
 				}
 
@@ -143,7 +120,7 @@ func (vaultClient *API) ExtractSecretsLegacy(input util.SecretJSON, appendToFile
 		}
 	}
 
-	finalResult = append(finalResult, Outputs{Format: config.Config.Format, Filename: "", Result: result})
+	finalResult = append(finalResult, models.SecretOutput{Format: config.Config.Format, Filename: "", Result: result})
 	return finalResult, nil
 }
 
