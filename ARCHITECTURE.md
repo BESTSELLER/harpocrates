@@ -93,7 +93,7 @@ To add a new secret store (e.g., AWS Secrets Manager):
    ```go
    type AWSAdapter struct { ... }
    func (a *AWSAdapter) ReadSecret(path string) (map[string]interface{}, error) { ... }
-   func (a *AWSAdapter) ReadSecretKey(path string, key string) (string, error) { ... }
+   func (a *AWSAdapter) ReadSecretKey(path string, key string) (interface{}, error) { ... }
    ```
 
 2. Wire it up in the application:
@@ -102,4 +102,7 @@ To add a new secret store (e.g., AWS Secrets Manager):
    service := services.NewSecretService(awsAdapter, filesystemAdapter, authAdapter)
    ```
 
-3. No changes needed to core domain logic (ports and services), but you may still need to update integration/wiring code (e.g., where adapters and services are constructed) until full dependency injection is in place.
+3. No changes needed to core domain logic (ports and services). However, integration/wiring code (e.g., `vault/extractSecrets.go` where adapters are constructed) will need updates until full dependency injection is in place.
+
+**Note**: The current implementation uses adapters within existing integration points. A future improvement would be to inject the service at the application entry point (main.go or cmd layer) for true pluggability without touching any integration code.
+
