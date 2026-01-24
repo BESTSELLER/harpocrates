@@ -139,9 +139,9 @@ func setUpper(potentialUpper *bool, currentUpper *bool) {
 	}
 }
 
-func setFormat(potentiaFormat string, currentFormat *string) {
-	if potentiaFormat != "" {
-		*currentFormat = potentiaFormat
+func setFormat(potentialFormat string, currentFormat *string) {
+	if potentialFormat != "" {
+		*currentFormat = potentialFormat
 	} else {
 		*currentFormat = config.Config.Format
 	}
