@@ -31,7 +31,7 @@ Ports are interfaces that define contracts for interacting with external systems
 Services contain the business logic for orchestrating operations.
 
 - **`SecretService`**: Orchestrates secret extraction and processing
-  - `ExtractSecrets(input util.SecretJSON, appendToFile bool) ([]Outputs, error)`
+  - `ExtractSecrets(input util.SecretJSON, appendToFile bool) ([]models.SecretOutput, error)`
 
 ### Adapter Layer (`adapters/`)
 
