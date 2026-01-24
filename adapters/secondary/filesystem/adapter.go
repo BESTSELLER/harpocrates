@@ -2,7 +2,6 @@ package filesystem
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -21,7 +20,7 @@ func NewAdapter() ports.SecretWriter {
 
 // Read reads the content of a file
 func (a *Adapter) Read(filePath string) (string, error) {
-	data, err := ioutil.ReadFile(filePath)
+	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return "", fmt.Errorf("unable to read the file at path '%s': %w", filePath, err)
 	}

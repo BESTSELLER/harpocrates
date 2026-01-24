@@ -81,7 +81,7 @@ func (s *SecretService) ExtractSecrets(input util.SecretJSON, appendToFile bool)
 
 						for h, i := range bb {
 							s.setPrefix(i.Prefix, &currentPrefix)
-							s.setUpper(d.UpperCase, &currentUpperCase)
+							s.setUpper(i.UpperCase, &currentUpperCase)
 
 							if i.SaveAsFile != nil {
 								secretValue, err := s.fetcher.ReadSecretKey(c, h)
@@ -150,9 +150,9 @@ func (s *SecretService) setUpper(potentialUpper *bool, currentUpper *bool) {
 	}
 }
 
-func (s *SecretService) setFormat(potentiaFormat string, currentFormat *string) {
-	if potentiaFormat != "" {
-		*currentFormat = potentiaFormat
+func (s *SecretService) setFormat(potentialFormat string, currentFormat *string) {
+	if potentialFormat != "" {
+		*currentFormat = potentialFormat
 	} else {
 		*currentFormat = config.Config.Format
 	}

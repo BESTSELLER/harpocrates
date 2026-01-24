@@ -1,7 +1,6 @@
 package files
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/BESTSELLER/harpocrates/adapters/secondary/filesystem"
@@ -33,7 +32,7 @@ func Write(output string, fileName string, content interface{}, owner *int, appe
 
 	err := adapter.Write(output, fileName, content, ownerToUse, append)
 	if err != nil {
-		log.Fatal().Err(err).Msg(fmt.Sprintf("%v", err))
+		log.Fatal().Err(err).Msg("Failed to write file")
 		os.Exit(1)
 	}
 }

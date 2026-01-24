@@ -21,7 +21,7 @@ type Outputs struct {
 	Owner    *int           `json:"owner,omitempty"     yaml:"owner,omitempty"`
 }
 
-// ExtractSecrets will loop through al those damn interfaces
+// ExtractSecrets will loop through all those damn interfaces
 // This method now delegates to the hexagonal architecture service layer
 func (vaultClient *API) ExtractSecrets(input util.SecretJSON, appendToFile bool) ([]Outputs, error) {
 	// Create adapters
