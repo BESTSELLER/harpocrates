@@ -76,25 +76,18 @@ func (s *SecretService) ExtractSecrets(input util.SecretJSON, appendToFile bool)
 							s.setPrefix(i.Prefix, &currentPrefix)
 							s.setUpper(i.UpperCase, &currentUpperCase)
 
-							if i.SaveAsFile != nil {
-								secretValue, err := s.fetcher.ReadSecretKey(c, h)
+							secretValue, err := s.fetcher.ReadSecretKey(c, h)
+							if err != nil {
+								return nil, err
+							}
+
+							if i.SaveAsFile != nil && *i.SaveAsFile {
+								// Write directly using writer port
+								err = s.writer.Write(input.Output, secrets.ToUpperOrNotToUpper(fmt.Sprintf("%s%s", currentPrefix, h), &currentUpperCase), secretValue, nil, appendToFile)
 								if err != nil {
 									return nil, err
-								}
-								if *i.SaveAsFile {
-									// Write directly using writer port
-									err = s.writer.Write(input.Output, secrets.ToUpperOrNotToUpper(fmt.Sprintf("%s%s", currentPrefix, h), &currentUpperCase), secretValue, nil, appendToFile)
-									if err != nil {
-										return nil, err
-									}
-								} else {
-									result.Add(h, secretValue, currentPrefix, currentUpperCase)
 								}
 							} else {
-								secretValue, err := s.fetcher.ReadSecretKey(c, h)
-								if err != nil {
-									return nil, err
-								}
 								result.Add(h, secretValue, currentPrefix, currentUpperCase)
 							}
 							s.setPrefix(d.Prefix, &currentPrefix)

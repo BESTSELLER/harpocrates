@@ -19,15 +19,18 @@ var (
 // getAdapter returns the adapter, initializing it if necessary
 func getAdapter() ports.SecretWriter {
 	adapterMu.RLock()
-	if adapter != nil {
-		defer adapterMu.RUnlock()
-		return adapter
-	}
+	a := adapter
 	adapterMu.RUnlock()
+	
+	if a != nil {
+		return a
+	}
 	
 	adapterOnce.Do(func() {
 		adapterMu.Lock()
-		adapter = filesystem.NewAdapter()
+		if adapter == nil {
+			adapter = filesystem.NewAdapter()
+		}
 		adapterMu.Unlock()
 	})
 	
@@ -36,19 +39,25 @@ func getAdapter() ports.SecretWriter {
 	return adapter
 }
 
-// SetAdapter allows injecting a custom adapter for testing purposes
+// SetAdapter allows injecting a custom adapter for testing purposes.
+// Note: This should only be called before any concurrent access to the adapter,
+// typically in test setup code.
 func SetAdapter(a ports.SecretWriter) {
 	adapterMu.Lock()
 	defer adapterMu.Unlock()
 	adapter = a
 }
 
-// ResetAdapter resets the adapter to nil (useful for testing)
+// ResetAdapter resets the adapter to nil (useful for testing).
+// WARNING: This should only be used in tests with no concurrent access.
+// sync.Once cannot be truly reset, so the adapter field is cleared but
+// sync.Once will not re-initialize it automatically.
 func ResetAdapter() {
 	adapterMu.Lock()
 	defer adapterMu.Unlock()
 	adapter = nil
-	adapterOnce = sync.Once{}
+	// Note: sync.Once cannot be reset. This means after ResetAdapter(),
+	// you must call SetAdapter() to inject a new adapter for testing.
 }
 
 // Read will read the the content of a file and return it as a string.

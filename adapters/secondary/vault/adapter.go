@@ -91,9 +91,16 @@ func (a *Adapter) ReadSecretKey(path string, key string) (interface{}, error) {
 	}
 
 	// 2. Traversal with nested keys and array access
-	normalizedKey := strings.ReplaceAll(key, "[", ".")
-	normalizedKey = strings.ReplaceAll(normalizedKey, "]", "")
-	keys := strings.Split(normalizedKey, ".")
+	// Handle array notation: users[0] becomes users.0
+	normalizedKey := strings.ReplaceAll(key, "]", "")
+	normalizedKey = strings.ReplaceAll(normalizedKey, "[", ".")
+	parts := strings.Split(normalizedKey, ".")
+	keys := make([]string, 0, len(parts))
+	for _, part := range parts {
+		if part != "" {
+			keys = append(keys, part)
+		}
+	}
 
 	var current interface{} = secret
 	for _, k := range keys {
