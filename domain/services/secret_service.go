@@ -1,17 +1,30 @@
-package vault
+package services
 
 import (
 	"fmt"
 
-	"github.com/BESTSELLER/harpocrates/adapters/secondary/filesystem"
-	vaultadapter "github.com/BESTSELLER/harpocrates/adapters/secondary/vault"
 	"github.com/BESTSELLER/harpocrates/config"
-	"github.com/BESTSELLER/harpocrates/domain/services"
-	"github.com/BESTSELLER/harpocrates/files"
+	"github.com/BESTSELLER/harpocrates/domain/ports"
 	"github.com/BESTSELLER/harpocrates/secrets"
 	"github.com/BESTSELLER/harpocrates/util"
 	"github.com/go-viper/mapstructure/v2"
 )
+
+// SecretService orchestrates secret extraction and processing
+type SecretService struct {
+	fetcher       ports.SecretFetcher
+	writer        ports.SecretWriter
+	authenticator ports.Authenticator
+}
+
+// NewSecretService creates a new instance of SecretService
+func NewSecretService(fetcher ports.SecretFetcher, writer ports.SecretWriter, authenticator ports.Authenticator) *SecretService {
+	return &SecretService{
+		fetcher:       fetcher,
+		writer:        writer,
+		authenticator: authenticator,
+	}
+}
 
 // Outputs represents the output format for secrets
 type Outputs struct {
@@ -21,38 +34,8 @@ type Outputs struct {
 	Owner    *int           `json:"owner,omitempty"     yaml:"owner,omitempty"`
 }
 
-// ExtractSecrets will loop through al those damn interfaces
-// This method now delegates to the hexagonal architecture service layer
-func (vaultClient *API) ExtractSecrets(input util.SecretJSON, appendToFile bool) ([]Outputs, error) {
-	// Create adapters
-	vaultAdapter := vaultadapter.NewAdapter(vaultClient.Client)
-	filesystemAdapter := filesystem.NewAdapter()
-	
-	// Create service with adapters
-	secretService := services.NewSecretService(vaultAdapter, filesystemAdapter, nil)
-	
-	// Delegate to service
-	serviceOutputs, err := secretService.ExtractSecrets(input, appendToFile)
-	if err != nil {
-		return nil, err
-	}
-	
-	// Convert service outputs to vault outputs (they have the same structure)
-	result := make([]Outputs, len(serviceOutputs))
-	for i, out := range serviceOutputs {
-		result[i] = Outputs{
-			Format:   out.Format,
-			Filename: out.Filename,
-			Result:   out.Result,
-			Owner:    out.Owner,
-		}
-	}
-	
-	return result, nil
-}
-
-// ExtractSecretsLegacy is the old implementation kept for reference
-func (vaultClient *API) ExtractSecretsLegacy(input util.SecretJSON, appendToFile bool) ([]Outputs, error) {
+// ExtractSecrets extracts secrets based on the input configuration
+func (s *SecretService) ExtractSecrets(input util.SecretJSON, appendToFile bool) ([]Outputs, error) {
 	var finalResult []Outputs
 	var result = make(secrets.Result)
 	var currentPrefix = config.Config.Prefix
@@ -72,12 +55,12 @@ func (vaultClient *API) ExtractSecretsLegacy(input util.SecretJSON, appendToFile
 			mapstructure.Decode(b, &aa)
 
 			for c, d := range aa {
-				setPrefix(d.Prefix, &currentPrefix)
-				setUpper(d.UpperCase, &currentUpperCase)
-				setFormat(d.Format, &currentFormat)
+				s.setPrefix(d.Prefix, &currentPrefix)
+				s.setUpper(d.UpperCase, &currentUpperCase)
+				s.setFormat(d.Format, &currentFormat)
 
 				if len(d.Keys) == 0 {
-					secretValue, err := vaultClient.ReadSecret(c)
+					secretValue, err := s.fetcher.ReadSecret(c)
 					if err != nil {
 						return nil, err
 					}
@@ -97,43 +80,47 @@ func (vaultClient *API) ExtractSecretsLegacy(input util.SecretJSON, appendToFile
 						mapstructure.Decode(f, &bb)
 
 						for h, i := range bb {
-							setPrefix(i.Prefix, &currentPrefix)
-							setUpper(d.UpperCase, &currentUpperCase)
+							s.setPrefix(i.Prefix, &currentPrefix)
+							s.setUpper(d.UpperCase, &currentUpperCase)
 
 							if i.SaveAsFile != nil {
-								secretValue, err := vaultClient.ReadSecretKey(c, h)
+								secretValue, err := s.fetcher.ReadSecretKey(c, h)
 								if err != nil {
 									return nil, err
 								}
 								if *i.SaveAsFile {
-									files.Write(input.Output, secrets.ToUpperOrNotToUpper(fmt.Sprintf("%s%s", currentPrefix, h), &currentUpperCase), secretValue, nil, appendToFile)
+									// Write directly using writer port
+									err = s.writer.Write(input.Output, secrets.ToUpperOrNotToUpper(fmt.Sprintf("%s%s", currentPrefix, h), &currentUpperCase), secretValue, nil, appendToFile)
+									if err != nil {
+										return nil, err
+									}
 								} else {
 									result.Add(h, secretValue, currentPrefix, currentUpperCase)
 								}
 							} else {
-								secretValue, err := vaultClient.ReadSecretKey(c, h)
+								secretValue, err := s.fetcher.ReadSecretKey(c, h)
 								if err != nil {
 									return nil, err
 								}
 								result.Add(h, secretValue, currentPrefix, currentUpperCase)
 							}
-							setPrefix(d.Prefix, &currentPrefix)
-							setUpper(d.UpperCase, &currentUpperCase)
+							s.setPrefix(d.Prefix, &currentPrefix)
+							s.setUpper(d.UpperCase, &currentUpperCase)
 						}
 					} else {
-						secretValue, err := vaultClient.ReadSecretKey(c, fmt.Sprintf("%s", f))
+						secretValue, err := s.fetcher.ReadSecretKey(c, fmt.Sprintf("%s", f))
 						if err != nil {
 							return nil, err
 						}
 						result.Add(fmt.Sprintf("%s", f), secretValue, currentPrefix, currentUpperCase)
 					}
 				}
-				setPrefix(config.Config.Prefix, &currentPrefix)
-				setUpper(d.UpperCase, &currentUpperCase)
-				setFormat(d.Format, &currentFormat)
+				s.setPrefix(config.Config.Prefix, &currentPrefix)
+				s.setUpper(d.UpperCase, &currentUpperCase)
+				s.setFormat(d.Format, &currentFormat)
 			}
 		} else {
-			secretValue, err := vaultClient.ReadSecret(fmt.Sprintf("%s", a))
+			secretValue, err := s.fetcher.ReadSecret(fmt.Sprintf("%s", a))
 			if err != nil {
 				return nil, err
 			}
@@ -147,14 +134,15 @@ func (vaultClient *API) ExtractSecretsLegacy(input util.SecretJSON, appendToFile
 	return finalResult, nil
 }
 
-func setPrefix(potentialPrefix string, currentPrefix *string) {
+func (s *SecretService) setPrefix(potentialPrefix string, currentPrefix *string) {
 	if potentialPrefix != "" {
 		*currentPrefix = potentialPrefix
 	} else {
 		*currentPrefix = config.Config.Prefix
 	}
 }
-func setUpper(potentialUpper *bool, currentUpper *bool) {
+
+func (s *SecretService) setUpper(potentialUpper *bool, currentUpper *bool) {
 	if potentialUpper != nil {
 		*currentUpper = *potentialUpper
 	} else {
@@ -162,7 +150,7 @@ func setUpper(potentialUpper *bool, currentUpper *bool) {
 	}
 }
 
-func setFormat(potentiaFormat string, currentFormat *string) {
+func (s *SecretService) setFormat(potentiaFormat string, currentFormat *string) {
 	if potentiaFormat != "" {
 		*currentFormat = potentiaFormat
 	} else {
