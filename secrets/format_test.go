@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-// TestGetStringRepresentationString tests the generic version with string
+// TestGetStringRepresentationString tests with string value
 func TestGetStringRepresentationString(t *testing.T) {
 	result := getStringRepresentation("hello")
 	expected := "'hello'"
@@ -13,7 +13,7 @@ func TestGetStringRepresentationString(t *testing.T) {
 	}
 }
 
-// TestGetStringRepresentationInt tests the generic version with int
+// TestGetStringRepresentationInt tests with int value
 func TestGetStringRepresentationInt(t *testing.T) {
 	result := getStringRepresentation(42)
 	expected := "42"
@@ -22,7 +22,7 @@ func TestGetStringRepresentationInt(t *testing.T) {
 	}
 }
 
-// TestGetStringRepresentationFloat tests the generic version with float64
+// TestGetStringRepresentationFloat tests with float64 value
 func TestGetStringRepresentationFloat(t *testing.T) {
 	result := getStringRepresentation(3.14)
 	expected := "3.140000"
@@ -31,7 +31,7 @@ func TestGetStringRepresentationFloat(t *testing.T) {
 	}
 }
 
-// TestGetStringRepresentationBool tests the generic version with bool
+// TestGetStringRepresentationBool tests with bool value
 func TestGetStringRepresentationBool(t *testing.T) {
 	result := getStringRepresentation(true)
 	expected := "true"
@@ -40,45 +40,9 @@ func TestGetStringRepresentationBool(t *testing.T) {
 	}
 }
 
-// TestGetStringRepresentationAnyString tests the any version with string
-func TestGetStringRepresentationAnyString(t *testing.T) {
-	result := getStringRepresentationAny("world")
-	expected := "'world'"
-	if result != expected {
-		t.Errorf("expected %q, got %q", expected, result)
-	}
-}
-
-// TestGetStringRepresentationAnyInt tests the any version with int
-func TestGetStringRepresentationAnyInt(t *testing.T) {
-	result := getStringRepresentationAny(123)
-	expected := "123"
-	if result != expected {
-		t.Errorf("expected %q, got %q", expected, result)
-	}
-}
-
-// TestGetStringRepresentationAnyFloat tests the any version with float64
-func TestGetStringRepresentationAnyFloat(t *testing.T) {
-	result := getStringRepresentationAny(2.718)
-	expected := "2.718000"
-	if result != expected {
-		t.Errorf("expected %q, got %q", expected, result)
-	}
-}
-
-// TestGetStringRepresentationAnyBool tests the any version with bool
-func TestGetStringRepresentationAnyBool(t *testing.T) {
-	result := getStringRepresentationAny(false)
-	expected := "false"
-	if result != expected {
-		t.Errorf("expected %q, got %q", expected, result)
-	}
-}
-
-// TestGetStringRepresentationAnyNil tests the any version with nil
-func TestGetStringRepresentationAnyNil(t *testing.T) {
-	result := getStringRepresentationAny(nil)
+// TestGetStringRepresentationNil tests with nil value
+func TestGetStringRepresentationNil(t *testing.T) {
+	result := getStringRepresentation(nil)
 	expected := "null"
 	if result != expected {
 		t.Errorf("expected %q, got %q", expected, result)

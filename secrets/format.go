@@ -36,7 +36,7 @@ func (result Result) toKV(prefix string) string {
 	for key, val := range result {
 		leKey := fixEnvName(key)
 		log.Info().Msgf("Exporting key: %s", leKey)
-		resturnString += fmt.Sprintf("%s%s=%s\n", prefix, leKey, getStringRepresentationAny(val))
+		resturnString += fmt.Sprintf("%s%s=%s\n", prefix, leKey, getStringRepresentation(val))
 	}
 	return resturnString
 }
@@ -55,7 +55,7 @@ func (result Result) toSecretKV() string {
 
 	for key, val := range result {
 		log.Info().Msgf("Exporting key: %s", key)
-		resturnString += fmt.Sprintf("%s=%s\n", key, getStringRepresentationAny(val))
+		resturnString += fmt.Sprintf("%s=%s\n", key, getStringRepresentation(val))
 	}
 	return resturnString
 }
@@ -100,30 +100,9 @@ func ToUpperOrNotToUpper(something string, currentUpper *bool) string {
 	return something
 }
 
-// SecretValue defines the types that can be stored as secret values
-type SecretValue interface {
-	string | int | float64 | bool
-}
-
-// getStringRepresentation converts a secret value to its string representation
-// Using generics provides compile-time type safety while handling different value types
-func getStringRepresentation[T SecretValue](val T) string {
-	switch v := any(val).(type) {
-	case string:
-		return fmt.Sprintf("'%s'", v)
-	case int:
-		return fmt.Sprintf("%d", v)
-	case float64:
-		return fmt.Sprintf("%f", v)
-	case bool:
-		return fmt.Sprintf("%t", v)
-	default:
-		return fmt.Sprintf("'%v'", v)
-	}
-}
-
-// getStringRepresentationAny handles the case where the value is of any type (legacy interface{} support)
-func getStringRepresentationAny(val any) string {
+// getStringRepresentation handles the case where the value can be of various types
+// and converts it to its appropriate string representation for output formatting.
+func getStringRepresentation(val any) string {
 	if val == nil {
 		return "null"
 	}
