@@ -17,7 +17,7 @@ type SecretJSON struct {
 	Owner         *int          `json:"owner,omitempty"       yaml:"owner,omitempty"`
 	Prefix        string        `json:"prefix,omitempty"      yaml:"prefix,omitempty"`
 	UpperCase     *bool         `json:"uppercase,omitempty"   yaml:"uppercase,omitempty"`
-	Secrets       []interface{} `json:"secrets,omitempty"     yaml:"secrets,omitempty"`
+	Secrets       []any `json:"secrets,omitempty"     yaml:"secrets,omitempty"`
 	GcpWorkloadID bool          `json:"gcpWorkloadID,omitempty"     yaml:"gcpWorkloadID,omitempty"`
 }
 
@@ -27,7 +27,7 @@ type Secret struct {
 	Format    string        `json:"format,omitempty"      yaml:"format,omitempty"      mapstructure:"format,omitempty"`
 	FileName  string        `json:"filename,omitempty"    yaml:"filename,omitempty"    mapstructure:"filename,omitempty"`
 	UpperCase *bool         `json:"uppercase,omitempty"   yaml:"uppercase,omitempty"`
-	Keys      []interface{} `json:"keys,omitempty"        yaml:"keys,omitempty"`
+	Keys      []any `json:"keys,omitempty"        yaml:"keys,omitempty"`
 	Owner     *int          `json:"owner,omitempty"       yaml:"owner,omitempty"`
 }
 

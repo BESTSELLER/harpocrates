@@ -10,7 +10,7 @@ const keyNotFound = "the key '%s' was not found in the path '%s': %v"
 const secretNotFound = "the secret '%s' was not found: %v"
 
 // ReadSecret from Vault
-func (client *API) ReadSecret(path string) (map[string]interface{}, error) {
+func (client *API) ReadSecret(path string) (map[string]any, error) {
 
 	secretValues, err := client.Client.Logical().Read(path)
 	if secretValues == nil {
@@ -25,7 +25,7 @@ func (client *API) ReadSecret(path string) (map[string]interface{}, error) {
 
 	// Will append data to path and retry if "data" is empty and warnings is present
 	// if path contains data and warnings an error is returned
-	if fmt.Sprintf("%s", secretValues.Data) == fmt.Sprintf("%s", make(map[string]interface{})) {
+	if fmt.Sprintf("%s", secretValues.Data) == fmt.Sprintf("%s", make(map[string]any)) {
 		if len(secretValues.Warnings) > 0 {
 			splitPath := strings.Split(path, "/")
 			if splitPath[1] == "data" {
@@ -45,19 +45,19 @@ func (client *API) ReadSecret(path string) (map[string]interface{}, error) {
 		return nil, err
 	}
 
-	var f interface{}
+	var f any
 	err = json.Unmarshal(b, &f)
 	if err != nil {
 		return nil, fmt.Errorf("unable to unmarshal response from Vault")
 	}
 
-	myMap := f.(map[string]interface{})
+	myMap := f.(map[string]any)
 
 	return myMap, nil
 }
 
 // ReadSecretKey from Vault
-func (client *API) ReadSecretKey(path string, key string) (interface{}, error) {
+func (client *API) ReadSecretKey(path string, key string) (any, error) {
 	secret, err := client.ReadSecret(path)
 	if secret == nil {
 		return "", fmt.Errorf(keyNotFound, key, path, err)

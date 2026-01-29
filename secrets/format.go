@@ -12,14 +12,14 @@ import (
 )
 
 // Result holds the result of all the secrets pulled from Vault
-type Result map[string]interface{}
+type Result map[string]any
 
 // Add will add a new secret to the Result
-func (result Result) Add(key string, value interface{}, prefix string, upperCase bool) {
+func (result Result) Add(key string, value any, prefix string, upperCase bool) {
 	result[ToUpperOrNotToUpper(fmt.Sprintf("%s%s", prefix, key), &upperCase)] = value
 }
 
-// ToJSON will format a map[string]interface{} to json
+// ToJSON will format a map[string]any to json
 func (result Result) ToJSON() string {
 	log.Debug().Msg("Exporting as JSON")
 	jsonString, err := json.Marshal(result)
@@ -36,7 +36,7 @@ func (result Result) toKV(prefix string) string {
 	for key, val := range result {
 		leKey := fixEnvName(key)
 		log.Info().Msgf("Exporting key: %s", leKey)
-		resturnString += fmt.Sprintf("%s%s=%s\n", prefix, leKey, getStringRepresentation(val))
+		resturnString += fmt.Sprintf("%s%s=%s\n", prefix, leKey, getStringRepresentationAny(val))
 	}
 	return resturnString
 }
@@ -55,7 +55,7 @@ func (result Result) toSecretKV() string {
 
 	for key, val := range result {
 		log.Info().Msgf("Exporting key: %s", key)
-		resturnString += fmt.Sprintf("%s=%s\n", key, getStringRepresentation(val))
+		resturnString += fmt.Sprintf("%s=%s\n", key, getStringRepresentationAny(val))
 	}
 	return resturnString
 }
@@ -100,19 +100,43 @@ func ToUpperOrNotToUpper(something string, currentUpper *bool) string {
 	return something
 }
 
-func getStringRepresentation(val interface{}) string {
-	switch val.(type) {
+// SecretValue defines the types that can be stored as secret values
+type SecretValue interface {
+	string | int | float64 | bool
+}
+
+// getStringRepresentation converts a secret value to its string representation
+// Using generics provides compile-time type safety while handling different value types
+func getStringRepresentation[T SecretValue](val T) string {
+	switch v := any(val).(type) {
 	case string:
-		return fmt.Sprintf("'%s'", val)
+		return fmt.Sprintf("'%s'", v)
 	case int:
-		return fmt.Sprintf("%d", val)
+		return fmt.Sprintf("%d", v)
 	case float64:
-		return fmt.Sprintf("%f", val)
+		return fmt.Sprintf("%f", v)
 	case bool:
-		return fmt.Sprintf("%t", val)
-	case nil:
-		return "null"
+		return fmt.Sprintf("%t", v)
 	default:
-		return fmt.Sprintf("'%s'", val)
+		return fmt.Sprintf("'%v'", v)
+	}
+}
+
+// getStringRepresentationAny handles the case where the value is of any type (legacy interface{} support)
+func getStringRepresentationAny(val any) string {
+	if val == nil {
+		return "null"
+	}
+	switch v := val.(type) {
+	case string:
+		return fmt.Sprintf("'%s'", v)
+	case int:
+		return fmt.Sprintf("%d", v)
+	case float64:
+		return fmt.Sprintf("%f", v)
+	case bool:
+		return fmt.Sprintf("%t", v)
+	default:
+		return fmt.Sprintf("'%v'", v)
 	}
 }

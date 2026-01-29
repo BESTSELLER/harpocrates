@@ -23,7 +23,7 @@ func Read(filePath string) string {
 }
 
 // Write will write some string data to a file
-func Write(output string, fileName string, content interface{}, owner *int, append bool) {
+func Write(output string, fileName string, content any, owner *int, append bool) {
 	fileName = fixFileName(fileName)
 	path := filepath.Join(output, fileName)
 

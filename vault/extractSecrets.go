@@ -29,9 +29,9 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON, appendToFile bool)
 
 		// If the key is just a secret path, then it will read that from Vault, otherwise:
 		if fmt.Sprintf("%T", a) != "string" {
-			b, ok := a.(map[string]interface{})
+			b, ok := a.(map[string]any)
 			if !ok {
-				return nil, fmt.Errorf("expected map[string]interface{}, got: '%s'", a)
+				return nil, fmt.Errorf("expected map[string]any, got: '%s'", a)
 			}
 
 			aa := map[string]util.Secret{}

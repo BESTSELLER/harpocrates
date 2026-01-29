@@ -47,7 +47,7 @@ func setupVault(t *testing.T) {
 
 	// put secrets
 	secretPath := "secret/data/secret"
-	secret := map[string]interface{}{"data": map[string]interface{}{"key1": "value1", "key2": "value2", "key3": "value3", "key4": 123, "key5": true}}
+	secret := map[string]any{"data": map[string]any{"key1": "value1", "key2": "value2", "key3": "value3", "key4": 123, "key5": true}}
 
 	_, err = client.Logical().Write(secretPath, secret)
 	if err != nil {
@@ -84,7 +84,7 @@ func TestExtractSecretsWithFormatAsExpected(t *testing.T) {
 	for _, v := range result {
 
 		// assert
-		expected := fmt.Sprintf("%v", map[string]interface{}{input.Prefix + "key1": "value1", input.Prefix + "key2": "value2", input.Prefix + "key3": "value3", input.Prefix + "key4": float64(123), input.Prefix + "key5": true})
+		expected := fmt.Sprintf("%v", map[string]any{input.Prefix + "key1": "value1", input.Prefix + "key2": "value2", input.Prefix + "key3": "value3", input.Prefix + "key4": float64(123), input.Prefix + "key5": true})
 		actual := fmt.Sprintf("%v", v.Result)
 
 		if expected != actual {
@@ -120,7 +120,7 @@ func TestExtractSecretsAsExpected(t *testing.T) {
 	}
 	for _, v := range result {
 		// assert
-		expected := fmt.Sprintf("%v", map[string]interface{}{input.Prefix + "key1": "value1", input.Prefix + "key2": "value2", input.Prefix + "key3": "value3", input.Prefix + "key4": float64(123), input.Prefix + "key5": true})
+		expected := fmt.Sprintf("%v", map[string]any{input.Prefix + "key1": "value1", input.Prefix + "key2": "value2", input.Prefix + "key3": "value3", input.Prefix + "key4": float64(123), input.Prefix + "key5": true})
 		actual := fmt.Sprintf("%v", v.Result)
 
 		if expected != actual {
@@ -157,7 +157,7 @@ func TestExtractSecretsWithPrefixAsExpected(t *testing.T) {
 
 	for _, v := range result {
 		// assert
-		expected := fmt.Sprintf("%v", map[string]interface{}{"PRE_key1": "value1", "FIX_key2": "value2", input.Prefix + "key3": "value3"})
+		expected := fmt.Sprintf("%v", map[string]any{"PRE_key1": "value1", "FIX_key2": "value2", input.Prefix + "key3": "value3"})
 		actual := fmt.Sprintf("%v", v.Result)
 
 		if expected != actual {
