@@ -41,59 +41,59 @@ func (client *API) ReadSecret(path string) (map[string]interface{}, error) {
 		return nil, fmt.Errorf("no data recieved")
 	}
 
-	b, err := json.Marshal(secretData)
+	jsonBytes, err := json.Marshal(secretData)
 	if err != nil {
 		return nil, err
 	}
 
-	var f interface{}
-	err = json.Unmarshal(b, &f)
+	var secretInterface interface{}
+	err = json.Unmarshal(jsonBytes, &secretInterface)
 	if err != nil {
 		return nil, fmt.Errorf("unable to unmarshal response from Vault")
 	}
 
-	myMap := f.(map[string]interface{})
+	secretMap := secretInterface.(map[string]interface{})
 
-	return myMap, nil
+	return secretMap, nil
 }
 
 // ReadSecretKey from Vault
-func (client *API) ReadSecretKey(path string, key string) (interface{}, error) {
+func (client *API) ReadSecretKey(path string, secretKey string) (interface{}, error) {
 	secret, err := client.ReadSecret(path)
 	if secret == nil {
-		return "", fmt.Errorf(keyNotFound, key, path, err)
+		return "", fmt.Errorf(keyNotFound, secretKey, path, err)
 	}
 	if err != nil {
 		return "", err
 	}
 
 	// 1. Literal match
-	if val, ok := secret[key]; ok {
-		return val, nil
+	if literalValue, keyExists := secret[secretKey]; keyExists {
+		return literalValue, nil
 	}
 
 	// 2. Traversal
-	normalizedKey := strings.ReplaceAll(key, "[", ".")
+	normalizedKey := strings.ReplaceAll(secretKey, "[", ".")
 	normalizedKey = strings.ReplaceAll(normalizedKey, "]", "")
 	keys := strings.Split(normalizedKey, ".")
 
 	var current interface{} = secret
-	for _, k := range keys {
-		if m, ok := current.(map[string]interface{}); ok {
-			if val, exists := m[k]; exists {
-				current = val
+	for _, keySegment := range keys {
+		if currentMap, isMap := current.(map[string]interface{}); isMap {
+			if mapValue, exists := currentMap[keySegment]; exists {
+				current = mapValue
 				continue
 			}
 		}
-		if a, ok := current.([]interface{}); ok {
-			if i, err := strconv.Atoi(k); err == nil {
-				if i >= 0 && i < len(a) {
-					current = a[i]
+		if currentSlice, isSlice := current.([]interface{}); isSlice {
+			if sliceIndex, err := strconv.Atoi(keySegment); err == nil {
+				if sliceIndex >= 0 && sliceIndex < len(currentSlice) {
+					current = currentSlice[sliceIndex]
 					continue
 				}
 			}
 		}
-		return "", fmt.Errorf(keyNotFound, key, path, nil)
+		return "", fmt.Errorf(keyNotFound, secretKey, path, nil)
 	}
 	return current, nil
 }
