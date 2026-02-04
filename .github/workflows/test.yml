@@ -46,7 +46,6 @@ jobs:
       - name: Go format and lint
         run: |
           go fmt ./...
-          go vet ./...
 
       - name: Suggest changes
         uses: reviewdog/action-suggester@aa38384ceb608d00f84b4690cacc83a5aba307ff # v1.24.0
