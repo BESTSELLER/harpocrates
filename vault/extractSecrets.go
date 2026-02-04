@@ -28,14 +28,19 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON, appendToFile bool)
 	for _, a := range input.Secrets {
 
 		// If the key is just a secret path, then it will read that from Vault, otherwise:
-		if fmt.Sprintf("%T", a) != "string" {
-			b, ok := a.(map[string]interface{})
-			if !ok {
-				return nil, fmt.Errorf("expected map[string]interface{}, got: '%s'", a)
+		if secretPath, ok := util.GetSecretString(a); ok {
+			// Handle simple string secret path
+			secretValue, err := vaultClient.ReadSecret(secretPath)
+			if err != nil {
+				return nil, err
 			}
-
+			for aa, bb := range secretValue {
+				result.Add(aa, bb, currentPrefix, currentUpperCase)
+			}
+		} else if secretMap, ok := util.GetSecretMap(a); ok {
+			// Handle Secret struct (as map)
 			aa := map[string]util.Secret{}
-			mapstructure.Decode(b, &aa)
+			mapstructure.Decode(secretMap, &aa)
 
 			for c, d := range aa {
 				setPrefix(d.Prefix, &currentPrefix)
@@ -57,10 +62,18 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON, appendToFile bool)
 				}
 
 				for _, f := range d.Keys {
-					// If the key is just a secret path, then it will read that from Vault, otherwise:
-					if fmt.Sprintf("%T", f) != "string" {
+					// If the key is just a string, then it will read that key from Vault, otherwise:
+					if keyName, ok := util.GetKeyString(f); ok {
+						// Handle simple string key name
+						secretValue, err := vaultClient.ReadSecretKey(c, keyName)
+						if err != nil {
+							return nil, err
+						}
+						result.Add(keyName, secretValue, currentPrefix, currentUpperCase)
+					} else if keyMap, ok := util.GetKeyMap(f); ok {
+						// Handle SecretKeys struct (as map)
 						bb := map[string]util.SecretKeys{}
-						mapstructure.Decode(f, &bb)
+						mapstructure.Decode(keyMap, &bb)
 
 						for h, i := range bb {
 							setPrefix(i.Prefix, &currentPrefix)
@@ -87,11 +100,7 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON, appendToFile bool)
 							setUpper(d.UpperCase, &currentUpperCase)
 						}
 					} else {
-						secretValue, err := vaultClient.ReadSecretKey(c, fmt.Sprintf("%s", f))
-						if err != nil {
-							return nil, err
-						}
-						result.Add(fmt.Sprintf("%s", f), secretValue, currentPrefix, currentUpperCase)
+						return nil, fmt.Errorf("invalid key item type: expected string or SecretKeys map, got: %T", f)
 					}
 				}
 				setPrefix(config.Config.Prefix, &currentPrefix)
@@ -99,13 +108,7 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON, appendToFile bool)
 				setFormat(d.Format, &currentFormat)
 			}
 		} else {
-			secretValue, err := vaultClient.ReadSecret(fmt.Sprintf("%s", a))
-			if err != nil {
-				return nil, err
-			}
-			for aa, bb := range secretValue {
-				result.Add(aa, bb, currentPrefix, currentUpperCase)
-			}
+			return nil, fmt.Errorf("invalid secret item type: expected string or Secret map, got: %T", a)
 		}
 	}
 

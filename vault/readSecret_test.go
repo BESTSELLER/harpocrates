@@ -30,7 +30,7 @@ func TestReadSecretWrongPath(t *testing.T) {
 	}
 }
 
-func testReadSecretKey(path string, key string, expectedValue interface{}, t *testing.T) {
+func testReadSecretKey(path string, key string, expectedValue any, t *testing.T) {
 	// mock the ReadSecret function
 	vaultClient := &API{
 		Client: testClient,

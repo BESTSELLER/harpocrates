@@ -12,14 +12,14 @@ import (
 )
 
 // Result holds the result of all the secrets pulled from Vault
-type Result map[string]interface{}
+type Result map[string]any
 
 // Add will add a new secret to the Result
-func (result Result) Add(key string, value interface{}, prefix string, upperCase bool) {
+func (result Result) Add(key string, value any, prefix string, upperCase bool) {
 	result[ToUpperOrNotToUpper(fmt.Sprintf("%s%s", prefix, key), &upperCase)] = value
 }
 
-// ToJSON will format a map[string]interface{} to json
+// ToJSON will format a map[string]any to json
 func (result Result) ToJSON() string {
 	log.Debug().Msg("Exporting as JSON")
 	jsonString, err := json.Marshal(result)
@@ -100,19 +100,22 @@ func ToUpperOrNotToUpper(something string, currentUpper *bool) string {
 	return something
 }
 
-func getStringRepresentation(val interface{}) string {
-	switch val.(type) {
-	case string:
-		return fmt.Sprintf("'%s'", val)
-	case int:
-		return fmt.Sprintf("%d", val)
-	case float64:
-		return fmt.Sprintf("%f", val)
-	case bool:
-		return fmt.Sprintf("%t", val)
-	case nil:
+// getStringRepresentation handles the case where the value can be of various types
+// and converts it to its appropriate string representation for output formatting.
+func getStringRepresentation(val any) string {
+	if val == nil {
 		return "null"
+	}
+	switch v := val.(type) {
+	case string:
+		return fmt.Sprintf("'%s'", v)
+	case int:
+		return fmt.Sprintf("%d", v)
+	case float64:
+		return fmt.Sprintf("%f", v)
+	case bool:
+		return fmt.Sprintf("%t", v)
 	default:
-		return fmt.Sprintf("'%s'", val)
+		return fmt.Sprintf("'%v'", v)
 	}
 }
