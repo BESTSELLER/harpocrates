@@ -201,3 +201,33 @@ func TestReadSecretKeyDeeplyNested(t *testing.T) {
 	// act & assert
 	testReadSecretKey(path, "level1[0].level3.level4[1].level6.final", "FoundIt", t)
 }
+
+// TestReadSecretKeyLiteralWithDots confirms that keys with literal dots are found before dot-notation traversal
+func TestReadSecretKeyLiteralWithDots(t *testing.T) {
+	// arrange
+	setupVault(t)
+	t.Cleanup(func() {
+		testClient = nil
+	})
+
+	path := "secret/data/literal_dots"
+	secretData := map[string]interface{}{
+		"key.with.dots": "literalValue",
+		"key": map[string]interface{}{
+			"with": map[string]interface{}{
+				"dots": "nestedValue",
+			},
+		},
+	}
+
+	_, err := testClient.Logical().Write(path, map[string]interface{}{
+		"data": secretData,
+	})
+	if err != nil {
+		t.Fatalf("failed to write secret data to vault: %v", err)
+	}
+
+	// act & assert
+	// Should prioritize literal match ("literalValue") over nested traversal ("nestedValue")
+	testReadSecretKey(path, "key.with.dots", "literalValue", t)
+}
