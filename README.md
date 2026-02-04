@@ -163,6 +163,40 @@ harpocrates fetch --format "env" --secret "/secret/data/somesecret" --prefix "PR
 
 There is not the same granularity as in the json and yaml specs. e.g. prefix can only exist on the top level.
 
+<br/>
+
+### Nested Keys
+
+Harpocrates supports fetching nested values from secrets stored as JSON objects. This allows referencing deeply nested fields without duplicating or flattening secrets.
+
+Supported syntax:
+
+- Dot notation for nested maps: `globalSecrets.theSecretINeed`
+- Array indexing: `users[0].name` or `users.0.name`
+
+**Example:**
+
+If a secret in Vault contains the following JSON:
+
+```json
+{
+  "db": {
+    "username": "app",
+    "password": "s3cr3t"
+  }
+}
+```
+
+You can reference the nested keys in your YAML configuration:
+
+```yaml
+secrets:
+  - secret/data/mysecret:
+      keys:
+        - db.username
+        - db.password
+```
+
 ---
 
 <br/>
