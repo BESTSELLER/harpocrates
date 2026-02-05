@@ -78,13 +78,23 @@ func (client *API) ReadSecretKey(path string, secretKey string) (interface{}, er
 	keys := strings.Split(normalizedKey, ".")
 
 	var current interface{} = secret
-	for _, keySegment := range keys {
+	for i := 0; i < len(keys); i++ {
+		keySegment := keys[i]
+
 		if currentMap, isMap := current.(map[string]interface{}); isMap {
 			if mapValue, exists := currentMap[keySegment]; exists {
 				current = mapValue
 				continue
 			}
+
+			// Attempt to match keys with dots (merging segments)
+			mergedKeys := strings.Join(keys[i:], ".")
+			if mapValue, exists := currentMap[mergedKeys]; exists {
+				current = mapValue
+				break
+			}
 		}
+
 		if currentSlice, isSlice := current.([]interface{}); isSlice {
 			if sliceIndex, err := strconv.Atoi(keySegment); err == nil {
 				if sliceIndex >= 0 && sliceIndex < len(currentSlice) {

@@ -215,7 +215,8 @@ func TestReadSecretKeyLiteralWithDots(t *testing.T) {
 		"key.with.dots": "literalValue",
 		"key": map[string]interface{}{
 			"with": map[string]interface{}{
-				"dots": "nestedValue",
+				"dots":         "nestedValue",
+				"dots1.nested": "nextNestedValues",
 			},
 		},
 	}
@@ -230,4 +231,39 @@ func TestReadSecretKeyLiteralWithDots(t *testing.T) {
 	// act & assert
 	// Should prioritize literal match ("literalValue") over nested traversal ("nestedValue")
 	testReadSecretKey(path, "key.with.dots", "literalValue", t)
+	testReadSecretKey(path, "key.with.dots1.nested", "nextNestedValues", t)
+}
+
+// TestReadSecretKeyNestedNotFound tests that accessing a non-existent nested key returns an error
+func TestReadSecretKeyNestedNotFound(t *testing.T) {
+	// arrange
+	setupVault(t)
+	t.Cleanup(func() {
+		testClient = nil
+	})
+
+	path := "secret/data/nested_not_found"
+	secretData := map[string]interface{}{
+		"parent": map[string]interface{}{
+			"child": "value",
+		},
+	}
+
+	_, err := testClient.Logical().Write(path, map[string]interface{}{
+		"data": secretData,
+	})
+	if err != nil {
+		t.Fatalf("failed to write secret data to vault: %v", err)
+	}
+
+	// act
+	// accessing "parent.missing" -> should fail because "missing" is not in {child: value}
+	vaultClient := &API{Client: testClient}
+	key := "parent.missing"
+	val, err := vaultClient.ReadSecretKey(path, key)
+
+	// assert
+	if err == nil {
+		t.Errorf("expected error for key %q, got value: %v", key, val)
+	}
 }
