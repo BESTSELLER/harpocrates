@@ -45,7 +45,12 @@ func Write(output string, fileName string, content interface{}, owner *int, appe
 		os.Exit(1)
 	}
 
-	defer f.Close() //nolint:errcheck // We can't really handle error when trying to close a file, so we ignore it.
+	defer func() {
+		if err := f.Close(); err != nil {
+			log.Fatal().Err(err).Msgf("Unable to close file '%s'", path)
+			os.Exit(1)
+		}
+	}()
 
 	if _, err = fmt.Fprintf(f, "%v", content); err != nil {
 		log.Fatal().Err(err).Msgf("Unable to write to file '%s'", path)
