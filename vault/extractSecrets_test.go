@@ -193,7 +193,7 @@ func TestExtractSecretsSaveAsFileAsExpected(t *testing.T) {
 	}
 
 	// clean up
-	defer os.Remove("../.tmp/TEST_key1")
+	defer os.Remove("../.tmp/TEST_key1") //nolint:errcheck // It's just tests, we don't care
 
 	// assert
 	content, err := os.ReadFile("../.tmp/TEST_key1")

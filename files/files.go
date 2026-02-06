@@ -2,7 +2,6 @@ package files
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -13,7 +12,7 @@ import (
 
 // Read will read the the content of a file and return it as a string.
 func Read(filePath string) string {
-	data, err := ioutil.ReadFile(filePath)
+	data, err := os.ReadFile(filePath)
 	if err != nil {
 		log.Fatal().Err(err).Msgf("Unable to read the file at path '%s'", filePath)
 		os.Exit(1)
@@ -46,9 +45,14 @@ func Write(output string, fileName string, content interface{}, owner *int, appe
 		os.Exit(1)
 	}
 
-	defer f.Close()
+	defer func() {
+		if err := f.Close(); err != nil {
+			log.Fatal().Err(err).Msgf("Unable to close file '%s'", path)
+			os.Exit(1)
+		}
+	}()
 
-	if _, err = f.WriteString(fmt.Sprintf("%v", content)); err != nil {
+	if _, err = fmt.Fprintf(f, "%v", content); err != nil {
 		log.Fatal().Err(err).Msgf("Unable to write to file '%s'", path)
 		os.Exit(1)
 	}

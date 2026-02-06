@@ -69,7 +69,7 @@ func Login() {
 		log.Fatal().Err(err).Msg("Unable to make login call to Vault")
 		os.Exit(1)
 	}
-	defer res.Body.Close()
+	defer res.Body.Close() //nolint:errcheck // We don't care about errors from this
 
 	returnPayload := gcp.VaultLoginResult{}
 	err = json.NewDecoder(res.Body).Decode(&returnPayload)

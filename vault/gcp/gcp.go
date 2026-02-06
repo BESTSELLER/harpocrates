@@ -63,7 +63,7 @@ func fetchVaultLogin(vaultAddr string, jwt string, vaultRole string) (VaultLogin
 	if err != nil {
 		return login, err
 	}
-	defer resp.Body.Close()
+	defer resp.Body.Close() //nolint:errcheck // We don't care about errors from this
 
 	err = json.NewDecoder(resp.Body).Decode(&login)
 	if err != nil {

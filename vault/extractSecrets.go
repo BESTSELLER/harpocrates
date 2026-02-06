@@ -36,7 +36,10 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON, appendToFile bool)
 			}
 
 			aa := map[string]util.Secret{}
-			mapstructure.Decode(b, &aa)
+			err := mapstructure.Decode(b, &aa)
+			if err != nil {
+				return finalResult, err
+			}
 
 			for c, d := range aa {
 				setPrefix(d.Prefix, &currentPrefix)
@@ -61,7 +64,10 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON, appendToFile bool)
 					// If the key is just a secret path, then it will read that from Vault, otherwise:
 					if fmt.Sprintf("%T", f) != "string" {
 						bb := map[string]util.SecretKeys{}
-						mapstructure.Decode(f, &bb)
+						err := mapstructure.Decode(f, &bb)
+						if err != nil {
+							return finalResult, err
+						}
 
 						for h, i := range bb {
 							setPrefix(i.Prefix, &currentPrefix)

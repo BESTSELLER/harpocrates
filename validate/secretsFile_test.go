@@ -2,7 +2,7 @@ package validate
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"strings"
 	"testing"
 
@@ -13,7 +13,7 @@ import (
 // Collect all secret file tests from the test_data directory.
 // Return as a slice of strings.
 func collectTests() []string {
-	tests, err := ioutil.ReadDir("../test_data")
+	tests, err := os.ReadDir("../test_data")
 	if err != nil {
 		panic(err)
 	}

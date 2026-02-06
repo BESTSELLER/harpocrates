@@ -57,7 +57,7 @@ func doIt(cmd *cobra.Command, args []string) []string {
 	} else if len(*secret) > 0 {
 		if config.Config.Output == "" {
 			log.Error().Msg("Output is required!")
-			cmd.Usage()
+			cmd.Usage() //nolint:errcheck // We don't care about errors from this
 			return secretEnvs
 		}
 
@@ -72,7 +72,7 @@ func doIt(cmd *cobra.Command, args []string) []string {
 		}
 	} else {
 		if len(args) == 0 {
-			cmd.Help()
+			cmd.Help() //nolint:errcheck // We don't care about errors from this
 			return secretEnvs
 		}
 
@@ -111,7 +111,9 @@ func doIt(cmd *cobra.Command, args []string) []string {
 			}
 		}))
 		go func() {
-			http.ListenAndServe(":8000", nil)
+			if err := http.ListenAndServe(":8000", nil); err != http.ErrServerClosed {
+				panic(err)
+			}
 		}()
 	}
 
@@ -128,7 +130,7 @@ func doIt(cmd *cobra.Command, args []string) []string {
 
 		if cmd.Flags().Changed("format") && (config.Config.Format != "json" && config.Config.Format != "env" && config.Config.Format != "secret") {
 			log.Error().Msg("Please a valid format of either: json, env or secret")
-			cmd.Help()
+			cmd.Help() //nolint:errcheck // We don't care about errors from this
 			return secretEnvs
 		}
 
