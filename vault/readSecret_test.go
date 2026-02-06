@@ -217,6 +217,9 @@ func TestReadSecretKeyLiteralWithDots(t *testing.T) {
 			"with": map[string]interface{}{
 				"dots":         "nestedValue",
 				"dots1.nested": "nextNestedValues",
+				"this.should.also": map[string]interface{}{
+					"work": "right?",
+				},
 			},
 		},
 	}
@@ -232,6 +235,7 @@ func TestReadSecretKeyLiteralWithDots(t *testing.T) {
 	// Should prioritize literal match ("literalValue") over nested traversal ("nestedValue")
 	testReadSecretKey(path, "key.with.dots", "literalValue", t)
 	testReadSecretKey(path, "key.with.dots1.nested", "nextNestedValues", t)
+	testReadSecretKey(path, "key.with.this.should.also.work", "right?", t)
 }
 
 // TestReadSecretKeyNestedNotFound tests that accessing a non-existent nested key returns an error
