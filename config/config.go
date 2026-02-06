@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"os"
 	"strings"
 
@@ -63,8 +62,8 @@ func tryEnv(env string, some *string, required bool, cmd *cobra.Command) {
 	if *some != "" {
 		return
 	}
-	envVar, ok := os.LookupEnv(strings.ToUpper(fmt.Sprintf("%s", env)))
-	if ok == true && envVar != "" {
+	envVar, ok := os.LookupEnv(strings.ToUpper(env))
+	if ok && envVar != "" {
 		*some = envVar
 	} else {
 		if required {
