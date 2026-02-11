@@ -43,14 +43,9 @@ jobs:
         with:
           go-mod-path: "go.mod"
 
-      - name: Install linters
-        run: go install golang.org/x/lint/golint@latest
-
       - name: Go format and lint
         run: |
           go fmt ./...
-          golint ./...
-          go vet ./...
 
       - name: Suggest changes
         uses: reviewdog/action-suggester@aa38384ceb608d00f84b4690cacc83a5aba307ff # v1.24.0
@@ -59,3 +54,6 @@ jobs:
 
       - name: Test
         uses: robherley/go-test-action@42a1975c97156330b5126c2f35ef0fb78c4c7154 # v0.7.1
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@1e7e51e771db61008b38414a730f564565cf7c20 # v9.2.0
