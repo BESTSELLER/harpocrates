@@ -73,22 +73,27 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON, appendToFile bool)
 							setPrefix(i.Prefix, &currentPrefix)
 							setUpper(d.UpperCase, &currentUpperCase)
 
+							keyName := h
+							if i.OverrideName != "" {
+								keyName = i.OverrideName
+							}
+
 							if i.SaveAsFile != nil {
 								secretValue, err := vaultClient.ReadSecretKey(c, h)
 								if err != nil {
 									return nil, err
 								}
 								if *i.SaveAsFile {
-									files.Write(input.Output, secrets.ToUpperOrNotToUpper(fmt.Sprintf("%s%s", currentPrefix, h), &currentUpperCase), secretValue, nil, appendToFile)
+									files.Write(input.Output, secrets.ToUpperOrNotToUpper(fmt.Sprintf("%s%s", currentPrefix, keyName), &currentUpperCase), secretValue, nil, appendToFile)
 								} else {
-									result.Add(h, secretValue, currentPrefix, currentUpperCase)
+									result.Add(keyName, secretValue, currentPrefix, currentUpperCase)
 								}
 							} else {
 								secretValue, err := vaultClient.ReadSecretKey(c, h)
 								if err != nil {
 									return nil, err
 								}
-								result.Add(h, secretValue, currentPrefix, currentUpperCase)
+								result.Add(keyName, secretValue, currentPrefix, currentUpperCase)
 							}
 							setPrefix(d.Prefix, &currentPrefix)
 							setUpper(d.UpperCase, &currentUpperCase)

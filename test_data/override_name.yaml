@@ -1,0 +1,7 @@
+secrets:
+  - secret/data/secret:
+      format: yaml
+      keys:
+        - key1:
+            overrideName: newKey1
+        - key2
