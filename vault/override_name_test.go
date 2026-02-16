@@ -58,3 +58,60 @@ func TestExtractSecretsWithOverrideName(t *testing.T) {
 		}
 	}
 }
+
+func TestExtractSecretsWithOverrideNameNested(t *testing.T) {
+	// arrange
+	setupVault(t)
+	t.Cleanup(func() {
+		testClient = nil
+	})
+
+	path := "secret/data/complex"
+	secretData := map[string]interface{}{
+		"globalSecrets": map[string]interface{}{
+			"theSecretINeed": "HelloThere!",
+		},
+	}
+
+	_, err := testClient.Logical().Write(path, map[string]interface{}{
+		"data": secretData,
+	})
+	if err != nil {
+		t.Fatalf("failed to write secret data to vault: %v", err)
+	}
+
+	// define input
+	data := files.Read("../test_data/override_name_nested.yaml")
+	input := util.ReadInput(data)
+
+	// mock prefix
+	config.Config.Prefix = input.Prefix
+
+	vaultClient := &API{
+		Client: testClient,
+	}
+
+	// act
+	result, err := vaultClient.ExtractSecrets(input, false)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(result) == 0 {
+		t.Fatal("No secrets extracted")
+	}
+
+	// assert
+	for _, v := range result {
+		resMap := v.Result
+		if val, ok := resMap["myTopSecret"]; !ok {
+			t.Errorf("Expected 'myTopSecret' in result, got %v", resMap)
+		} else if val != "HelloThere!" {
+			t.Errorf("Expected 'myTopSecret' to be 'HelloThere!', got '%v'", val)
+		}
+
+		if _, ok := resMap["globalSecrets.theSecretINeed"]; ok {
+			t.Errorf("Did not expect 'globalSecrets.theSecretINeed' in result, got %v", resMap)
+		}
+	}
+}
