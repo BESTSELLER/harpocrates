@@ -1,0 +1,99 @@
+package lsp
+
+import "encoding/json"
+
+type Request struct {
+	RPC    string          `json:"jsonrpc"`
+	ID     any             `json:"id,omitempty"`
+	Method string          `json:"method"`
+	Params json.RawMessage `json:"params"`
+}
+
+type Response struct {
+	RPC    string `json:"jsonrpc"`
+	ID     any    `json:"id"`
+	Result any    `json:"result,omitempty"`
+	Error  *Error `json:"error,omitempty"`
+}
+
+type Error struct {
+	Code    int    `json:"code"`
+	Message string `json:"message"`
+}
+
+type InitializeParams struct {
+	ProcessID int    `json:"processId"`
+	RootURI   string `json:"rootUri"`
+}
+
+type InitializeResult struct {
+	Capabilities ServerCapabilities `json:"capabilities"`
+}
+
+type ServerCapabilities struct {
+	TextDocumentSync   int                `json:"textDocumentSync"`
+	CompletionProvider *CompletionOptions `json:"completionProvider,omitempty"`
+}
+
+type CompletionOptions struct{}
+
+type DidOpenTextDocumentParams struct {
+	TextDocument TextDocumentItem `json:"textDocument"`
+}
+
+type TextDocumentItem struct {
+	URI        string `json:"uri"`
+	LanguageID string `json:"languageId"`
+	Version    int    `json:"version"`
+	Text       string `json:"text"`
+}
+
+type DidChangeTextDocumentParams struct {
+	TextDocument   VersionedTextDocumentIdentifier  `json:"textDocument"`
+	ContentChanges []TextDocumentContentChangeEvent `json:"contentChanges"`
+}
+
+type VersionedTextDocumentIdentifier struct {
+	URI     string `json:"uri"`
+	Version int    `json:"version"`
+}
+
+type TextDocumentContentChangeEvent struct {
+	Text string `json:"text"`
+}
+
+type CompletionParams struct {
+	TextDocument TextDocumentIdentifier `json:"textDocument"`
+	Position     Position               `json:"position"`
+}
+
+type TextDocumentIdentifier struct {
+	URI string `json:"uri"`
+}
+
+type Position struct {
+	Line      int `json:"line"`
+	Character int `json:"character"`
+}
+
+type CompletionList struct {
+	IsIncomplete bool             `json:"isIncomplete"`
+	Items        []CompletionItem `json:"items"`
+}
+
+const (
+	CompletionItemKindText    = 1
+	CompletionItemKindMethod  = 2
+	CompletionItemKindField   = 5
+	CompletionItemKindValue   = 12
+	CompletionItemKindKeyword = 14
+	CompletionItemKindFolder  = 19
+)
+
+type CompletionItem struct {
+	Label         string `json:"label"`
+	Kind          int    `json:"kind,omitempty"`
+	Detail        string `json:"detail,omitempty"`
+	Documentation string `json:"documentation,omitempty"`
+	InsertText    string `json:"insertText,omitempty"`
+}
