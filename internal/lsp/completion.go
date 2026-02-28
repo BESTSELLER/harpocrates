@@ -48,11 +48,19 @@ func (s *Server) provideCompletions(params CompletionParams) CompletionList {
 			return CompletionList{}
 		}
 
+		// Find the closest slash '/' to determine the "base path"
+		basePath := ""
+		if idx := strings.LastIndex(trimmedPrefix, "/"); idx != -1 {
+			basePath = trimmedPrefix[:idx+1]
+		}
+
+		// The Vault V2 KV engine list method expects /metadata/ to list child secrets/directories.
+		queryPath := strings.Replace(basePath, "/data/", "/metadata/", 1)
+
 		// Try to list secrets
-		// Assume trimming prefix correctly leaves exact vault path like secret/data/foo
-		tokens, err := s.vaultClient.ListTokens(trimmedPrefix)
+		tokens, err := s.vaultClient.ListTokens(queryPath)
 		if err != nil {
-			log.Error().Err(err).Str("path", trimmedPrefix).Msg("ListTokens failed")
+			log.Error().Err(err).Str("path", queryPath).Msg("ListTokens failed")
 		}
 
 		var items []CompletionItem
@@ -61,11 +69,32 @@ func (s *Server) provideCompletions(params CompletionParams) CompletionList {
 			if strings.HasSuffix(token, "/") {
 				kind = CompletionItemKindFolder
 			}
-			items = append(items, CompletionItem{
-				Label:      token,
-				Kind:       kind,
-				InsertText: token,
-			})
+
+			// prefix matching to filter out items not matching the current word
+			currentWord := strings.TrimPrefix(trimmedPrefix, basePath)
+			if strings.HasPrefix(token, currentWord) {
+				var cmd *Command
+				if kind == CompletionItemKindFolder {
+					cmd = &Command{
+						Title:   "Trigger Suggest",
+						Command: "editor.action.triggerSuggest",
+					}
+				}
+
+				items = append(items, CompletionItem{
+					Label:      token,
+					Kind:       kind,
+					InsertText: token,
+					TextEdit: &TextEdit{
+						Range: Range{
+							Start: params.Position,
+							End:   params.Position,
+						},
+						NewText: token,
+					},
+					Command: cmd,
+				})
+			}
 		}
 		return CompletionList{Items: items}
 	}
@@ -89,6 +118,13 @@ func (s *Server) provideCompletions(params CompletionParams) CompletionList {
 					Label:      key,
 					Kind:       CompletionItemKindField,
 					InsertText: key,
+					TextEdit: &TextEdit{
+						Range: Range{
+							Start: params.Position,
+							End:   params.Position,
+						},
+						NewText: key,
+					},
 				})
 			}
 		}

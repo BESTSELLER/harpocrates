@@ -92,8 +92,10 @@ func (s *Server) handleMessage(req Request) {
 
 		result := InitializeResult{
 			Capabilities: ServerCapabilities{
-				TextDocumentSync:   1, // Full document sync
-				CompletionProvider: &CompletionOptions{},
+				TextDocumentSync: 1, // Full document sync
+				CompletionProvider: &CompletionOptions{
+					TriggerCharacters: []string{"/"},
+				},
 			},
 		}
 

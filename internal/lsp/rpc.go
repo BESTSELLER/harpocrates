@@ -35,7 +35,10 @@ type ServerCapabilities struct {
 	CompletionProvider *CompletionOptions `json:"completionProvider,omitempty"`
 }
 
-type CompletionOptions struct{}
+type CompletionOptions struct {
+	ResolveProvider   bool     `json:"resolveProvider,omitempty"`
+	TriggerCharacters []string `json:"triggerCharacters,omitempty"`
+}
 
 type DidOpenTextDocumentParams struct {
 	TextDocument TextDocumentItem `json:"textDocument"`
@@ -90,10 +93,28 @@ const (
 	CompletionItemKindFolder  = 19
 )
 
+type Range struct {
+	Start Position `json:"start"`
+	End   Position `json:"end"`
+}
+
+type TextEdit struct {
+	Range   Range  `json:"range"`
+	NewText string `json:"newText"`
+}
+
+type Command struct {
+	Title     string `json:"title"`
+	Command   string `json:"command"`
+	Arguments []any  `json:"arguments,omitempty"`
+}
+
 type CompletionItem struct {
-	Label         string `json:"label"`
-	Kind          int    `json:"kind,omitempty"`
-	Detail        string `json:"detail,omitempty"`
-	Documentation string `json:"documentation,omitempty"`
-	InsertText    string `json:"insertText,omitempty"`
+	Label         string    `json:"label"`
+	Kind          int       `json:"kind,omitempty"`
+	Detail        string    `json:"detail,omitempty"`
+	Documentation string    `json:"documentation,omitempty"`
+	InsertText    string    `json:"insertText,omitempty"`
+	TextEdit      *TextEdit `json:"textEdit,omitempty"`
+	Command       *Command  `json:"command,omitempty"`
 }
