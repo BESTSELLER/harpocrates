@@ -1,0 +1,6 @@
+secrets:
+  - secret/data/complex:
+      format: yaml
+      keys:
+        - globalSecrets.theSecretINeed:
+            overrideName: myTopSecret
