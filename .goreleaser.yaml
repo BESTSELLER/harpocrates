@@ -35,6 +35,21 @@ archives:
         formats:
           - zip
 
+dockers_v2:
+  - images:
+      - "foo/bar"
+      - "ghcr.io/foo/bar"
+    tags:
+      - "v{{ .Version }}"
+      - "{{ if not .IsNightly }}latest{{ end }}"
+    labels:
+      "org.opencontainers.image.description": "Foo bar"
+      "org.opencontainers.image.created": "{{.Date}}"
+      "org.opencontainers.image.name": "{{.ProjectName}}"
+      "org.opencontainers.image.revision": "{{.FullCommit}}"
+      "org.opencontainers.image.version": "{{.Version}}"
+      "org.opencontainers.image.source": "{{.GitURL}}"
+
 homebrew_casks:
   - name: harpocrates
     repository:
