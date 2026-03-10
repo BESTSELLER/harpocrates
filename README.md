@@ -52,6 +52,42 @@ This requires that the [Kubernetes Auth Method](https://www.vaultproject.io/docs
 
 <br/>
 
+## Installation
+
+You can install Harpocrates using one of the following methods, built and published via [GoReleaser](https://goreleaser.com/).
+
+### macOS / Linux (Homebrew)
+
+```bash
+brew install BESTSELLER/tap/harpocrates
+```
+
+### Windows (Winget)
+
+```powershell
+winget install bestseller.harpocrates
+```
+
+### Docker
+
+```bash
+docker pull europe-docker.pkg.dev/artifacts-pub-prod-b57f/public-docker/harpocrates:latest
+```
+
+### Binary Downloads
+
+Pre-compiled binaries for Linux, macOS, and Windows are available in the [GitHub Releases](https://github.com/BESTSELLER/harpocrates/releases).
+
+### Go (From Source)
+
+```bash
+go install github.com/BESTSELLER/harpocrates@latest
+```
+
+---
+
+<br/>
+
 ## Authentication
 
 The easiest way to authenticate is to use your Vault token:
@@ -264,14 +300,9 @@ Harpocrates can also help you manage secrets for local development. Using Harpoc
 
 ### Prerequisites
 
-- Go installed
 - Vault installed
   https://developer.hashicorp.com/vault/install
-- Harpocrates CLI tool installed
-
-```bash
-go install github.com/BESTSELLER/harpocrates@latest
-```
+- Harpocrates CLI tool installed (see [Installation](#installation))
 
 ### How to Use
 
