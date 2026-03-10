@@ -42,7 +42,7 @@ dockers_v2:
       - "v{{ .Version }}"
       - "{{ if not .IsNightly }}latest{{ end }}"
     labels:
-      "org.opencontainers.image.description": "Foo bar"
+      "org.opencontainers.image.description": "Harpocrates is a lightweight, versatile CLI tool designed to securely fetch, format, and inject secrets from HashiCorp Vault"
       "org.opencontainers.image.created": "{{.Date}}"
       "org.opencontainers.image.name": "{{.ProjectName}}"
       "org.opencontainers.image.revision": "{{.FullCommit}}"
@@ -54,13 +54,13 @@ homebrew_casks:
     repository:
       owner: BESTSELLER
       name: homebrew-tap
-    description: "CLI to interact with Harpocrates"
+    description: "Harpocrates is a lightweight, versatile CLI tool designed to securely fetch, format, and inject secrets from HashiCorp Vault"
 
 winget:
   - name: harpocrates
     publisher: BESTSELLER
     license: "MIT"
-    short_description: "CLI to interact with Harpocrates from BESTSELLER"
+    short_description: "Harpocrates is a lightweight, versatile CLI tool designed to securely fetch, format, and inject secrets from HashiCorp Vault"
     publisher_support_url: "https://github.com/BESTSELLER/harpocrates/issues"
     package_identifier: "bestseller.harpocrates"
     repository:

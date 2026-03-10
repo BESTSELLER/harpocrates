@@ -10,7 +10,8 @@
 
 <br/>
 
-Harpocrates is a small application that can be used to pull secrets from [HashiCorp Vault](https://www.vaultproject.io/).
+Harpocrates is a lightweight, versatile CLI tool designed to securely fetch, format, and inject secrets from [HashiCorp Vault](https://www.vaultproject.io/). Whether you're configuring a Kubernetes pod, building CI/CD pipelines, or injecting secrets into applications during local development, Harpocrates simplifies the secure delivery of your Vault secrets.
+
 It can output the secrets in different formats:
 
 - JSON, which is simple key-values.
