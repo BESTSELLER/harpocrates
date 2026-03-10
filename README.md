@@ -21,12 +21,17 @@ It can output the secrets in different formats:
     "FOO": "bar"
   }
   ```
+- YAML, exported as a simple YAML map.
+  ```yaml
+  KEY: value
+  FOO: bar
+  ```
 - `source` ready env file e.g.
   ```bash
   export KEY=value
   export FOO=bar
   ```
-- Raw key values.
+- Raw key values (for secrets or env files).
   ```bash
   KEY=value
   FOO=bar
@@ -55,7 +60,9 @@ The easiest way to authenticate is to use your Vault token:
 harpocrates fetch --vault-token "sometoken"
 ```
 
-This can also be specified as the environment var `VAULT_TOKEN`
+This can also be specified as the environment variable `VAULT_TOKEN`.
+
+Alternatively, if you're working locally, Harpocrates will automatically look for a `.vault-token` file in your home directory (`~/.vault-token`), which is the default location Vault stores the token when executing `vault login`.
 
 ### GCP Workload identity
 
@@ -79,7 +86,7 @@ YAML is a great option for readability and replication of configs. YAML options 
 | Option        | Required | Value                                                        | default      |
 | ------------- | -------- | ------------------------------------------------------------ | ------------ |
 | format        | no       | one of: env, json, secret, yaml                              | env          |
-| output        | yes      | /path/to/output/folder                                       | -            |
+| output        | no       | /path/to/output/folder                                       | /secrets     |
 | owner         | no       | UID of the user e.g 0, can be set on "root" and secret level | current user |
 | prefix        | no       | prefix, can be set on any level                              | -            |
 | uppercase     | no       | will uppercase prefix and key                                | false        |
@@ -211,14 +218,18 @@ secrets:
 | role-name     | ROLE_NAME            | Vault role name, used at login                                                                             |                          -                          |
 | token-path    | TOKEN_PATH           | /path/to/token, uses clustername and path to login and exchange a vault token which is used in vault_token | /var/run/secrets/kubernetes.io/serviceaccount/token |
 | vault-token   | VAULT_TOKEN          | token as a string. If empty token_path will be queried                                                     |                          -                          |
-| format        | -                    | env, json, secret or yaml                                                                                  |                         env                         |
-| output        | -                    | /path/to/output                                                                                            |                  /tmp/secrets.env                   |
+| format        | FORMAT               | env, json, secret or yaml                                                                                  |                         env                         |
+| output        | -                    | /path/to/output                                                                                            |                   none (required)                   |
 | owner         | -                    | UID of the user e.g 0                                                                                      |                    current user                     |
-| prefix        | -                    | prefix keys, eg. K8S\_                                                                                     |                          -                          |
+| prefix        | PREFIX               | prefix keys, eg. K8S\_                                                                                     |                          -                          |
 | uppercase     | -                    | will uppercase prefix and key                                                                              |                        false                        |
 | secret        | -                    | vault path /secretengine/data/some/secret                                                                  |                          -                          |
 | append        | -                    | Appends secrets to a file                                                                                  |                        true                         |
-| -             | HARPOCRATES_FILENAME | overwrites the default output filename                                                                     |                          -                          |
+| file, -f      | -                    | yaml or json file configuration with secrets to apply                                                      |                          -                          |
+| log-level     | LOG_LEVEL            | logging level: debug, info, warn, error                                                                    |                        warn                         |
+| validate      | -                    | will only validate the secrets file                                                                        |                        false                        |
+| redact        | -                    | [dev command only] Redact secrets from output                                                              |                        false                        |
+| -             | HARPOCRATES_FILENAME | overwrites the default output filename                                                                     |                       secrets                       |
 | gcpWorkloadID | GCP_WORKLOAD_ID      | set to true to enable GCP workload identity, useful when running in GCP                                    |                        false                        |
 | -             | CONTINUOUS           | set to true to run harpocrates in a loop and fetch secrets every 1 minute, useful as a sidecar             |                        false                        |
 | -             | INTERVAL             | set the interval in minutes for the continuous mode                                                        |                          1                          |
