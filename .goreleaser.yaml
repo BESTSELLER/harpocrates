@@ -37,8 +37,7 @@ archives:
 
 dockers_v2:
   - images:
-      - "foo/bar"
-      - "ghcr.io/foo/bar"
+      - "europe-docker.pkg.dev/artifacts-pub-prod-b57f/public-docker/harpocrates"
     tags:
       - "v{{ .Version }}"
       - "{{ if not .IsNightly }}latest{{ end }}"
