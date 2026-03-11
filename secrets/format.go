@@ -25,7 +25,6 @@ func (result Result) ToJSON() string {
 	jsonString, err := json.Marshal(result)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Unable to convert result to json")
-		os.Exit(1)
 	}
 	return string(jsonString)
 }
@@ -81,7 +80,6 @@ func (result Result) ToYAML() string {
 	yamlString, err := yaml.Marshal(result)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Unable to convert result to yaml")
-		os.Exit(1)
 	}
 	return string(yamlString)
 }

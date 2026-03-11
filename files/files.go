@@ -30,7 +30,6 @@ func Write(output string, fileName string, content interface{}, owner *int, appe
 		err = os.MkdirAll(output, 0700)
 		if err != nil {
 			log.Fatal().Err(err).Msgf("Unable to create dir at path '%s'", output)
-			os.Exit(1)
 		}
 	}
 
@@ -42,19 +41,16 @@ func Write(output string, fileName string, content interface{}, owner *int, appe
 	f, err := os.OpenFile(path, overWriteOrAppend|os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
 		log.Fatal().Err(err).Msgf("An error happened while trying to open file %s", path)
-		os.Exit(1)
 	}
 
 	defer func() {
 		if err := f.Close(); err != nil {
 			log.Fatal().Err(err).Msgf("Unable to close file '%s'", path)
-			os.Exit(1)
 		}
 	}()
 
 	if _, err = fmt.Fprintf(f, "%v", content); err != nil {
 		log.Fatal().Err(err).Msgf("Unable to write to file '%s'", path)
-		os.Exit(1)
 	}
 	log.Debug().Msgf("Wrote file '%s'", path)
 
@@ -72,12 +68,10 @@ func Write(output string, fileName string, content interface{}, owner *int, appe
 func setPermissions(f *os.File, path string, output string, owner int) {
 	if err := os.Chown(output, owner, -1); err != nil {
 		log.Fatal().Err(err).Msgf("Unable to set permissions to folder '%s'", path)
-		os.Exit(1)
 	}
 
 	if err := f.Chown(owner, -1); err != nil {
 		log.Fatal().Err(err).Msgf("Unable to set permissions to file '%s'", path)
-		os.Exit(1)
 	}
 }
 

@@ -20,7 +20,6 @@ func NewClient() *API {
 	})
 	if err != nil {
 		log.Fatal().Err(err).Msg("Unable to create Vault client")
-		os.Exit(1)
 	}
 	client.SetToken(config.Config.VaultToken)
 
