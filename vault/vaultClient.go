@@ -1,8 +1,6 @@
 package vault
 
 import (
-	"os"
-
 	"github.com/BESTSELLER/harpocrates/config"
 	api "github.com/hashicorp/vault/api"
 	"github.com/rs/zerolog/log"
@@ -20,7 +18,6 @@ func NewClient() *API {
 	})
 	if err != nil {
 		log.Fatal().Err(err).Msg("Unable to create Vault client")
-		os.Exit(1)
 	}
 	client.SetToken(config.Config.VaultToken)
 
