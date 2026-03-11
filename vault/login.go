@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/BESTSELLER/harpocrates/config"
@@ -42,7 +41,6 @@ func Login() {
 		login, err := gcp.FetchVaultLogin(config.Config.VaultAddress, config.Config.AuthName)
 		if err != nil {
 			log.Fatal().Err(err).Msg("GcpWorkload Identity was enabled but auth failed")
-			os.Exit(1)
 		}
 		config.Config.VaultToken = login.Auth.ClientToken
 		tokenExpiry = time.Now().Add(time.Duration(login.Auth.LeaseDuration) * time.Second)
@@ -55,19 +53,16 @@ func Login() {
 	err := json.NewEncoder(b).Encode(JWTPayLoad{Jwt: token.Read(), Role: config.Config.RoleName})
 	if err != nil {
 		log.Fatal().Err(err).Msg("Unable to prepare jwt token")
-		os.Exit(1)
 	}
 
 	req, err := http.NewRequest(http.MethodPost, url, b)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Unable to create login request to Vault")
-		os.Exit(1)
 	}
 
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Unable to make login call to Vault")
-		os.Exit(1)
 	}
 	defer res.Body.Close() //nolint:errcheck // We don't care about errors from this
 
@@ -75,12 +70,10 @@ func Login() {
 	err = json.NewDecoder(res.Body).Decode(&returnPayload)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Unexpected response from Vault")
-		os.Exit(1)
 	}
 
 	if len(returnPayload.Errors) != 0 {
 		log.Fatal().Err(fmt.Errorf("%s", returnPayload.Errors)).Msg("API call to Vault failed")
-		os.Exit(1)
 	}
 
 	config.Config.VaultToken = returnPayload.Auth.ClientToken
