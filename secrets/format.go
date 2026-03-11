@@ -3,7 +3,6 @@ package secrets
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 	"regexp"
 	"strings"
 

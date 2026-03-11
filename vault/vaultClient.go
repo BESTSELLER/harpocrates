@@ -1,8 +1,6 @@
 package vault
 
 import (
-	"os"
-
 	"github.com/BESTSELLER/harpocrates/config"
 	api "github.com/hashicorp/vault/api"
 	"github.com/rs/zerolog/log"
