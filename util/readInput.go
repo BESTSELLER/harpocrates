@@ -34,10 +34,11 @@ type Secret struct {
 
 // SecretKeys holds the configuration for secret keys
 type SecretKeys struct {
-	Append     *bool  `json:"append,omitempty"         yaml:"append,omitempty"`
-	Prefix     string `json:"prefix,omitempty"         yaml:"prefix,omitempty"      mapstructure:"prefix,omitempty"`
-	UpperCase  *bool  `json:"uppercase,omitempty"      yaml:"uppercase,omitempty"   mapstructure:"uppercase,omitempty"`
-	SaveAsFile *bool  `json:"saveAsFile,omitempty"     yaml:"saveAsFile,omitempty"`
+	Append       *bool  `json:"append,omitempty"         yaml:"append,omitempty"`
+	Prefix       string `json:"prefix,omitempty"         yaml:"prefix,omitempty"      mapstructure:"prefix,omitempty"`
+	UpperCase    *bool  `json:"uppercase,omitempty"      yaml:"uppercase,omitempty"   mapstructure:"uppercase,omitempty"`
+	SaveAsFile   *bool  `json:"saveAsFile,omitempty"     yaml:"saveAsFile,omitempty"`
+	OverrideName string `json:"overrideName,omitempty"   yaml:"overrideName,omitempty" mapstructure:"overrideName,omitempty"`
 }
 
 // ReadInput will read the input given to Harpocrates and try to parse it to SecretJSON
