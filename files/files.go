@@ -66,7 +66,7 @@ func Write(output string, fileName string, content interface{}, owner *int, appe
 
 func setPermissions(f *os.File, path string, output string, owner int) {
 	if err := os.Chown(output, owner, -1); err != nil {
-		log.Fatal().Err(err).Msgf("Unable to set permissions to folder '%s'", path)
+		log.Fatal().Err(err).Msgf("Unable to set permissions to folder '%s'", output)
 	}
 
 	if err := f.Chown(owner, -1); err != nil {
