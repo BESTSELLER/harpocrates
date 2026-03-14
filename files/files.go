@@ -10,7 +10,7 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// Read will read the the content of a file and return it as a string.
+// Read will read the content of a file and return it as a string.
 func Read(filePath string) string {
 	data, err := os.ReadFile(filePath)
 	if err != nil {
