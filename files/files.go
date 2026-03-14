@@ -10,6 +10,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+var fileNameRegexp = regexp.MustCompile("[^a-zA-Z0-9.-]+")
+
 // Read will read the content of a file and return it as a string.
 func Read(filePath string) string {
 	data, err := os.ReadFile(filePath)
@@ -75,8 +77,7 @@ func setPermissions(f *os.File, path string, output string, owner int) {
 }
 
 func fixFileName(name string) string {
-	reg := regexp.MustCompile("[^a-zA-Z0-9.-]+")
-	fileName := reg.ReplaceAllString(name, "_")
+	fileName := fileNameRegexp.ReplaceAllString(name, "_")
 
 	return fileName
 }
