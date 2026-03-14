@@ -85,7 +85,7 @@ func (result Result) ToYAML() string {
 
 // fixEnvName replaces all unsported env characters with "_"
 func fixEnvName(currentName string) string {
-	reg, _ := regexp.Compile("[^a-zA-Z0-9_]+")
+	reg := regexp.MustCompile("[^a-zA-Z0-9_]+")
 	envVar := reg.ReplaceAllString(currentName, "_")
 
 	return envVar

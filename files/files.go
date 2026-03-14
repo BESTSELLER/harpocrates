@@ -75,7 +75,7 @@ func setPermissions(f *os.File, path string, output string, owner int) {
 }
 
 func fixFileName(name string) string {
-	reg, _ := regexp.Compile("[^a-zA-Z0-9.-]+")
+	reg := regexp.MustCompile("[^a-zA-Z0-9.-]+")
 	fileName := reg.ReplaceAllString(name, "_")
 
 	return fileName
