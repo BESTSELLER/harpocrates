@@ -13,6 +13,9 @@ import (
 // Result holds the result of all the secrets pulled from Vault
 type Result map[string]interface{}
 
+// envNameRegexp is a precompiled regular expression used by fixEnvName
+var envNameRegexp = regexp.MustCompile("[^a-zA-Z0-9_]+")
+
 // Add will add a new secret to the Result
 func (result Result) Add(key string, value interface{}, prefix string, upperCase bool) {
 	result[ToUpperOrNotToUpper(fmt.Sprintf("%s%s", prefix, key), &upperCase)] = value
@@ -85,8 +88,7 @@ func (result Result) ToYAML() string {
 
 // fixEnvName replaces all unsupported env characters with "_"
 func fixEnvName(currentName string) string {
-	reg := regexp.MustCompile("[^a-zA-Z0-9_]+")
-	envVar := reg.ReplaceAllString(currentName, "_")
+	envVar := envNameRegexp.ReplaceAllString(currentName, "_")
 
 	return envVar
 }
