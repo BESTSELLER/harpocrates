@@ -10,7 +10,8 @@
 
 <br/>
 
-Harpocrates is a small application that can be used to pull secrets from [HashiCorp Vault](https://www.vaultproject.io/).
+Harpocrates is a lightweight, versatile CLI tool designed to securely fetch, format, and inject secrets from [HashiCorp Vault](https://www.vaultproject.io/). Whether you're configuring a Kubernetes pod, building CI/CD pipelines, or injecting secrets into applications during local development, Harpocrates simplifies the secure delivery of your Vault secrets.
+
 It can output the secrets in different formats:
 
 - JSON, which is simple key-values.
@@ -20,12 +21,17 @@ It can output the secrets in different formats:
     "FOO": "bar"
   }
   ```
+- YAML, exported as a simple YAML map.
+  ```yaml
+  KEY: value
+  FOO: bar
+  ```
 - `source` ready env file e.g.
   ```bash
   export KEY=value
   export FOO=bar
   ```
-- Raw key values.
+- Raw key values (for secrets or env files).
   ```bash
   KEY=value
   FOO=bar
@@ -46,6 +52,42 @@ This requires that the [Kubernetes Auth Method](https://www.vaultproject.io/docs
 
 <br/>
 
+## Installation
+
+You can install Harpocrates using one of the following methods, built and published via [GoReleaser](https://goreleaser.com/).
+
+### macOS / Linux (Homebrew)
+
+```bash
+brew install BESTSELLER/tap/harpocrates
+```
+
+### Windows (Winget)
+
+```powershell
+winget install bestseller.harpocrates
+```
+
+### Docker
+
+```bash
+docker pull europe-docker.pkg.dev/artifacts-pub-prod-b57f/public-docker/harpocrates:latest
+```
+
+### Binary Downloads
+
+Pre-compiled binaries for Linux, macOS, and Windows are available in the [GitHub Releases](https://github.com/BESTSELLER/harpocrates/releases).
+
+### Go (From Source)
+
+```bash
+go install github.com/BESTSELLER/harpocrates@latest
+```
+
+---
+
+<br/>
+
 ## Authentication
 
 The easiest way to authenticate is to use your Vault token:
@@ -54,7 +96,9 @@ The easiest way to authenticate is to use your Vault token:
 harpocrates fetch --vault-token "sometoken"
 ```
 
-This can also be specified as the environment var `VAULT_TOKEN`
+This can also be specified as the environment variable `VAULT_TOKEN`.
+
+Alternatively, if you're working locally, Harpocrates will automatically look for a `.vault-token` file in your home directory (`~/.vault-token`), which is the default location Vault stores the token when executing `vault login`.
 
 ### GCP Workload identity
 
@@ -78,7 +122,7 @@ YAML is a great option for readability and replication of configs. YAML options 
 | Option        | Required | Value                                                        | default      |
 | ------------- | -------- | ------------------------------------------------------------ | ------------ |
 | format        | no       | one of: env, json, secret, yaml                              | env          |
-| output        | yes      | /path/to/output/folder                                       | -            |
+| output        | no       | /path/to/output/folder                                       | /secrets     |
 | owner         | no       | UID of the user e.g 0, can be set on "root" and secret level | current user |
 | prefix        | no       | prefix, can be set on any level                              | -            |
 | uppercase     | no       | will uppercase prefix and key                                | false        |
@@ -210,14 +254,18 @@ secrets:
 | role-name     | ROLE_NAME            | Vault role name, used at login                                                                             |                          -                          |
 | token-path    | TOKEN_PATH           | /path/to/token, uses clustername and path to login and exchange a vault token which is used in vault_token | /var/run/secrets/kubernetes.io/serviceaccount/token |
 | vault-token   | VAULT_TOKEN          | token as a string. If empty token_path will be queried                                                     |                          -                          |
-| format        | -                    | env, json, secret or yaml                                                                                  |                         env                         |
-| output        | -                    | /path/to/output                                                                                            |                  /tmp/secrets.env                   |
+| format        | FORMAT               | env, json, secret or yaml                                                                                  |                         env                         |
+| output        | -                    | /path/to/output                                                                                            |                   none (required)                   |
 | owner         | -                    | UID of the user e.g 0                                                                                      |                    current user                     |
-| prefix        | -                    | prefix keys, eg. K8S\_                                                                                     |                          -                          |
+| prefix        | PREFIX               | prefix keys, eg. K8S\_                                                                                     |                          -                          |
 | uppercase     | -                    | will uppercase prefix and key                                                                              |                        false                        |
 | secret        | -                    | vault path /secretengine/data/some/secret                                                                  |                          -                          |
 | append        | -                    | Appends secrets to a file                                                                                  |                        true                         |
-| -             | HARPOCRATES_FILENAME | overwrites the default output filename                                                                     |                          -                          |
+| file, -f      | -                    | yaml or json file configuration with secrets to apply                                                      |                          -                          |
+| log-level     | LOG_LEVEL            | logging level: debug, info, warn, error                                                                    |                        warn                         |
+| validate      | -                    | will only validate the secrets file                                                                        |                        false                        |
+| redact        | -                    | [dev command only] Redact secrets from output                                                              |                        false                        |
+| -             | HARPOCRATES_FILENAME | overwrites the default output filename                                                                     |                       secrets                       |
 | gcpWorkloadID | GCP_WORKLOAD_ID      | set to true to enable GCP workload identity, useful when running in GCP                                    |                        false                        |
 | -             | CONTINUOUS           | set to true to run harpocrates in a loop and fetch secrets every 1 minute, useful as a sidecar             |                        false                        |
 | -             | INTERVAL             | set the interval in minutes for the continuous mode                                                        |                          1                          |
@@ -252,14 +300,9 @@ Harpocrates can also help you manage secrets for local development. Using Harpoc
 
 ### Prerequisites
 
-- Go installed
 - Vault installed
   https://developer.hashicorp.com/vault/install
-- Harpocrates CLI tool installed
-
-```bash
-go install github.com/BESTSELLER/harpocrates@latest
-```
+- Harpocrates CLI tool installed (see [Installation](#installation))
 
 ### How to Use
 
