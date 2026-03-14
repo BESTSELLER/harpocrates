@@ -15,7 +15,6 @@ func Read(filePath string) string {
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		log.Fatal().Err(err).Msgf("Unable to read the file at path '%s'", filePath)
-		os.Exit(1)
 	}
 
 	return fmt.Sprint(string(data))
