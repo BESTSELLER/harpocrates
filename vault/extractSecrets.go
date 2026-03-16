@@ -71,7 +71,7 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON, appendToFile bool)
 
 						for h, i := range bb {
 							setPrefix(i.Prefix, &currentPrefix)
-							setUpper(d.UpperCase, &currentUpperCase)
+							setUpper(i.UpperCase, &currentUpperCase)
 
 							keyName := h
 							if i.OverrideName != "" {
