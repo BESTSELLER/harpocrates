@@ -88,11 +88,11 @@ func doIt(cmd *cobra.Command, args []string) []string {
 
 	allSecrets, err := vaultClient.ExtractSecrets(input, config.Config.Append)
 	if err != nil {
-		log.Fatal().Err(err).Msgf("%s", err)
+		log.Fatal().Err(err).Msg("failed to extract secrets from Vault")
 	}
 
-	if cmd.Flags().Changed("format") && (config.Config.Format != "json" && config.Config.Format != "env" && config.Config.Format != "secret") {
-		log.Error().Msg("Please a valid format of either: json, env or secret")
+	if cmd.Flags().Changed("format") && (config.Config.Format != "json" && config.Config.Format != "env" && config.Config.Format != "secret" && config.Config.Format != "yaml") {
+		log.Error().Msg("Please use a valid format of either: json, env, secret or yaml")
 		cmd.Help() //nolint:errcheck // We don't care about errors from this
 		return secretEnvs
 	}
