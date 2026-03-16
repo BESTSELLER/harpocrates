@@ -10,12 +10,13 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-// Read will read the the content of a file and return it as a string.
+var fileNameRegexp = regexp.MustCompile("[^a-zA-Z0-9.-]+")
+
+// Read will read the content of a file and return it as a string.
 func Read(filePath string) string {
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		log.Fatal().Err(err).Msgf("Unable to read the file at path '%s'", filePath)
-		os.Exit(1)
 	}
 
 	return fmt.Sprint(string(data))
@@ -67,7 +68,7 @@ func Write(output string, fileName string, content interface{}, owner *int, appe
 
 func setPermissions(f *os.File, path string, output string, owner int) {
 	if err := os.Chown(output, owner, -1); err != nil {
-		log.Fatal().Err(err).Msgf("Unable to set permissions to folder '%s'", path)
+		log.Fatal().Err(err).Msgf("Unable to set permissions to folder '%s'", output)
 	}
 
 	if err := f.Chown(owner, -1); err != nil {
@@ -76,8 +77,7 @@ func setPermissions(f *os.File, path string, output string, owner int) {
 }
 
 func fixFileName(name string) string {
-	reg, _ := regexp.Compile("[^a-zA-Z0-9.-]+")
-	fileName := reg.ReplaceAllString(name, "_")
+	fileName := fileNameRegexp.ReplaceAllString(name, "_")
 
 	return fileName
 }
