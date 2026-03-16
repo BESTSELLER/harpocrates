@@ -106,6 +106,57 @@ func TestExtractSecretsWithOverrideNameAndSaveAsFile(t *testing.T) {
 	}
 }
 
+func TestExtractSecretsWithKeyLevelUpperCase(t *testing.T) {
+	// arrange
+	setupVault(t)
+	t.Cleanup(func() {
+		testClient = nil
+	})
+
+	// define input
+	data := files.Read("../test_data/override_name_uppercase.yaml")
+	input := util.ReadInput(data)
+
+	// mock prefix
+	config.Config.Prefix = input.Prefix
+
+	vaultClient := &API{
+		Client: testClient,
+	}
+
+	// act
+	result, err := vaultClient.ExtractSecrets(input, false)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(result) == 0 {
+		t.Fatal("No secrets extracted")
+	}
+
+	// assert: key1 has uppercase: true at the key level, so it should be uppercased to KEY1
+	for _, v := range result {
+		resMap := v.Result
+		if val, ok := resMap["KEY1"]; !ok {
+			t.Errorf("Expected 'KEY1' (uppercased) in result, got %v", resMap)
+		} else if val != "value1" {
+			t.Errorf("Expected 'KEY1' to be 'value1', got '%v'", val)
+		}
+
+		// key1 (lowercase) should NOT be present
+		if _, ok := resMap["key1"]; ok {
+			t.Errorf("Did not expect 'key1' (lowercase) in result when uppercase is true, got %v", resMap)
+		}
+
+		// key2 has no uppercase config, so it should remain lowercase
+		if val, ok := resMap["key2"]; !ok {
+			t.Errorf("Expected 'key2' in result, got %v", resMap)
+		} else if val != "value2" {
+			t.Errorf("Expected 'key2' to be 'value2', got '%v'", val)
+		}
+	}
+}
+
 func TestExtractSecretsWithOverrideNameNested(t *testing.T) {
 	// arrange
 	setupVault(t)

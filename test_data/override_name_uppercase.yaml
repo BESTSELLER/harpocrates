@@ -1,0 +1,6 @@
+secrets:
+  - secret/data/secret:
+      keys:
+        - key1:
+            uppercase: true
+        - key2
