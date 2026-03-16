@@ -1,6 +1,7 @@
 package vault
 
 import (
+	"os"
 	"testing"
 
 	"github.com/BESTSELLER/harpocrates/config"
@@ -56,6 +57,52 @@ func TestExtractSecretsWithOverrideName(t *testing.T) {
 		if _, ok := resMap["key1"]; ok {
 			t.Errorf("Did not expect 'key1' in result, got %v", resMap)
 		}
+	}
+}
+
+func TestExtractSecretsWithOverrideNameAndSaveAsFile(t *testing.T) {
+	// arrange
+	setupVault(t)
+	t.Cleanup(func() {
+		testClient = nil
+	})
+
+	// define input
+	data := files.Read("../test_data/override_name_save_as_file.yaml")
+	input := util.ReadInput(data)
+
+	// mock prefix
+	config.Config.Prefix = input.Prefix
+
+	vaultClient := &API{
+		Client: testClient,
+	}
+
+	// clean up: file should be written using the overridden name, not the original key
+	defer os.Remove("../.tmp/TEST_newKey1") //nolint:errcheck // It's just tests, we don't care
+	defer os.Remove("../.tmp/TEST_key1")    //nolint:errcheck // It's just tests, we don't care
+
+	// act
+	_, err := vaultClient.ExtractSecrets(input, false)
+	if err != nil {
+		t.Error(err)
+	}
+
+	// assert: file must exist with the overridden name
+	content, err := os.ReadFile("../.tmp/TEST_newKey1")
+	if err != nil {
+		t.Errorf("expected file ../.tmp/TEST_newKey1 to exist (overridden name), but got error: %v", err)
+	}
+
+	expected := "value1"
+	actual := string(content)
+	if expected != actual {
+		t.Errorf("expected file content %q, got %q", expected, actual)
+	}
+
+	// assert: file must NOT exist with the original key name
+	if _, err := os.Stat("../.tmp/TEST_key1"); err == nil {
+		t.Errorf("expected no file ../.tmp/TEST_key1 (original key), but it was found")
 	}
 }
 
