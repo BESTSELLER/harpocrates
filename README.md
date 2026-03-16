@@ -197,6 +197,33 @@ secrets:
         - db.password
 ```
 
+<br/>
+
+### Overriding Key Names
+
+Harpocrates allows you to override the resulting name of a secret key. This is useful when you want the exported environment variable or JSON key to have a different name than the one stored in Vault.
+
+**Example:**
+
+```yaml
+secrets:
+  - secret/data/mysecret:
+      keys:
+        - originalKey:
+            overrideName: NEW_KEY_NAME
+        - otherKey
+```
+
+If combined with nested keys, you can extract a deep value and assign it a completely new name.
+
+```yaml
+secrets:
+  - secret/data/mysecret:
+      keys:
+        - db.username:
+            overrideName: APP_DB_USER
+```
+
 ---
 
 <br/>
