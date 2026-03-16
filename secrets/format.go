@@ -13,6 +13,9 @@ import (
 // Result holds the result of all the secrets pulled from Vault
 type Result map[string]interface{}
 
+// envNameRegexp is a precompiled regular expression used by fixEnvName
+var envNameRegexp = regexp.MustCompile("[^a-zA-Z0-9_]+")
+
 // Add will add a new secret to the Result
 func (result Result) Add(key string, value interface{}, prefix string, upperCase bool) {
 	result[ToUpperOrNotToUpper(fmt.Sprintf("%s%s", prefix, key), &upperCase)] = value
@@ -29,14 +32,14 @@ func (result Result) ToJSON() string {
 }
 
 func (result Result) toKV(prefix string) string {
-	var resturnString string
+	var returnString string
 
 	for key, val := range result {
 		leKey := fixEnvName(key)
 		log.Info().Msgf("Exporting key: %s", leKey)
-		resturnString += fmt.Sprintf("%s%s=%s\n", prefix, leKey, getStringRepresentation(val))
+		returnString += fmt.Sprintf("%s%s=%s\n", prefix, leKey, getStringRepresentation(val))
 	}
-	return resturnString
+	return returnString
 }
 
 // ToKVarray converts the result to a key=value array
@@ -50,13 +53,13 @@ func (result Result) ToKVarray(prefix string) (returnString []string) {
 }
 
 func (result Result) toSecretKV() string {
-	var resturnString string
+	var returnString string
 
 	for key, val := range result {
 		log.Info().Msgf("Exporting key: %s", key)
-		resturnString += fmt.Sprintf("%s=%s\n", key, getStringRepresentation(val))
+		returnString += fmt.Sprintf("%s=%s\n", key, getStringRepresentation(val))
 	}
-	return resturnString
+	return returnString
 }
 
 // ToENV will format a map[string]string to a env file
@@ -83,10 +86,9 @@ func (result Result) ToYAML() string {
 	return string(yamlString)
 }
 
-// fixEnvName replaces all unsported env characters with "_"
+// fixEnvName replaces all unsupported env characters with "_"
 func fixEnvName(currentName string) string {
-	reg, _ := regexp.Compile("[^a-zA-Z0-9_]+")
-	envVar := reg.ReplaceAllString(currentName, "_")
+	envVar := envNameRegexp.ReplaceAllString(currentName, "_")
 
 	return envVar
 }
