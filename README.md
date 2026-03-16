@@ -219,8 +219,6 @@ secrets:
 | append        | -                    | Appends secrets to a file                                                                                  |                        true                         |
 | -             | HARPOCRATES_FILENAME | overwrites the default output filename                                                                     |                          -                          |
 | gcpWorkloadID | GCP_WORKLOAD_ID      | set to true to enable GCP workload identity, useful when running in GCP                                    |                        false                        |
-| -             | CONTINUOUS           | set to true to run harpocrates in a loop and fetch secrets every 1 minute, useful as a sidecar             |                        false                        |
-| -             | INTERVAL             | set the interval in minutes for the continuous mode                                                        |                          1                          |
 
 ---
 
@@ -228,15 +226,11 @@ secrets:
 
 ## Kubernetes
 
-When running `harpocrates` or `cloudrun` as an init container or sidecar you have to mount a volume to pass on the exported secrets to your main application.
+When running `harpocrates` as an init container you have to mount a volume to pass on the exported secrets to your main application.
 Then you can either chose to source the env file or simply just read the json formatted file.
 Harpocrates will startup and export the secrets in a matter of seconds.
 
 An example can be found at [examples/deployment.yaml](examples/deployment.yaml)
-
-### Sidecar
-
-To run harpocrates as a sidecar, you have to set the `CONTINUOUS` env var to true. Harpocrates will then run in a loop and fetch secrets every 1 minute. The shortest secret refresh interval is 1 minute and can be increased by setting the `INTERVAL` variable (in minutes).
 
 ---
 
