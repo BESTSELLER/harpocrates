@@ -227,7 +227,7 @@ secrets:
 ## Kubernetes
 
 When running `harpocrates` as an init container you have to mount a volume to pass on the exported secrets to your main application.
-Then you can either chose to source the env file or simply just read the json formatted file.
+Then you can either choose to source the env file or simply just read the json formatted file.
 Harpocrates will startup and export the secrets in a matter of seconds.
 
 An example can be found at [examples/deployment.yaml](examples/deployment.yaml)
