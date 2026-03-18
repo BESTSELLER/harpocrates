@@ -5,7 +5,7 @@ secrets:
   - secret/data/secret:
       keys:
         - key1:
-            overrideName: newKey1
+            alias: newKey1
             saveAsFile: true
         - key2:
             saveAsFile: false

@@ -3,4 +3,4 @@ secrets:
       format: yaml
       keys:
         - globalSecrets.theSecretINeed:
-            overrideName: myTopSecret
+            alias: myTopSecret

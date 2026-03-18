@@ -95,7 +95,7 @@
                           "saveAsFile": {
                             "type": "boolean"
                           },
-                          "overrideName": {
+                          "alias": {
                             "type": "string"
                           },
                           "uppercase": {

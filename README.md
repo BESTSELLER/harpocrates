@@ -210,7 +210,7 @@ secrets:
   - secret/data/mysecret:
       keys:
         - originalKey:
-            overrideName: NEW_KEY_NAME
+            alias: NEW_KEY_NAME
         - otherKey
 ```
 
@@ -221,7 +221,7 @@ secrets:
   - secret/data/mysecret:
       keys:
         - db.username:
-            overrideName: APP_DB_USER
+            alias: APP_DB_USER
 ```
 
 ---

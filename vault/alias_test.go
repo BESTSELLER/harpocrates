@@ -9,7 +9,7 @@ import (
 	"github.com/BESTSELLER/harpocrates/util"
 )
 
-func TestExtractSecretsWithOverrideName(t *testing.T) {
+func TestExtractSecretsWithAlias(t *testing.T) {
 	// arrange
 	setupVault(t)
 	t.Cleanup(func() {
@@ -60,7 +60,7 @@ func TestExtractSecretsWithOverrideName(t *testing.T) {
 	}
 }
 
-func TestExtractSecretsWithOverrideNameAndSaveAsFile(t *testing.T) {
+func TestExtractSecretsWithAliasAndSaveAsFile(t *testing.T) {
 	// arrange
 	setupVault(t)
 	t.Cleanup(func() {
@@ -78,7 +78,7 @@ func TestExtractSecretsWithOverrideNameAndSaveAsFile(t *testing.T) {
 		Client: testClient,
 	}
 
-	// clean up: file should be written using the overridden name, not the original key
+	// clean up: file should be written using the aliased name, not the original key
 	defer os.Remove("../.tmp/TEST_newKey1") //nolint:errcheck // It's just tests, we don't care
 	defer os.Remove("../.tmp/TEST_key1")    //nolint:errcheck // It's just tests, we don't care
 
@@ -88,10 +88,10 @@ func TestExtractSecretsWithOverrideNameAndSaveAsFile(t *testing.T) {
 		t.Error(err)
 	}
 
-	// assert: file must exist with the overridden name
+	// assert: file must exist with the aliased name
 	content, err := os.ReadFile("../.tmp/TEST_newKey1")
 	if err != nil {
-		t.Errorf("expected file ../.tmp/TEST_newKey1 to exist (overridden name), but got error: %v", err)
+		t.Errorf("expected file ../.tmp/TEST_newKey1 to exist (aliased name), but got error: %v", err)
 	}
 
 	expected := "value1"
@@ -157,7 +157,7 @@ func TestExtractSecretsWithKeyLevelUpperCase(t *testing.T) {
 	}
 }
 
-func TestExtractSecretsWithOverrideNameNested(t *testing.T) {
+func TestExtractSecretsWithAliasNested(t *testing.T) {
 	// arrange
 	setupVault(t)
 	t.Cleanup(func() {

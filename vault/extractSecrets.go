@@ -74,8 +74,8 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON, appendToFile bool)
 							setUpper(i.UpperCase, &currentUpperCase)
 
 							keyName := h
-							if i.OverrideName != "" {
-								keyName = i.OverrideName
+							if i.Alias != "" {
+								keyName = i.Alias
 							}
 
 							if i.SaveAsFile != nil {
