@@ -17,7 +17,7 @@ func TestExtractSecretsWithAlias(t *testing.T) {
 	})
 
 	// define input
-	data := files.Read("../test_data/override_name.yaml")
+	data := files.Read("../test_data/key_alias.yaml")
 	input := util.ReadInput(data)
 
 	// mock prefix
@@ -68,7 +68,7 @@ func TestExtractSecretsWithAliasAndSaveAsFile(t *testing.T) {
 	})
 
 	// define input
-	data := files.Read("../test_data/override_name_save_as_file.yaml")
+	data := files.Read("../test_data/key_alias_save_as_file.yaml")
 	input := util.ReadInput(data)
 
 	// mock prefix
@@ -114,7 +114,7 @@ func TestExtractSecretsWithKeyLevelUpperCase(t *testing.T) {
 	})
 
 	// define input
-	data := files.Read("../test_data/override_name_uppercase.yaml")
+	data := files.Read("../test_data/key_alias_uppercase.yaml")
 	input := util.ReadInput(data)
 
 	// mock prefix
@@ -179,7 +179,7 @@ func TestExtractSecretsWithAliasNested(t *testing.T) {
 	}
 
 	// define input
-	data := files.Read("../test_data/override_name_nested.yaml")
+	data := files.Read("../test_data/key_alias_nested.yaml")
 	input := util.ReadInput(data)
 
 	// mock prefix
