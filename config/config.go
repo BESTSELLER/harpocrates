@@ -24,7 +24,6 @@ type GlobalConfig struct {
 	VaultAddress  string `required:"false"`
 	VaultToken    string `required:"false"`
 	GcpWorkloadID bool   `required:"false"`
-	Continuous    bool   `required:"false"`
 }
 
 // Config stores the Global Configuration.

@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/BESTSELLER/harpocrates/config"
 	"github.com/gookit/color"
@@ -20,11 +19,9 @@ var (
 )
 
 var (
-	duration *time.Duration
 	// Used for flags.
 	secretFile string
 	secret     *[]string
-	success    bool
 
 	rootCmd = &cobra.Command{
 		Use:     "harpocrates",

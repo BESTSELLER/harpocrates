@@ -1,11 +1,9 @@
 package cmd
 
 import (
-	"net/http"
 	"os"
 	"path"
 	"strings"
-	"time"
 
 	"github.com/BESTSELLER/harpocrates/config"
 	"github.com/BESTSELLER/harpocrates/files"
@@ -84,83 +82,39 @@ func doIt(cmd *cobra.Command, args []string) []string {
 		}
 	}
 
-	envVar, ok := os.LookupEnv("CONTINUOUS")
-	if ok && strings.ToLower(envVar) == "true" {
-		config.Config.Continuous = true
+	vault.Login()
 
-		interval, _ := os.LookupEnv("INTERVAL")
+	vaultClient := vault.NewClient()
 
-		durationParsed, err := time.ParseDuration(interval)
-		if err != nil {
-			log.Fatal().Err(err).Msgf("%s", err)
-		}
-
-		if durationParsed < (1 * time.Minute) {
-			log.Fatal().Msg("Interval must be at least 1 minute")
-		}
-
-		duration = &durationParsed
-		log.Debug().Msgf("Continuous mode enabled, will run every %s", durationParsed)
-
-		config.Config.Append = false
-		http.Handle("/status", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if success {
-				w.WriteHeader(http.StatusOK)
-			} else {
-				w.WriteHeader(http.StatusTooEarly)
-			}
-		}))
-		go func() {
-			if err := http.ListenAndServe(":8000", nil); err != http.ErrServerClosed {
-				panic(err)
-			}
-		}()
+	allSecrets, err := vaultClient.ExtractSecrets(input, config.Config.Append)
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to extract secrets from Vault")
 	}
 
-	for {
-		vault.Login()
+	if cmd.Flags().Changed("format") && (config.Config.Format != "json" && config.Config.Format != "env" && config.Config.Format != "secret" && config.Config.Format != "yaml") {
+		log.Error().Msg("Please use a valid format of either: json, env, secret or yaml")
+		cmd.Help() //nolint:errcheck // We don't care about errors from this
+		return secretEnvs
+	}
 
-		vaultClient := vault.NewClient()
-
-		allSecrets, err := vaultClient.ExtractSecrets(input, config.Config.Append)
-		if err != nil {
-			success = false
-			log.Fatal().Err(err).Msgf("%s", err)
+	for _, v := range allSecrets {
+		fileName := config.Config.FileName
+		if v.Filename != "" {
+			fileName = v.Filename
 		}
 
-		if cmd.Flags().Changed("format") && (config.Config.Format != "json" && config.Config.Format != "env" && config.Config.Format != "secret") {
-			log.Error().Msg("Please a valid format of either: json, env or secret")
-			cmd.Help() //nolint:errcheck // We don't care about errors from this
-			return secretEnvs
+		switch v.Format {
+		case "json":
+			files.Write(config.Config.Output, fileName, v.Result.ToJSON(), v.Owner, config.Config.Append)
+		case "env":
+			files.Write(config.Config.Output, fileName, v.Result.ToENV(), v.Owner, config.Config.Append)
+			secretEnvs = append(secretEnvs, v.Result.ToKVarray("")...)
+		case "secret":
+			files.Write(config.Config.Output, fileName, v.Result.ToK8sSecret(), v.Owner, config.Config.Append)
+		case "yaml":
+			files.Write(config.Config.Output, fileName, v.Result.ToYAML(), v.Owner, config.Config.Append)
 		}
-
-		for _, v := range allSecrets {
-			fileName := config.Config.FileName
-			if v.Filename != "" {
-				fileName = v.Filename
-			}
-
-			switch v.Format {
-			case "json":
-				files.Write(config.Config.Output, fileName, v.Result.ToJSON(), v.Owner, config.Config.Append)
-			case "env":
-				files.Write(config.Config.Output, fileName, v.Result.ToENV(), v.Owner, config.Config.Append)
-				secretEnvs = append(secretEnvs, v.Result.ToKVarray("")...)
-			case "secret":
-				files.Write(config.Config.Output, fileName, v.Result.ToK8sSecret(), v.Owner, config.Config.Append)
-			case "yaml":
-				files.Write(config.Config.Output, fileName, v.Result.ToYAML(), v.Owner, config.Config.Append)
-			}
-			log.Debug().Msgf("Secrets written to file: %s/%s", config.Config.Output, fileName)
-		}
-		success = true
-
-		if !config.Config.Continuous {
-			break
-		}
-
-		log.Debug().Msgf("Sleeping for %s", duration)
-		time.Sleep(*duration)
+		log.Debug().Msgf("Secrets written to file: %s/%s", config.Config.Output, fileName)
 	}
 
 	return secretEnvs
