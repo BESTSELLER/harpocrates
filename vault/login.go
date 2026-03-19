@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/BESTSELLER/harpocrates/config"
 	"github.com/BESTSELLER/harpocrates/token"
@@ -13,27 +12,16 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-var tokenExpiry time.Time
-
 // JWTPayLoad contains the kubernetes token and which role to use
 type JWTPayLoad struct {
 	Jwt  string `json:"jwt"`
 	Role string `json:"role"`
 }
 
-// Login will exchange the JWT token for a Vault token and only refresh if less than 5 minutes remain
+// Login will exchange the JWT token for a Vault token
 func Login() {
-	// tokenIsNotAboutToExpire is true if the token's expiry is more than 5 minutes away.
-	tokenIsNotAboutToExpire := time.Now().Add(5 * time.Minute).Before(tokenExpiry)
-
-	// We can reuse the existing token if:
-	// 1. Continuous mode is disabled (in this case, we don't proactively refresh based on the 5-minute window).
-	// OR
-	// 2. Continuous mode is enabled, AND the token is not about to expire within the next 5 minutes.
-	canReuseExistingToken := !config.Config.Continuous || tokenIsNotAboutToExpire
-
-	// If a token exists and it meets the conditions for reuse, skip the login.
-	if config.Config.VaultToken != "" && canReuseExistingToken {
+	// If a token exists, skip the login.
+	if config.Config.VaultToken != "" {
 		return
 	}
 
@@ -43,7 +31,6 @@ func Login() {
 			log.Fatal().Err(err).Msg("GcpWorkload Identity was enabled but auth failed")
 		}
 		config.Config.VaultToken = login.Auth.ClientToken
-		tokenExpiry = time.Now().Add(time.Duration(login.Auth.LeaseDuration) * time.Second)
 		return
 	}
 
@@ -77,5 +64,4 @@ func Login() {
 	}
 
 	config.Config.VaultToken = returnPayload.Auth.ClientToken
-	tokenExpiry = time.Now().Add(time.Duration(returnPayload.Auth.LeaseDuration) * time.Second)
 }
