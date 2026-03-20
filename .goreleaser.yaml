@@ -3,6 +3,10 @@ version: 2
 before:
   hooks:
     - go mod tidy
+    - mkdir -p completions
+    - sh -c "go run main.go completion bash > completions/harpocrates.bash"
+    - sh -c "go run main.go completion zsh > completions/harpocrates.zsh"
+    - sh -c "go run main.go completion fish > completions/harpocrates.fish"
 
 builds:
   - env:
@@ -22,6 +26,8 @@ builds:
 
 archives:
   - # this name template makes the OS and Arch compatible with the results of `uname`.
+    files:
+      - completions/*
     name_template: >-
       {{ .ProjectName }}_
       {{- title .Os }}_
@@ -55,6 +61,10 @@ homebrew_casks:
       owner: BESTSELLER
       name: homebrew-tap
     description: "Harpocrates is a lightweight, versatile CLI tool designed to securely fetch, format, and inject secrets from HashiCorp Vault"
+    completions:
+      bash: completions/harpocrates.bash
+      zsh: completions/harpocrates.zsh
+      fish: completions/harpocrates.fish
 
 winget:
   - name: harpocrates

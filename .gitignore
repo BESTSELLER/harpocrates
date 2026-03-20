@@ -11,6 +11,7 @@
 *.dylib
 harpocrates
 /dist/
+/completions/
 
 # Test binary, built with `go test -c`
 *.test
@@ -46,3 +47,4 @@ gha-creds-*.json
 .tmp
 .tmp/*
 /.idea/*
+.DS_Store
