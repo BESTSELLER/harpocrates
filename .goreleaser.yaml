@@ -42,11 +42,12 @@ signs:
       - "--yes"
       - "--key"
       - "hashivault://harpocrates-cosign"
-      - "--new-bundle-format=false"
-      - "--output-signature"
+      - "--new-bundle-format"
+      - "--bundle"
       - "${signature}"
       - "${artifact}"
     artifacts: checksum
+    signature: "${artifact}.json"
     output: true
 
 dockers_v2:
