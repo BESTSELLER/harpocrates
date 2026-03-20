@@ -1,0 +1,80 @@
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    flags:
+      - -trimpath
+    ldflags:
+      - >-
+        -s -w
+        -X github.com/BESTSELLER/harpocrates/cmd.version={{.Version}}
+        -X github.com/BESTSELLER/harpocrates/cmd.commit={{.Commit}}
+        -X github.com/BESTSELLER/harpocrates/cmd.date={{.Date}}
+
+archives:
+  - # this name template makes the OS and Arch compatible with the results of `uname`.
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- title .Os }}_
+      {{- if eq .Arch "amd64" }}x86_64
+      {{- else if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+    # use zip for windows archives
+    format_overrides:
+      - goos: windows
+        formats:
+          - zip
+
+dockers_v2:
+  - images:
+      - '{{ if index .Env "IMAGE_NAME" }}{{ .Env.IMAGE_NAME }}{{ else }}{{ .ProjectName }}{{ end }}'
+    tags:
+      - "v{{ .Version }}"
+      - "{{ if not .IsNightly }}latest{{ end }}"
+    labels:
+      "org.opencontainers.image.description": "Harpocrates is a lightweight, versatile CLI tool designed to securely fetch, format, and inject secrets from HashiCorp Vault"
+      "org.opencontainers.image.created": "{{.Date}}"
+      "org.opencontainers.image.name": "{{.ProjectName}}"
+      "org.opencontainers.image.revision": "{{.FullCommit}}"
+      "org.opencontainers.image.version": "{{.Version}}"
+      "org.opencontainers.image.source": "{{.GitURL}}"
+
+homebrew_casks:
+  - name: harpocrates
+    repository:
+      owner: BESTSELLER
+      name: homebrew-tap
+    description: "Harpocrates is a lightweight, versatile CLI tool designed to securely fetch, format, and inject secrets from HashiCorp Vault"
+
+winget:
+  - name: harpocrates
+    publisher: BESTSELLER
+    license: "MIT"
+    short_description: "Harpocrates is a lightweight, versatile CLI tool designed to securely fetch, format, and inject secrets from HashiCorp Vault"
+    publisher_support_url: "https://github.com/BESTSELLER/harpocrates/issues"
+    package_identifier: "bestseller.harpocrates"
+    repository:
+      owner: BESTSELLER
+      name: winget-pkgs
+      pull_request:
+        enabled: false
+        base:
+          owner: microsoft
+          name: winget-pkgs
+          branch: master
+
+release:
+  draft: true
+
+changelog:
+  disable: true

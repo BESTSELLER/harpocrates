@@ -10,14 +10,23 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// Define variables to hold the build info.
+// These will be populated at build time.
+var (
+	version = "dev"
+	commit  = "none"
+	date    = "unknown"
+)
+
 var (
 	// Used for flags.
 	secretFile string
 	secret     *[]string
 
 	rootCmd = &cobra.Command{
-		Use:   "harpocrates",
-		Short: fmt.Sprintf("%sThis application will fetch secrets from Hashicorp Vault", color.Blue.Sprintf("\"Harpocrates was the god of silence, secrets and confidentiality\"\n")),
+		Use:     "harpocrates",
+		Short:   fmt.Sprintf("%sThis application will fetch secrets from Hashicorp Vault", color.Blue.Sprintf("\"Harpocrates was the god of silence, secrets and confidentiality\"\n")),
+		Version: fmt.Sprintf("%s\ncommit: %s\nbuild date: %s", version, commit, date),
 	}
 )
 
