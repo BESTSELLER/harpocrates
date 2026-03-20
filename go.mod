@@ -5,8 +5,8 @@ go 1.26.0
 require (
 	cloud.google.com/go/compute/metadata v0.9.0
 	github.com/creack/pty v1.1.24
-	github.com/fatih/color v1.18.0
 	github.com/go-viper/mapstructure/v2 v2.5.0
+	github.com/gookit/color v1.6.0
 	github.com/hashicorp/vault/api v1.22.0
 	github.com/rs/zerolog v1.34.0
 	github.com/spf13/cobra v1.10.2
@@ -81,6 +81,7 @@ require (
 	github.com/tklauser/numcpus v0.11.0 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
+	github.com/xo/terminfo v0.0.0-20220910002029-abceb7e1c41e // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	go.opentelemetry.io/auto/sdk v1.2.1 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.49.0 // indirect

@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/BESTSELLER/harpocrates/config"
-	"github.com/fatih/color"
+	"github.com/gookit/color"
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
@@ -25,7 +25,7 @@ var (
 
 	rootCmd = &cobra.Command{
 		Use:     "harpocrates",
-		Short:   fmt.Sprintf("%sThis application will fetch secrets from Hashicorp Vault", color.BlueString("\"Harpocrates was the god of silence, secrets and confidentiality\"\n")),
+		Short:   fmt.Sprintf("%sThis application will fetch secrets from Hashicorp Vault", color.Blue.Sprintf("\"Harpocrates was the god of silence, secrets and confidentiality\"\n")),
 		Version: fmt.Sprintf("%s\ncommit: %s\nbuild date: %s", version, commit, date),
 	}
 )
