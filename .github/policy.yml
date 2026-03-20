@@ -18,7 +18,7 @@ approval_rules:
     if:
       has_workflow_result:
         workflows:
-          - ".github/workflows/build_deploy.yml"
+          - ".github/workflows/build.yml"
           - ".github/workflows/test.yml"
     requires:
       count: 0
