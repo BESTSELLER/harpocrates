@@ -39,8 +39,10 @@ signs:
   - cmd: cosign
     args:
       - "sign-blob"
+      - "--yes"
       - "--key"
       - "hashivault://harpocrates-cosign"
+      - "--new-bundle-format=false"
       - "--output-signature"
       - "${signature}"
       - "${artifact}"
