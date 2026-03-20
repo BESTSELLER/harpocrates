@@ -27,13 +27,15 @@ jobs:
           secrets: |
             SHARED/data/common artifact_registry_url | ARTIFACT_REGISTRY_URL ;
             SHARED/data/common artifact_registry_project | ARTIFACT_REGISTRY_PROJECT ;
+            PLATFORM/data/harpocrates/prod GITHUB_APP_ID | GITHUB_APP_ID ;
+            PLATFORM/data/harpocrates/prod GITHUB_APP_PRIVATE_KEY | GITHUB_APP_PRIVATE_KEY ;
 
       - name: Generate a token
         id: generate_token
         uses: actions/create-github-app-token@29824e69f54612133e76f7eaac726eef6c875baf # v2.2.1
         with:
-          app-id: ${{ steps.secrets.outputs.APP_ID }}
-          private-key: ${{ steps.secrets.outputs.APP_PRIVATE_KEY }}
+          app-id: ${{ steps.secrets.outputs.GITHUB_APP_ID }}
+          private-key: ${{ steps.secrets.outputs.GITHUB_APP_PRIVATE_KEY }}
 
       - id: "auth"
         name: Auth GCloud
