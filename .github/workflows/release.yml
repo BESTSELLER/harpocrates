@@ -37,6 +37,8 @@ jobs:
         with:
           app-id: ${{ steps.secrets.outputs.GITHUB_APP_ID }}
           private-key: ${{ steps.secrets.outputs.GITHUB_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: "harpocrates,homebrew-tap,winget-pkgs"
 
       - id: "auth"
         name: Auth GCloud
