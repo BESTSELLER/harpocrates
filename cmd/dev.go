@@ -58,7 +58,7 @@ This is useful for local development, where you want to run an application with 
 		finalEnvs = append(os.Environ(), finalEnvs...)
 		execCmd.Env = finalEnvs
 
-		if err := util.RunCmdPTY(ctx, execCmd, secretEnvs, redact); err != nil {
+		if err := util.RunCmdPTY(execCmd, secretEnvs, redact); err != nil {
 			if ctx.Err() != nil || err == context.Canceled {
 				// Context cancelled (e.g., ctrl+c)
 				return
