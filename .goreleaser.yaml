@@ -7,6 +7,7 @@ before:
     - sh -c "go run main.go completion bash > completions/harpocrates.bash"
     - sh -c "go run main.go completion zsh > completions/harpocrates.zsh"
     - sh -c "go run main.go completion fish > completions/harpocrates.fish"
+    - sh -c "go run main.go completion powershell > completions/harpocrates.ps1"
 
 builds:
   - env:
