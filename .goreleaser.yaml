@@ -66,6 +66,7 @@ winget:
     repository:
       owner: BESTSELLER
       name: winget-pkgs
+      branch: "{{ .ProjectName }}-{{.Version}}"
       pull_request:
         enabled: false
         base:
