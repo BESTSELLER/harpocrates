@@ -35,21 +35,6 @@ archives:
         formats:
           - zip
 
-signs:
-  - cmd: cosign
-    args:
-      - "sign-blob"
-      - "--yes"
-      - "--key"
-      - "hashivault://harpocrates-cosign"
-      - "--new-bundle-format"
-      - "--bundle"
-      - "${signature}"
-      - "${artifact}"
-    artifacts: checksum
-    signature: "${artifact}.json"
-    output: true
-
 dockers_v2:
   - images:
       - '{{ if index .Env "IMAGE_NAME" }}{{ .Env.IMAGE_NAME }}{{ else }}{{ .ProjectName }}{{ end }}'
