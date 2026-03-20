@@ -67,7 +67,7 @@ winget:
       owner: BESTSELLER
       name: winget-pkgs
       pull_request:
-        enabled: true
+        enabled: false
         base:
           owner: microsoft
           name: winget-pkgs
