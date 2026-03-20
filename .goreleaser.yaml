@@ -45,7 +45,9 @@ dockers_v2:
   - images:
       - '{{ if index .Env "IMAGE_NAME" }}{{ .Env.IMAGE_NAME }}{{ else }}{{ .ProjectName }}{{ end }}'
     tags:
-      - "v{{ .Version }}"
+      - "{{ .Version }}"
+      - "{{ .Major }}"
+      - "{{ .Major }}.{{ .Minor }}"
       - "{{ if not .IsNightly }}latest{{ end }}"
     labels:
       "org.opencontainers.image.description": "Harpocrates is a lightweight, versatile CLI tool designed to securely fetch, format, and inject secrets from HashiCorp Vault"
