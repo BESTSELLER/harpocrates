@@ -15,11 +15,11 @@ import (
 // wiring its output through the Redactor to ensure sensitive values are stripped.
 func RunCmdPTY(cmd *exec.Cmd, secretEnvs []string, redact bool) error {
 	// Start the command with a pseudo-terminal.
-	ptmx, err := pty.Start(cmd)
+	ptyFile, err := pty.Start(cmd)
 	if err != nil {
 		return err
 	}
-	defer func() { _ = ptmx.Close() }() // Best effort cleanup
+	defer func() { _ = ptyFile.Close() }() // Best effort cleanup
 
 	// Check if stdin is a terminal. If not, we skip terminal-specific features.
 	isTerm := term.IsTerminal(int(os.Stdin.Fd()))
@@ -31,7 +31,7 @@ func RunCmdPTY(cmd *exec.Cmd, secretEnvs []string, redact bool) error {
 		go func() {
 			for range ch {
 				// Will try and inherit the size, we don't really care if it fails.
-				pty.InheritSize(os.Stdin, ptmx)
+				pty.InheritSize(os.Stdin, ptyFile) //nolint:errcheck // It isn't that important if it fails
 			}
 		}()
 		ch <- syscall.SIGWINCH // initial resize trigger
@@ -51,7 +51,7 @@ func RunCmdPTY(cmd *exec.Cmd, secretEnvs []string, redact bool) error {
 	// Note: This goroutine intentionally leaks when the command finishes,
 	// as standard input reads block indefinitely.
 	go func() {
-		_, _ = io.Copy(ptmx, os.Stdin)
+		_, _ = io.Copy(ptyFile, os.Stdin)
 	}()
 
 	// The pseudo-terminal unites both stdout and stderr and gives it to us here.
@@ -61,17 +61,16 @@ func RunCmdPTY(cmd *exec.Cmd, secretEnvs []string, redact bool) error {
 		Redact: redact,
 	}
 
-	// Copy the ptmx output through our redactor back to os.Stdout
-	_, err = io.Copy(redactor, ptmx)
+	// Copy the ptyFile output through our redactor back to os.Stdout
+	_, err = io.Copy(redactor, ptyFile)
 	if err != nil {
 		// On some platforms (like Linux), closing the PTY from the child process
 		// returns an EIO error. We can safely ignore it.
-		if pathErr, ok := err.(*os.PathError); ok && pathErr.Err == syscall.EIO {
-			// Ignore EIO error completely
-		} else {
+		pathErr, ok := err.(*os.PathError)
+		if !ok || pathErr.Err != syscall.EIO {
 			// It's a real error, print it but don't fail the command yet.
 			// The caller typically cares more about the exit code.
-			os.Stderr.WriteString("error reading pty output: " + err.Error() + "\n")
+			os.Stderr.WriteString("error reading pty output: " + err.Error() + "\n") //nolint:errcheck // We are already in an error state, don't care if this also fails
 		}
 	}
 
