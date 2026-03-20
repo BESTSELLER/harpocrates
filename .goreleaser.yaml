@@ -37,7 +37,7 @@ archives:
 
 dockers_v2:
   - images:
-      - "europe-docker.pkg.dev/artifacts-pub-prod-b57f/public-docker/harpocrates"
+      - '{{ if index .Env "IMAGE_NAME" }}{{ .Env.IMAGE_NAME }}{{ else }}{{ .ProjectName }}{{ end }}'
     tags:
       - "v{{ .Version }}"
       - "{{ if not .IsNightly }}latest{{ end }}"

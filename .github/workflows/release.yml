@@ -63,3 +63,4 @@ jobs:
           # A GitHub App token is used here because pushing to other repositories
           # (like BESTSELLER/homebrew-tap and BESTSELLER/winget-pkgs) requires cross-repo write access.
           GITHUB_TOKEN: ${{ steps.generate_token.outputs.token }}
+          IMAGE_NAME: "${{ steps.secrets.outputs.ARTIFACT_REGISTRY_URL }}/${{ steps.secrets.outputs.ARTIFACT_REGISTRY_PROJECT }}/public-docker/${{ github.event.repository.name }}"
