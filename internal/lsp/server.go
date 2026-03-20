@@ -29,10 +29,6 @@ func NewServer(vaultClient *vault.API) *Server {
 
 // Start stars the LSP blocking loop
 func (s *Server) Start() {
-	f, _ := os.OpenFile("/tmp/harpocrates.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-	defer f.Close()
-	log.Logger = log.Output(f)
-
 	reader := bufio.NewReader(os.Stdin)
 
 	for {

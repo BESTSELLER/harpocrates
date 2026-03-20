@@ -19,10 +19,6 @@ func init() {
 }
 
 func startLSP() {
-	// Silence standard logging output for LSP standard I/O (we only log to a file or disable it)
-	// For production, maybe write to /tmp/harpocrates-lsp.log
-
-	// Try to get Vault initialized identical to `fetch`
 	loadLocalVaultToken()
 	vault.Login()
 	vaultClient := vault.NewClient()
