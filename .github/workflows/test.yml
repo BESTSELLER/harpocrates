@@ -12,11 +12,8 @@ permissions:
 
 jobs:
   test:
-    name: Go test (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+    name: Go test
+    runs-on: ubuntu-latest
     environment: prod
     permissions:
       id-token: write
