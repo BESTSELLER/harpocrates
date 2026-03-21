@@ -9,11 +9,14 @@ concurrency:
 
 permissions:
   contents: read
-  
+
 jobs:
   test:
-    name: Go test
-    runs-on: ubuntu-latest
+    name: Go test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
     environment: prod
     permissions:
       id-token: write
