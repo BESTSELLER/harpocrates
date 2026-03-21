@@ -4,7 +4,6 @@ import (
 	"io"
 	"os"
 	"os/exec"
-	"os/signal"
 	"syscall"
 
 	"github.com/creack/pty"
@@ -26,18 +25,8 @@ func RunCmdPTY(cmd *exec.Cmd, secretEnvs []string, redact bool) error {
 
 	if isTerm {
 		// Handle standard input window resizing
-		ch := make(chan os.Signal, 1)
-		signal.Notify(ch, syscall.SIGWINCH)
-		go func() {
-			for range ch {
-				// Will try and inherit the size, we don't really care if it fails.
-				pty.InheritSize(os.Stdin, ptyFile) //nolint:errcheck // It isn't that important if it fails
-			}
-		}()
-		ch <- syscall.SIGWINCH // initial resize trigger
-		defer func() {
-			signal.Stop(ch)
-		}()
+		cleanupResize := handleResize(ptyFile)
+		defer cleanupResize()
 
 		// Put the true os.Stdin into raw mode to capture Ctrl+C, etc.
 		oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
