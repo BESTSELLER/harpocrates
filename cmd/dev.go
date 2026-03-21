@@ -58,19 +58,7 @@ This is useful for local development, where you want to run an application with 
 		finalEnvs = append(os.Environ(), finalEnvs...)
 		execCmd.Env = finalEnvs
 
-		execCmd.Stdin = os.Stdin
-		execCmd.Stdout = &util.Redactor{
-			Writer: os.Stdout,
-			Envs:   secretEnvs,
-			Redact: redact,
-		}
-		execCmd.Stderr = &util.Redactor{
-			Writer: os.Stderr,
-			Envs:   secretEnvs,
-			Redact: redact,
-		}
-
-		if err := execCmd.Run(); err != nil {
+		if err := util.RunCmdPTY(execCmd, secretEnvs, redact); err != nil {
 			if ctx.Err() != nil || err == context.Canceled {
 				// Context cancelled (e.g., ctrl+c)
 				return
