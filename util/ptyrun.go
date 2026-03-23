@@ -31,8 +31,8 @@ func RunCmdPTY(cmd *exec.Cmd, secretEnvs []string, redact bool) error {
 		oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
 		if err != nil {
 			// Will try cleanup up the process so that we don't have any zombie processes.
-			cmd.Process.Kill()
-			cmd.Wait()
+			cmd.Process.Kill() //nolint:errcheck // We are already in an error state, don't care if this also fails
+			cmd.Wait()         //nolint:errcheck // We are already in an error state, don't care if this also fails
 			return err
 		}
 		defer func() { _ = term.Restore(int(os.Stdin.Fd()), oldState) }() // Important: Restore on exit
