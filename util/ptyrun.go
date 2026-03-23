@@ -30,6 +30,9 @@ func RunCmdPTY(cmd *exec.Cmd, secretEnvs []string, redact bool) error {
 		// Put the true os.Stdin into raw mode to capture Ctrl+C, etc.
 		oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
 		if err != nil {
+			// Will try cleanup up the process so that we don't have any zombie processes.
+			cmd.Process.Kill()
+			cmd.Wait()
 			return err
 		}
 		defer func() { _ = term.Restore(int(os.Stdin.Fd()), oldState) }() // Important: Restore on exit
