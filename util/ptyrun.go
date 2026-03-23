@@ -10,15 +10,14 @@ import (
 	"golang.org/x/term"
 )
 
-// RunCmdPTY runs the given command in a pseudo-terminal to preserve colored output,
-// wiring its output through the Redactor to ensure sensitive values are stripped.
+// RunCmdPTY runs the given command in a pseudo-terminal
 func RunCmdPTY(cmd *exec.Cmd, secretEnvs []string, redact bool) error {
 	// Start the command with a pseudo-terminal.
 	ptyFile, err := pty.Start(cmd)
 	if err != nil {
 		return err
 	}
-	defer func() { _ = ptyFile.Close() }() // Best effort cleanup
+	defer func() { _ = ptyFile.Close() }() // Best effort cleanup - we don't care about errors here.
 
 	// Check if stdin is a terminal. If not, we skip terminal-specific features.
 	isTerm := term.IsTerminal(int(os.Stdin.Fd()))
@@ -37,13 +36,10 @@ func RunCmdPTY(cmd *exec.Cmd, secretEnvs []string, redact bool) error {
 	}
 
 	// Copy os.Stdin directly to the pseudo-terminal
-	// Note: This goroutine intentionally leaks when the command finishes,
-	// as standard input reads block indefinitely.
 	go func() {
 		_, _ = io.Copy(ptyFile, os.Stdin)
 	}()
 
-	// The pseudo-terminal unites both stdout and stderr and gives it to us here.
 	redactor := &Redactor{
 		Writer: os.Stdout,
 		Envs:   secretEnvs,
@@ -53,8 +49,6 @@ func RunCmdPTY(cmd *exec.Cmd, secretEnvs []string, redact bool) error {
 	// Copy the ptyFile output through our redactor back to os.Stdout
 	_, err = io.Copy(redactor, ptyFile)
 	if err != nil {
-		// On some platforms (like Linux), closing the PTY from the child process
-		// returns an EIO error. We can safely ignore it.
 		pathErr, ok := err.(*os.PathError)
 		if !ok || pathErr.Err != syscall.EIO {
 			// It's a real error, print it but don't fail the command yet.
