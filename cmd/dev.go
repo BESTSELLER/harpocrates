@@ -12,6 +12,7 @@ import (
 
 	"github.com/BESTSELLER/harpocrates/config"
 	"github.com/BESTSELLER/harpocrates/util"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -28,7 +29,7 @@ This is useful for local development, where you want to run an application with 
 		// Create temporary directory and file
 		dir, err := os.MkdirTemp("", "harpocrates")
 		if err != nil {
-			panic(err)
+			log.Fatal().Err(err).Msg("Failed to create temporary directory")
 		}
 		defer os.RemoveAll(dir) //nolint:errcheck // We don't care if it fails to remove the folder as it is created a a temp folder and the OS should take care of it.
 
@@ -75,7 +76,7 @@ This is useful for local development, where you want to run an application with 
 				// Context cancelled (e.g., ctrl+c)
 				return
 			}
-			panic(err)
+			log.Fatal().Err(err).Msg("Command execution failed")
 		}
 
 	},
