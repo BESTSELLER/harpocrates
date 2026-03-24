@@ -29,7 +29,7 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON, appendToFile bool)
 	for _, a := range input.Secrets {
 
 		// If the key is just a secret path, then it will read that from Vault, otherwise:
-		if fmt.Sprintf("%T", a) != "string" {
+		if _, isString := a.(string); !isString {
 			b, ok := a.(map[string]interface{})
 			if !ok {
 				return nil, fmt.Errorf("expected map[string]interface{}, got: '%s'", a)
@@ -62,7 +62,7 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON, appendToFile bool)
 
 				for _, f := range d.Keys {
 					// If the key is just a secret path, then it will read that from Vault, otherwise:
-					if fmt.Sprintf("%T", f) != "string" {
+					if _, isString := f.(string); !isString {
 						bb := map[string]util.SecretKeys{}
 						err := mapstructure.Decode(f, &bb)
 						if err != nil {
