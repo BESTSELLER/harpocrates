@@ -30,7 +30,7 @@ This is useful for local development, where you want to run an application with 
 		if err != nil {
 			panic(err)
 		}
-		defer os.RemoveAll(dir) //nolint:errcheck // We don't care if it fails to remove the folder as it is created a a temp folder and the OS should take care of it.
+		defer os.RemoveAll(dir) //nolint:errcheck // Best-effort cleanup of the temp folder; ignore errors as failure is non-critical and the OS will eventually reclaim the space.
 
 		config.Config.Output = path.Join(dir, config.Config.Output)
 
