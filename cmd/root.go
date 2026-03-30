@@ -52,7 +52,7 @@ func init() {
 	rootCmd.PersistentFlags().IntVar(&config.Config.Owner, "owner", -1, "UID of the owner that the secret files will be created e.g. 2")
 	rootCmd.PersistentFlags().StringVar(&config.Config.Prefix, "prefix", "", "key prefix e.g TEST_ will produce TEST_key=secret")
 	rootCmd.PersistentFlags().BoolVar(&config.Config.UpperCase, "uppercase", false, "will convert key to UPPERCASE")
-	rootCmd.PersistentFlags().StringVar(&config.Config.LogLevel, "log-level", "", "LogLevel, default is warn")
+	rootCmd.PersistentFlags().StringVar(&config.Config.LogLevel, "log-level", "", "LogLevel, default is info")
 	rootCmd.PersistentFlags().BoolVar(&config.Config.Validate, "validate", false, "Validate, will only validate the secrets file")
 	rootCmd.PersistentFlags().BoolVar(&config.Config.Append, "append", true, "Append, appends secrets to a file, defaults to true")
 	secret = rootCmd.PersistentFlags().StringSlice("secret", []string{}, "vault path to secret, supports array of secrets e.g. SECRETENGINE/data/test/dev,SECRETENGINE/data/test/prod")
