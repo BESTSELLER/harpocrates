@@ -81,7 +81,7 @@ winget:
       name: winget-pkgs
       branch: "{{ .ProjectName }}-{{.Version}}"
       pull_request:
-        enabled: true
+        enabled: false
         base:
           owner: microsoft
           name: winget-pkgs
