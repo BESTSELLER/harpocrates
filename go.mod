@@ -7,7 +7,7 @@ require (
 	github.com/creack/pty v1.1.24
 	github.com/go-viper/mapstructure/v2 v2.5.0
 	github.com/gookit/color v1.6.0
-	github.com/hashicorp/vault/api v1.22.0
+	github.com/hashicorp/vault/api v1.23.0
 	github.com/rs/zerolog v1.34.0
 	github.com/spf13/cobra v1.10.2
 	github.com/testcontainers/testcontainers-go/modules/vault v0.41.0
