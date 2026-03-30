@@ -31,7 +31,7 @@ This is useful for local development, where you want to run an application with 
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed to create temporary directory")
 		}
-		defer os.RemoveAll(dir) //nolint:errcheck // We don't care if it fails to remove the folder as it is created a a temp folder and the OS should take care of it.
+		defer os.RemoveAll(dir) //nolint:errcheck // Best-effort cleanup of the temp folder; ignore errors as failure is non-critical and the OS will eventually reclaim the space.
 
 		config.Config.Output = path.Join(dir, config.Config.Output)
 
@@ -59,19 +59,7 @@ This is useful for local development, where you want to run an application with 
 		finalEnvs = append(os.Environ(), finalEnvs...)
 		execCmd.Env = finalEnvs
 
-		execCmd.Stdin = os.Stdin
-		execCmd.Stdout = &util.Redactor{
-			Writer: os.Stdout,
-			Envs:   secretEnvs,
-			Redact: redact,
-		}
-		execCmd.Stderr = &util.Redactor{
-			Writer: os.Stderr,
-			Envs:   secretEnvs,
-			Redact: redact,
-		}
-
-		if err := execCmd.Run(); err != nil {
+		if err := util.RunCmdPTY(execCmd, secretEnvs, redact); err != nil {
 			if ctx.Err() != nil || err == context.Canceled {
 				// Context cancelled (e.g., ctrl+c)
 				return
