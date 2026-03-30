@@ -203,7 +203,12 @@ secrets:
 
 ### CLI Parameters
 
-The third option is to specify the options as parameters in the cli.
+Harpocrates supports multiple subcommands depending on your workflow:
+
+- `fetch`: Fetch secrets and dump them into files at the specified output path.
+- `dev`: Run a command with secrets injected directly into its environment variables from Vault.
+
+You can also specify connection options and formatting overrides directly via [CLI parameters](#cli-and-env-options):
 
 ```bash
 harpocrates fetch --format "env" --secret "/secret/data/somesecret" --prefix "PREFIX_" --output "/secrets"
