@@ -5,8 +5,8 @@
 <br/>
 
 ![GitHub repo size](https://img.shields.io/github/repo-size/BESTSELLER/harpocrates)
-![GitHub All Releases](https://img.shields.io/github/downloads/BESTSELLER/harpocrates/total)
-![GitHub](https://img.shields.io/github/license/BESTSELLER/harpocrates)
+![GitHub total downloads](https://img.shields.io/github/downloads/BESTSELLER/harpocrates/total)
+![License](https://img.shields.io/github/license/BESTSELLER/harpocrates)
 [![Go Report Card](https://goreportcard.com/badge/github.com/BESTSELLER/harpocrates)](https://goreportcard.com/report/github.com/BESTSELLER/harpocrates)
 [![CI build status](https://github.com/BESTSELLER/harpocrates/actions/workflows/test.yml/badge.svg)](https://github.com/BESTSELLER/harpocrates/actions/workflows/test.yml)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/BESTSELLER/harpocrates/badge)](https://securityscorecards.dev/viewer/?uri=github.com/BESTSELLER/harpocrates)
