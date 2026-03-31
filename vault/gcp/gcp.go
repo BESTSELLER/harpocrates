@@ -52,9 +52,19 @@ func fetchVaultLogin(vaultAddr string, jwt string, vaultRole string) (VaultLogin
 	var login VaultLoginResult
 	client := http.DefaultClient
 
-	j := `{"role":"` + vaultRole + `", "jwt":"` + jwt + `"}`
+	payload := struct {
+		Role string `json:"role"`
+		JWT  string `json:"jwt"`
+	}{
+		Role: vaultRole,
+		JWT:  jwt,
+	}
+	body, err := json.Marshal(payload)
+	if err != nil {
+		return login, err
+	}
 
-	req, err := http.NewRequest(http.MethodPost, vaultAddr+"/v1/auth/gcp/login", bytes.NewBufferString(j))
+	req, err := http.NewRequest(http.MethodPost, vaultAddr+"/v1/auth/gcp/login", bytes.NewReader(body))
 	if err != nil {
 		return login, err
 	}
