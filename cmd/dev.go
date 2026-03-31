@@ -50,7 +50,7 @@ This is useful for local development, where you want to run an application with 
 		}()
 
 		fmt.Println(config.Config.Output)
-		// 4. Start the child application with the temporary file path using the context
+		// Start the child application with the temporary file path using the context
 		// cmd := exec.CommandContext(ctx, "bash", "-c", "echo $HEJSA")
 		fmt.Println("args:", args)
 		execCmd := exec.CommandContext(ctx, "bash", "-c", strings.Join(args, " "))
@@ -60,9 +60,13 @@ This is useful for local development, where you want to run an application with 
 		execCmd.Env = finalEnvs
 
 		if err := util.RunCmdPTY(execCmd, secretEnvs, redact); err != nil {
-			if ctx.Err() != nil || err == context.Canceled {
-				// Context cancelled (e.g., ctrl+c)
-				return
+			if exitErr, ok := err.(*exec.ExitError); ok {
+				// Clean up the temporary directory manually before os.Exit since defer won't run
+				os.RemoveAll(dir) //nolint:errcheck
+
+				code := exitErr.ExitCode()
+
+				os.Exit(code)
 			}
 			log.Fatal().Err(err).Msg("Command execution failed")
 		}
