@@ -38,6 +38,11 @@ jobs:
             SHARED/data/common artifact_registry_project | ARTIFACT_REGISTRY_PROJECT ;
             PLATFORM/data/harpocrates/prod GITHUB_APP_ID | GITHUB_APP_ID ;
             PLATFORM/data/harpocrates/prod GITHUB_APP_PRIVATE_KEY | GITHUB_APP_PRIVATE_KEY ;
+            PLATFORM/data/harpocrates/prod MACOS_SIGN_P12 | MACOS_SIGN_P12 ;
+            PLATFORM/data/harpocrates/prod MACOS_SIGN_PASSWORD | MACOS_SIGN_PASSWORD ;
+            PLATFORM/data/harpocrates/prod MACOS_NOTARY_ISSUER_ID | MACOS_NOTARY_ISSUER_ID ;
+            PLATFORM/data/harpocrates/prod MACOS_NOTARY_KEY_ID | MACOS_NOTARY_KEY_ID ;
+            PLATFORM/data/harpocrates/prod MACOS_NOTARY_KEY | MACOS_NOTARY_KEY ;
 
       - name: Generate a token
         id: generate_token
