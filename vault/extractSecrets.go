@@ -18,7 +18,7 @@ type Outputs struct {
 	Owner    *int           `json:"owner,omitempty"     yaml:"owner,omitempty"`
 }
 
-// ExtractSecrets will loop through al those damn interfaces
+// ExtractSecrets will loop through all the provided secret interfaces
 func (vaultClient *API) ExtractSecrets(input util.SecretJSON, appendToFile bool) ([]Outputs, error) {
 	var finalResult []Outputs
 	var result = make(secrets.Result)
