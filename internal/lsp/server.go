@@ -144,6 +144,6 @@ func (s *Server) writeResponse(id any, result any) {
 	header := fmt.Sprintf("Content-Length: %d\r\n\r\n", len(body))
 
 	// Write atomically to avoid interleaving
-	os.Stdout.Write([]byte(header)) //nolint:errcheck If this fails here, there is no reason to handle it.
-	os.Stdout.Write(body)           //nolint:errcheck If this fails here, there is no reason to handle it.
+	os.Stdout.Write([]byte(header)) //nolint:errcheck // If this fails here, there is no reason to handle it.
+	os.Stdout.Write(body)           //nolint:errcheck // If this fails here, there is no reason to handle it.
 }
