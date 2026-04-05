@@ -59,14 +59,14 @@ func doIt(cmd *cobra.Command, args []string) []string {
 			return secretEnvs
 		}
 
-		y := make([]interface{}, len(*secret))
+		secretItems := make([]interface{}, len(*secret))
 
-		for i, s := range *secret {
-			y[i] = s
+		for i, secretPath := range *secret {
+			secretItems[i] = secretPath
 		}
 
 		input = util.SecretJSON{
-			Secrets: y,
+			Secrets: secretItems,
 		}
 	} else {
 		if len(args) == 0 {
@@ -97,22 +97,22 @@ func doIt(cmd *cobra.Command, args []string) []string {
 		return secretEnvs
 	}
 
-	for _, v := range allSecrets {
+	for _, output := range allSecrets {
 		fileName := config.Config.FileName
-		if v.Filename != "" {
-			fileName = v.Filename
+		if output.Filename != "" {
+			fileName = output.Filename
 		}
 
-		switch v.Format {
+		switch output.Format {
 		case "json":
-			files.Write(config.Config.Output, fileName, v.Result.ToJSON(), v.Owner, config.Config.Append)
+			files.Write(config.Config.Output, fileName, output.Result.ToJSON(), output.Owner, config.Config.Append)
 		case "env":
-			files.Write(config.Config.Output, fileName, v.Result.ToENV(), v.Owner, config.Config.Append)
-			secretEnvs = append(secretEnvs, v.Result.ToKVarray("")...)
+			files.Write(config.Config.Output, fileName, output.Result.ToENV(), output.Owner, config.Config.Append)
+			secretEnvs = append(secretEnvs, output.Result.ToKVarray("")...)
 		case "secret":
-			files.Write(config.Config.Output, fileName, v.Result.ToK8sSecret(), v.Owner, config.Config.Append)
+			files.Write(config.Config.Output, fileName, output.Result.ToK8sSecret(), output.Owner, config.Config.Append)
 		case "yaml":
-			files.Write(config.Config.Output, fileName, v.Result.ToYAML(), v.Owner, config.Config.Append)
+			files.Write(config.Config.Output, fileName, output.Result.ToYAML(), output.Owner, config.Config.Append)
 		}
 		log.Debug().Msgf("Secrets written to file: %s/%s", config.Config.Output, fileName)
 	}
