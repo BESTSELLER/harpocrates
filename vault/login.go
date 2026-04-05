@@ -36,13 +36,12 @@ func Login() {
 
 	url := config.Config.VaultAddress + "/v1/auth/" + config.Config.AuthName + "/login"
 
-	buf := new(bytes.Buffer)
-	err := json.NewEncoder(buf).Encode(JWTPayLoad{Jwt: token.Read(), Role: config.Config.RoleName})
+	payload, err := json.Marshal(JWTPayLoad{Jwt: token.Read(), Role: config.Config.RoleName})
 	if err != nil {
 		log.Fatal().Err(err).Msg("Unable to prepare jwt token")
 	}
 
-	req, err := http.NewRequest(http.MethodPost, url, buf)
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(payload))
 	if err != nil {
 		log.Fatal().Err(err).Msg("Unable to create login request to Vault")
 	}
