@@ -38,9 +38,9 @@ func TestExtractSecretsWithAlias(t *testing.T) {
 	}
 
 	// assert
-	for _, v := range result {
+	for _, output := range result {
 		// Assert newKey1 is present and key1 is not (or rather key1 is mapped to value1 but key in result is newKey1)
-		resMap := v.Result
+		resMap := output.Result
 		if val, ok := resMap["newKey1"]; !ok {
 			t.Errorf("Expected 'newKey1' in result, got %v", resMap)
 		} else if val != "value1" {
@@ -135,8 +135,8 @@ func TestExtractSecretsWithKeyLevelUpperCase(t *testing.T) {
 	}
 
 	// assert: key1 has uppercase: true at the key level, so it should be uppercased to KEY1
-	for _, v := range result {
-		resMap := v.Result
+	for _, output := range result {
+		resMap := output.Result
 		if val, ok := resMap["KEY1"]; !ok {
 			t.Errorf("Expected 'KEY1' (uppercased) in result, got %v", resMap)
 		} else if val != "value1" {
@@ -200,8 +200,8 @@ func TestExtractSecretsWithAliasNested(t *testing.T) {
 	}
 
 	// assert
-	for _, v := range result {
-		resMap := v.Result
+	for _, output := range result {
+		resMap := output.Result
 		if val, ok := resMap["myTopSecret"]; !ok {
 			t.Errorf("Expected 'myTopSecret' in result, got %v", resMap)
 		} else if val != "HelloThere!" {
