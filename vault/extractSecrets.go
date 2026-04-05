@@ -26,97 +26,97 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON, appendToFile bool)
 	var currentUpperCase = config.Config.UpperCase
 	var currentFormat = config.Config.Format
 
-	for _, a := range input.Secrets {
+	for _, secretEntry := range input.Secrets {
 
 		// If the key is just a secret path, then it will read that from Vault, otherwise:
-		if _, isString := a.(string); !isString {
-			b, ok := a.(map[string]interface{})
+		if _, isString := secretEntry.(string); !isString {
+			secretMapRaw, ok := secretEntry.(map[string]interface{})
 			if !ok {
-				return nil, fmt.Errorf("expected map[string]interface{}, got: '%s'", a)
+				return nil, fmt.Errorf("expected map[string]interface{}, got: '%s'", secretEntry)
 			}
 
-			aa := map[string]util.Secret{}
-			err := mapstructure.Decode(b, &aa)
+			secretConfigMap := map[string]util.Secret{}
+			err := mapstructure.Decode(secretMapRaw, &secretConfigMap)
 			if err != nil {
 				return finalResult, err
 			}
 
-			for c, d := range aa {
-				setPrefix(d.Prefix, &currentPrefix)
-				setUpper(d.UpperCase, &currentUpperCase)
-				setFormat(d.Format, &currentFormat)
+			for secretPath, secretConfig := range secretConfigMap {
+				setPrefix(secretConfig.Prefix, &currentPrefix)
+				setUpper(secretConfig.UpperCase, &currentUpperCase)
+				setFormat(secretConfig.Format, &currentFormat)
 
-				if len(d.Keys) == 0 {
-					secretValue, err := vaultClient.ReadSecret(c)
+				if len(secretConfig.Keys) == 0 {
+					secretValue, err := vaultClient.ReadSecret(secretPath)
 					if err != nil {
 						return nil, err
 					}
 					var thisResult = make(secrets.Result)
-					for k, v := range secretValue {
-						thisResult.Add(k, v, currentPrefix, currentUpperCase)
+					for key, value := range secretValue {
+						thisResult.Add(key, value, currentPrefix, currentUpperCase)
 					}
 
-					finalResult = append(finalResult, Outputs{Format: currentFormat, Filename: d.FileName, Result: thisResult, Owner: d.Owner})
+					finalResult = append(finalResult, Outputs{Format: currentFormat, Filename: secretConfig.FileName, Result: thisResult, Owner: secretConfig.Owner})
 					continue
 				}
 
-				for _, f := range d.Keys {
+				for _, keyEntry := range secretConfig.Keys {
 					// If the key is just a secret path, then it will read that from Vault, otherwise:
-					if _, isString := f.(string); !isString {
-						bb := map[string]util.SecretKeys{}
-						err := mapstructure.Decode(f, &bb)
+					if _, isString := keyEntry.(string); !isString {
+						secretKeysConfigMap := map[string]util.SecretKeys{}
+						err := mapstructure.Decode(keyEntry, &secretKeysConfigMap)
 						if err != nil {
 							return finalResult, err
 						}
 
-						for h, i := range bb {
-							setPrefix(i.Prefix, &currentPrefix)
-							setUpper(i.UpperCase, &currentUpperCase)
+						for vaultKey, keyConfig := range secretKeysConfigMap {
+							setPrefix(keyConfig.Prefix, &currentPrefix)
+							setUpper(keyConfig.UpperCase, &currentUpperCase)
 
-							keyName := h
-							if i.Alias != "" {
-								keyName = i.Alias
+							keyName := vaultKey
+							if keyConfig.Alias != "" {
+								keyName = keyConfig.Alias
 							}
 
-							if i.SaveAsFile != nil {
-								secretValue, err := vaultClient.ReadSecretKey(c, h)
+							if keyConfig.SaveAsFile != nil {
+								secretValue, err := vaultClient.ReadSecretKey(secretPath, vaultKey)
 								if err != nil {
 									return nil, err
 								}
-								if *i.SaveAsFile {
+								if *keyConfig.SaveAsFile {
 									files.Write(input.Output, secrets.ToUpperOrNotToUpper(fmt.Sprintf("%s%s", currentPrefix, keyName), &currentUpperCase), secretValue, nil, appendToFile)
 								} else {
 									result.Add(keyName, secretValue, currentPrefix, currentUpperCase)
 								}
 							} else {
-								secretValue, err := vaultClient.ReadSecretKey(c, h)
+								secretValue, err := vaultClient.ReadSecretKey(secretPath, vaultKey)
 								if err != nil {
 									return nil, err
 								}
 								result.Add(keyName, secretValue, currentPrefix, currentUpperCase)
 							}
-							setPrefix(d.Prefix, &currentPrefix)
-							setUpper(d.UpperCase, &currentUpperCase)
+							setPrefix(secretConfig.Prefix, &currentPrefix)
+							setUpper(secretConfig.UpperCase, &currentUpperCase)
 						}
 					} else {
-						secretValue, err := vaultClient.ReadSecretKey(c, fmt.Sprintf("%s", f))
+						secretValue, err := vaultClient.ReadSecretKey(secretPath, fmt.Sprintf("%s", keyEntry))
 						if err != nil {
 							return nil, err
 						}
-						result.Add(fmt.Sprintf("%s", f), secretValue, currentPrefix, currentUpperCase)
+						result.Add(fmt.Sprintf("%s", keyEntry), secretValue, currentPrefix, currentUpperCase)
 					}
 				}
 				setPrefix(config.Config.Prefix, &currentPrefix)
-				setUpper(d.UpperCase, &currentUpperCase)
-				setFormat(d.Format, &currentFormat)
+				setUpper(secretConfig.UpperCase, &currentUpperCase)
+				setFormat(secretConfig.Format, &currentFormat)
 			}
 		} else {
-			secretValue, err := vaultClient.ReadSecret(fmt.Sprintf("%s", a))
+			secretValue, err := vaultClient.ReadSecret(fmt.Sprintf("%s", secretEntry))
 			if err != nil {
 				return nil, err
 			}
-			for aa, bb := range secretValue {
-				result.Add(aa, bb, currentPrefix, currentUpperCase)
+			for key, value := range secretValue {
+				result.Add(key, value, currentPrefix, currentUpperCase)
 			}
 		}
 	}
