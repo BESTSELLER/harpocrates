@@ -204,12 +204,13 @@ func (s *Server) determineContext(content string, targetLine int) (ctx Completio
 func getIndentCount(line string) int {
 	count := 0
 	for _, ch := range line {
-		if ch == ' ' {
+		switch ch {
+		case ' ':
 			count++
-		} else if ch == '\t' { // Tabs not standard for yaml, but fallback support
+		case '\t': // Tabs not standard for yaml, but fallback support
 			count += 2
-		} else {
-			break
+		default:
+			return count
 		}
 	}
 	return count
