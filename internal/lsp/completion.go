@@ -63,6 +63,36 @@ func (s *Server) provideCompletions(params CompletionParams) CompletionList {
 			log.Error().Err(err).Str("path", queryPath).Msg("ListTokens failed")
 		}
 
+		// At root level, also list secret engines
+		if basePath == "" {
+			engines, err := s.vaultClient.ListSecretEngines()
+			if err != nil {
+				log.Error().Err(err).Msg("ListSecretEngines failed")
+			} else {
+				tokens = append(tokens, engines...)
+			}
+		} else {
+			// suggest engine sub-paths (like data/, roles/)
+			subPath, err := s.vaultClient.GetEngineSubPath(basePath)
+			if err != nil {
+				log.Error().Err(err).Str("path", basePath).Msg("GetEngineSubPath failed")
+			} else if subPath != "" {
+				// Avoid duplicate if the engine already returned it in ListTokens
+				exists := false
+				for _, t := range tokens {
+					// tokens might be relative like "data/", but subPath contains basePath too
+					if basePath+t == subPath {
+						exists = true
+						break
+					}
+				}
+				if !exists {
+					// token in ListTokens is just the name (e.g. "data/"), so we must trim basePath
+					tokens = append(tokens, strings.TrimPrefix(subPath, basePath))
+				}
+			}
+		}
+
 		var items []CompletionItem
 		for _, token := range tokens {
 			kind := CompletionItemKindValue

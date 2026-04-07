@@ -9,10 +9,21 @@ type Request struct {
 	Params json.RawMessage `json:"params"`
 }
 
+type Notification struct {
+	RPC    string `json:"jsonrpc"`
+	Method string `json:"method"`
+	Params any    `json:"params"`
+}
+
+type ShowMessageParams struct {
+	Type    int    `json:"type"`
+	Message string `json:"message"`
+}
+
 type Response struct {
 	RPC    string `json:"jsonrpc"`
 	ID     any    `json:"id"`
-	Result any    `json:"result,omitempty"`
+	Result any    `json:"result"`
 	Error  *Error `json:"error,omitempty"`
 }
 

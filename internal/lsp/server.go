@@ -17,13 +17,15 @@ import (
 type Server struct {
 	documents   map[string]string // URI to document content
 	vaultClient *vault.API
+	tokenErr    error
 }
 
 // NewServer creates a new LSP server
-func NewServer(vaultClient *vault.API) *Server {
+func NewServer(vaultClient *vault.API, tokenErr error) *Server {
 	return &Server{
 		documents:   make(map[string]string),
 		vaultClient: vaultClient,
+		tokenErr:    tokenErr,
 	}
 }
 
@@ -97,6 +99,14 @@ func (s *Server) handleMessage(req Request) {
 
 		s.writeResponse(req.ID, result)
 
+	case "initialized":
+		if s.tokenErr != nil {
+			s.SendNotification("window/showMessage", ShowMessageParams{
+				Type:    2, // Warning
+				Message: fmt.Sprintf("Harpocrates: Vault token validation failed (%v). Autocomplete and validation may not work.", s.tokenErr),
+			})
+		}
+
 	case "textDocument/didOpen":
 		var params DidOpenTextDocumentParams
 		if err := json.Unmarshal(req.Params, &params); err != nil {
@@ -125,6 +135,12 @@ func (s *Server) handleMessage(req Request) {
 		items := s.provideCompletions(params)
 
 		s.writeResponse(req.ID, items)
+
+	case "shutdown":
+		s.writeResponse(req.ID, nil)
+
+	case "exit":
+		os.Exit(0)
 	}
 }
 
@@ -141,6 +157,26 @@ func (s *Server) writeResponse(id any, result any) {
 		return
 	}
 
+	s.writeMessage(body)
+}
+
+func (s *Server) SendNotification(method string, params any) {
+	notif := Notification{
+		RPC:    "2.0",
+		Method: method,
+		Params: params,
+	}
+
+	body, err := json.Marshal(notif)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to marshal notification")
+		return
+	}
+
+	s.writeMessage(body)
+}
+
+func (s *Server) writeMessage(body []byte) {
 	header := fmt.Sprintf("Content-Length: %d\r\n\r\n", len(body))
 
 	// Write atomically to avoid interleaving
