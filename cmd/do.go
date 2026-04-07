@@ -82,7 +82,10 @@ func doIt(cmd *cobra.Command, args []string) []string {
 		}
 	}
 
-	vault.Login()
+	err := vault.Login()
+	if err != nil {
+		log.Fatal().Err(err).Msg("failed to login to Vault")
+	}
 
 	vaultClient := vault.NewClient()
 
