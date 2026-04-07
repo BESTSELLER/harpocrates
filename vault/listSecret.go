@@ -27,3 +27,48 @@ func (client *API) ListTokens(path string) ([]string, error) {
 
 	return keys, nil
 }
+
+// ListSecretEngines lists all secret engines (mounts) available at the root level.
+func (client *API) ListSecretEngines() ([]string, error) {
+	mounts, err := client.Client.Sys().ListMounts()
+	if err != nil {
+		return nil, fmt.Errorf("failed to list secret engines: %v", err)
+	}
+
+	var engines []string
+	for path := range mounts {
+		if path != "" {
+			engines = append(engines, path)
+		}
+	}
+
+	return engines, nil
+}
+
+// GetEngineSubPath suggests the next path component (e.g., "data/", "roleset/") based on the engine type.
+func (client *API) GetEngineSubPath(mountPath string) (string, error) {
+	mounts, err := client.Client.Sys().ListMounts()
+	if err != nil {
+		return "", fmt.Errorf("failed to list mounts: %v", err)
+	}
+
+	mount, ok := mounts[mountPath]
+	if !ok {
+		return "", nil // Not a known root mount point
+	}
+
+	switch mount.Type {
+	case "kv":
+		if mount.Options != nil && mount.Options["version"] == "2" {
+			return mountPath + "data/", nil
+		}
+	case "gcp":
+		return mountPath + "roleset/", nil
+	case "pki", "ssh", "aws", "database":
+		return mountPath + "roles/", nil
+	case "transit":
+		return mountPath + "keys/", nil
+	}
+
+	return "", nil
+}
