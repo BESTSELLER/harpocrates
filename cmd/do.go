@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 	"path"
 	"strings"
@@ -15,37 +14,28 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func loadLocalVaultToken() error {
-	if config.Config.VaultToken == "" {
-		homeDir, err := os.UserHomeDir()
-		if err != nil {
-			log.Debug().Err(err).Msg("unable to get home directory")
-		} else {
-			vaultTokenFile := path.Join(homeDir, ".vault-token")
-			token, err := os.ReadFile(vaultTokenFile)
-			if err == nil {
-				config.Config.VaultToken = strings.TrimSpace(string(token))
-				log.Debug().Msg("using vault token from ~/.vault-token")
-			}
-		}
-	}
-
+func loadLocalVaultToken() {
 	if config.Config.VaultToken != "" {
-		client := vault.NewClient()
-		_, err := client.Client.Auth().Token().LookupSelf()
-		if err != nil {
-			return fmt.Errorf("vault token is invalid or expired: %w", err)
-		}
+		return
 	}
 
-	return nil
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		log.Debug().Err(err).Msg("unable to get home directory")
+		return
+	}
+
+	vaultTokenFile := path.Join(homeDir, ".vault-token")
+	token, err := os.ReadFile(vaultTokenFile)
+	if err == nil {
+		config.Config.VaultToken = strings.TrimSpace(string(token))
+		log.Debug().Msg("using vault token from ~/.vault-token")
+	}
+
 }
 
 func doIt(cmd *cobra.Command, args []string) []string {
-	err := loadLocalVaultToken()
-	if err != nil {
-		log.Fatal().Err(err).Msg("vault token validation failed")
-	}
+	loadLocalVaultToken()
 
 	secretEnvs := []string{}
 
