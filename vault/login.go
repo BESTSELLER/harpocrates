@@ -20,9 +20,15 @@ type JWTPayLoad struct {
 
 // Login will exchange the JWT token for a Vault token
 func Login() {
-	// If a token exists, skip the login.
+	// If a token exists, validate it. If valid, skip the login.
 	if config.Config.VaultToken != "" {
-		return
+		client := NewClient()
+		_, err := client.Client.Auth().Token().LookupSelf()
+		if err == nil {
+			return
+		}
+		log.Warn().Err(err).Msg("Vault token is invalid or expired, falling back to other authentication methods")
+		config.Config.VaultToken = ""
 	}
 
 	if config.Config.GcpWorkloadID {
