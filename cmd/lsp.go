@@ -20,11 +20,13 @@ func init() {
 }
 
 func startLSP() {
-	err := loadLocalVaultToken()
+	loadLocalVaultToken()
+
+	err := vault.Login()
 	if err != nil {
 		log.Warn().Err(err).Msg("Vault token validation failed, autocomplete/validation may not work")
 	}
-	vault.Login()
+
 	vaultClient := vault.NewClient()
 
 	server := lsp.NewServer(vaultClient, err)
