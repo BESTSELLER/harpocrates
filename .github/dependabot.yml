@@ -2,9 +2,7 @@ version: 2
 
 updates:
   - package-ecosystem: "gomod"
-    directories:
-      - "/"
-      - "/vault/"
+    directory: "/"
     open-pull-requests-limit: 100
     schedule:
       interval: "monthly"
