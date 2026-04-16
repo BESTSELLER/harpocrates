@@ -15,22 +15,21 @@ policy:
         - "bestseller"
 approval_rules:
   - name: tests passed
-    if:
-      has_workflow_result:
-        workflows:
-          - ".github/workflows/build.yml"
-          - ".github/workflows/test.yml"
     requires:
-      count: 0
+      conditions:
+        has_workflow_result:
+          workflows:
+            - ".github/workflows/build.yml"
+            - ".github/workflows/test.yml"
   - name: developer-platform has approved
     requires:
       count: 1
       teams:
         - "BESTSELLER/developer-platform"
   - name: dependabot is making the PR
-    if:
-      has_author_in:
-        users:
-          - "dependabot[bot]"
     requires:
       count: 0
+      conditions:
+        has_author_in:
+          users:
+            - "dependabot[bot]"
