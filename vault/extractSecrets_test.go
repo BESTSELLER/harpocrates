@@ -18,8 +18,9 @@ var testClient *api.Client
 func setupVault(t *testing.T) {
 	ctx := context.Background()
 
+	// renovate: datasource=docker depName=hashicorp/vault
 	vaultContainer, err := vault.Run(ctx,
-		"hashicorp/vault:latest",
+		"hashicorp/vault:1.21",
 		vault.WithToken("unittesttoken"),
 	)
 	if err != nil {
