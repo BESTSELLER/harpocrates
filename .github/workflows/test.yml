@@ -51,7 +51,7 @@ jobs:
           tool_name: go static analysis
 
       - name: Test
-        uses: robherley/go-test-action@42a1975c97156330b5126c2f35ef0fb78c4c7154 # v0.7.1
+        uses: robherley/go-test-action@72d31c2e7a3502ad0639274dcdc7ffbc7c9c6c4c # v1.0.0
 
       - name: golangci-lint
         uses: golangci/golangci-lint-action@1e7e51e771db61008b38414a730f564565cf7c20 # v9.2.0
