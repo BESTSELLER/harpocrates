@@ -8,7 +8,7 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.5.0
 	github.com/gookit/color v1.6.0
 	github.com/hashicorp/vault/api v1.23.0
-	github.com/rs/zerolog v1.35.0
+	github.com/rs/zerolog v1.35.1
 	github.com/spf13/cobra v1.10.2
 	github.com/testcontainers/testcontainers-go/modules/vault v0.42.0
 	github.com/xeipuuv/gojsonschema v1.2.0
