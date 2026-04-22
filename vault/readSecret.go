@@ -11,7 +11,7 @@ const keyNotFound = "the key '%s' was not found in the path '%s': %v"
 const secretNotFound = "the secret '%s' was not found: %v"
 
 // ReadSecret from Vault
-func (client *API) ReadSecret(path string) (map[string]interface{}, error) {
+func (client *API) ReadSecret(path string) (map[string]any, error) {
 
 	secretValues, err := client.Client.Logical().Read(path)
 	if secretValues == nil {
@@ -26,7 +26,7 @@ func (client *API) ReadSecret(path string) (map[string]interface{}, error) {
 
 	// Will append data to path and retry if "data" is empty and warnings is present
 	// if path contains data and warnings an error is returned
-	if fmt.Sprintf("%s", secretValues.Data) == fmt.Sprintf("%s", make(map[string]interface{})) {
+	if fmt.Sprintf("%s", secretValues.Data) == fmt.Sprintf("%s", make(map[string]any)) {
 		if len(secretValues.Warnings) > 0 {
 			splitPath := strings.Split(path, "/")
 			if splitPath[1] == "data" {
@@ -46,13 +46,13 @@ func (client *API) ReadSecret(path string) (map[string]interface{}, error) {
 		return nil, err
 	}
 
-	var secretInterface interface{}
+	var secretInterface any
 	err = json.Unmarshal(jsonBytes, &secretInterface)
 	if err != nil {
 		return nil, fmt.Errorf("unable to unmarshal response from Vault")
 	}
 
-	secretMap := secretInterface.(map[string]interface{})
+	secretMap := secretInterface.(map[string]any)
 
 	return secretMap, nil
 }
@@ -68,7 +68,7 @@ func (client *API) ReadSecret(path string) (map[string]interface{}, error) {
 //   - "mixed.array[0].key"  -> {"mixed": {"array": [{"key": "value"}]}}
 //   - "key.with.dots"       -> {"key": {"with.dots": "value"}}
 //   - "key.with.dots.child" -> {"key": {"with.dots": {"child": "value"}}}
-func (client *API) ReadSecretKey(path string, secretKey string) (interface{}, error) {
+func (client *API) ReadSecretKey(path string, secretKey string) (any, error) {
 	secret, err := client.ReadSecret(path)
 	if secret == nil {
 		return "", fmt.Errorf(keyNotFound, secretKey, path, err)
@@ -91,11 +91,11 @@ func (client *API) ReadSecretKey(path string, secretKey string) (interface{}, er
 	normalizedKey = strings.ReplaceAll(normalizedKey, "]", "")
 	keys := strings.Split(normalizedKey, ".")
 
-	var current interface{} = secret
+	var current any = secret
 	for i := 0; i < len(keys); i++ {
 		keySegment := keys[i]
 
-		if currentMap, isMap := current.(map[string]interface{}); isMap {
+		if currentMap, isMap := current.(map[string]any); isMap {
 			// Check for exact match of the current segment in the map
 			if mapValue, exists := currentMap[keySegment]; exists {
 				current = mapValue
@@ -122,7 +122,7 @@ func (client *API) ReadSecretKey(path string, secretKey string) (interface{}, er
 			}
 		}
 
-		if currentSlice, isSlice := current.([]interface{}); isSlice {
+		if currentSlice, isSlice := current.([]any); isSlice {
 			// Handle array index access (e.g., from "users[0]" -> "0")
 			if sliceIndex, err := strconv.Atoi(keySegment); err == nil {
 				if sliceIndex >= 0 && sliceIndex < len(currentSlice) {

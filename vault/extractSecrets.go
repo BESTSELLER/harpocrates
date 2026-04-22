@@ -30,7 +30,7 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON, appendToFile bool)
 
 		// If the key is just a secret path, then it will read that from Vault, otherwise:
 		if _, isString := secretEntry.(string); !isString {
-			secretMapRaw, ok := secretEntry.(map[string]interface{})
+			secretMapRaw, ok := secretEntry.(map[string]any)
 			if !ok {
 				return nil, fmt.Errorf("expected map[string]interface{}, got: '%s'", secretEntry)
 			}
