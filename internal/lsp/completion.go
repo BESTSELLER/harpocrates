@@ -392,14 +392,6 @@ func findContextPath(node *yaml.Node, targetLine int, currentPath []string) []st
 	return currentPath
 }
 
-func inSecretsList(path []string) bool {
-	if len(path) == 0 {
-		return false
-	}
-	// "secrets", "[]"
-	return path[0] == "secrets" && (len(path) == 1 || len(path) == 2)
-}
-
 func inKeysList(path []string) bool {
 	if len(path) < 3 {
 		return false
