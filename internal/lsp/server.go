@@ -92,7 +92,7 @@ func (s *Server) handleMessage(req Request) {
 			Capabilities: ServerCapabilities{
 				TextDocumentSync: 1, // Full document sync
 				CompletionProvider: &CompletionOptions{
-					TriggerCharacters: []string{"/"},
+					TriggerCharacters: []string{"/", "\n", "\r"},
 				},
 			},
 		}
