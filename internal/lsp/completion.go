@@ -184,36 +184,29 @@ func (s *Server) provideCompletions(params CompletionParams) CompletionList {
 }
 
 // determineContext figures out if we are under `secrets:` or `keys:`
-func (s *Server) determineContext(content string, targetLine int) (ctx CompletionContext, parentSecret string) {
-	ctx = ContextUnknown
-
+func (s *Server) determineContext(content string, targetLine int) (CompletionContext, string) {
+	var parentSecret string
 	var node yaml.Node
 	err := yaml.Unmarshal([]byte(content), &node)
 
 	// Either AST parsing succeeded entirely or partially.
-	// Try parsing AST first.
+	// Try parsing AST first to extract parent secret if possible.
 	if err == nil {
 		path := findContextPath(&node, targetLine+1, nil) // targetLine is 0-indexed in LSP, yaml Node is 1-indexed
-		if inSecretsList(path) {
-			return ContextSecretsList, ""
-		}
 		if inKeysList(path) {
-			// We are in keys, find the parent secret path
-			return ContextKeysList, extractParentSecret(path)
+			parentSecret = extractParentSecret(path)
 		}
 	}
 
-	// Fallback to line scanning heuristics if AST is broken due to typing
 	lines := strings.Split(content, "\n")
-
 	if targetLine < 0 || targetLine >= len(lines) {
-		return
+		return ContextUnknown, ""
 	}
 
-	// Count indent of the current line
+	// Validate the AST context (or find it if AST failed) using indentation
 	currentIndent := getIndentCount(lines[targetLine])
 
-	// Scan up to find nearest `keys:` or `secrets:` with a smaller indent
+	// Scan up to find nearest block with a smaller indent
 	for i := targetLine - 1; i >= 0; i-- {
 		line := lines[i]
 		if strings.TrimSpace(line) == "" {
@@ -223,31 +216,39 @@ func (s *Server) determineContext(content string, targetLine int) (ctx Completio
 
 		if indent < currentIndent {
 			trimmedLine := strings.TrimSpace(line)
+
+			// If we hit the expected block and the cursor is truly indented inside it
 			if strings.HasPrefix(trimmedLine, "secrets:") {
-				ctx = ContextSecretsList
-				return
+				return ContextSecretsList, ""
 			}
 			if strings.HasPrefix(trimmedLine, "keys:") {
-				ctx = ContextKeysList
-				// Now find parent secret path
+				// Find parent secret path
 				for j := i - 1; j >= 0; j-- {
 					if getIndentCount(lines[j]) < indent {
-						// This should be the list item `- secret/data/m...:`
 						pLine := strings.TrimSpace(lines[j])
 						if strings.HasPrefix(pLine, "-") {
-							parentSecret = extractValFromList(pLine)
+							return ContextKeysList, extractValFromList(pLine)
 						}
 						break
 					}
 				}
-				return
+				return ContextKeysList, parentSecret
 			}
+
+			// If we hit any other block (like a list item "- secret/data/foo:" or "format:"),
+			// we are inside that block, NOT directly inside secrets: or keys:
+			if strings.HasPrefix(trimmedLine, "-") || strings.Contains(trimmedLine, ":") {
+				// We reached a different parent block.
+				// The cursor is inside THIS block, not directly in `secrets:` or `keys:`
+				break
+			}
+
 			// Update current indent limit
 			currentIndent = indent
 		}
 	}
 
-	return
+	return ContextUnknown, ""
 }
 
 func getExistingItemsInBlock(lines []string, targetLine int) map[string]bool {
