@@ -122,14 +122,19 @@ func (s *Server) provideCompletions(params CompletionParams) CompletionList {
 					insertText = "- " + insertText
 				}
 
+				wordStart := params.Position.Character - len(currentWord)
+
 				items = append(items, CompletionItem{
 					Label:      token,
 					Kind:       kind,
 					InsertText: insertText,
 					TextEdit: &TextEdit{
 						Range: Range{
-							Start: params.Position,
-							End:   params.Position,
+							Start: Position{
+								Line:      params.Position.Line,
+								Character: wordStart,
+							},
+							End: params.Position,
 						},
 						NewText: insertText,
 					},
@@ -167,14 +172,19 @@ func (s *Server) provideCompletions(params CompletionParams) CompletionList {
 					insertText = "- " + insertText
 				}
 
+				wordStart := params.Position.Character - len(trimmedPrefix)
+
 				items = append(items, CompletionItem{
 					Label:      key,
 					Kind:       CompletionItemKindField,
 					InsertText: insertText,
 					TextEdit: &TextEdit{
 						Range: Range{
-							Start: params.Position,
-							End:   params.Position,
+							Start: Position{
+								Line:      params.Position.Line,
+								Character: wordStart,
+							},
+							End: params.Position,
 						},
 						NewText: insertText,
 					},
