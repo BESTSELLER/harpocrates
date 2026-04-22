@@ -34,6 +34,10 @@ func (s *Server) provideCompletions(params CompletionParams) CompletionList {
 		prefix = currentLine[:params.Position.Character]
 	}
 
+	if strings.HasSuffix(strings.TrimSpace(prefix), ":") {
+		return CompletionList{}
+	}
+
 	// Clean up prefix to just handle the current word for matching
 	trimmedPrefix := strings.TrimLeft(prefix, " \t-")
 	if idx := strings.LastIndexAny(trimmedPrefix, " :"); idx != -1 {
