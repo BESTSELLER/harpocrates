@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/rs/zerolog/log"
-	"gopkg.in/yaml.v3"
+	"go.yaml.in/yaml/v4"
 )
 
 // CompletionContext tells us where we are in the YAML document
