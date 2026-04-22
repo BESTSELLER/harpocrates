@@ -8,6 +8,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/BESTSELLER/harpocrates/vault"
 	"github.com/rs/zerolog/log"
@@ -17,6 +18,7 @@ import (
 type Server struct {
 	documents   map[string]string // URI to document content
 	vaultClient *vault.API
+	vaultCache  *TTLMap
 	tokenErr    error
 }
 
@@ -25,6 +27,7 @@ func NewServer(vaultClient *vault.API, tokenErr error) *Server {
 	return &Server{
 		documents:   make(map[string]string),
 		vaultClient: vaultClient,
+		vaultCache:  NewTTLMap(time.Minute * 5),
 		tokenErr:    tokenErr,
 	}
 }
