@@ -41,6 +41,8 @@ func (s *Server) provideCompletions(params CompletionParams) CompletionList {
 	}
 	trimmedPrefix = strings.TrimLeft(trimmedPrefix, "'\"")
 
+	needsDash := !strings.HasPrefix(strings.TrimSpace(prefix), "-")
+
 	ctx, parentSecret := s.determineContext(content, params.Position.Line)
 
 	if ctx == ContextSecretsList {
@@ -111,16 +113,21 @@ func (s *Server) provideCompletions(params CompletionParams) CompletionList {
 					}
 				}
 
+				insertText := token
+				if needsDash {
+					insertText = "- " + insertText
+				}
+
 				items = append(items, CompletionItem{
 					Label:      token,
 					Kind:       kind,
-					InsertText: token,
+					InsertText: insertText,
 					TextEdit: &TextEdit{
 						Range: Range{
 							Start: params.Position,
 							End:   params.Position,
 						},
-						NewText: token,
+						NewText: insertText,
 					},
 					Command: cmd,
 				})
@@ -140,20 +147,32 @@ func (s *Server) provideCompletions(params CompletionParams) CompletionList {
 			return CompletionList{}
 		}
 
+		existingKeys := getExistingItemsInBlock(lines, params.Position.Line)
+
 		var items []CompletionItem
 		for key := range secretData {
+			// Skip if already added
+			if existingKeys[key] {
+				continue
+			}
+
 			// Prefix match
 			if strings.HasPrefix(key, trimmedPrefix) {
+				insertText := key
+				if needsDash {
+					insertText = "- " + insertText
+				}
+
 				items = append(items, CompletionItem{
 					Label:      key,
 					Kind:       CompletionItemKindField,
-					InsertText: key,
+					InsertText: insertText,
 					TextEdit: &TextEdit{
 						Range: Range{
 							Start: params.Position,
 							End:   params.Position,
 						},
-						NewText: key,
+						NewText: insertText,
 					},
 				})
 			}
@@ -229,6 +248,67 @@ func (s *Server) determineContext(content string, targetLine int) (ctx Completio
 	}
 
 	return
+}
+
+func getExistingItemsInBlock(lines []string, targetLine int) map[string]bool {
+	existing := make(map[string]bool)
+	if targetLine < 0 || targetLine >= len(lines) {
+		return existing
+	}
+
+	blockLineIdx := -1
+	blockIndent := -1
+	currentIndent := getIndentCount(lines[targetLine])
+
+	// 1. Scan up to find the nearest keys: or secrets:
+	for i := targetLine; i >= 0; i-- {
+		line := lines[i]
+		if strings.TrimSpace(line) == "" {
+			continue
+		}
+		indent := getIndentCount(line)
+
+		if indent < currentIndent || i == targetLine {
+			trimmed := strings.TrimSpace(line)
+			if strings.HasPrefix(trimmed, "keys:") || strings.HasPrefix(trimmed, "secrets:") {
+				blockLineIdx = i
+				blockIndent = indent
+				break
+			}
+			currentIndent = indent
+		}
+	}
+
+	if blockLineIdx == -1 {
+		return existing
+	}
+
+	// 2. Scan down to collect existing items
+	for i := blockLineIdx + 1; i < len(lines); i++ {
+		if i == targetLine {
+			continue // Skip the line currently being typed
+		}
+		line := lines[i]
+		if strings.TrimSpace(line) == "" {
+			continue
+		}
+		indent := getIndentCount(line)
+
+		// Found the end of the block
+		if indent <= blockIndent {
+			break
+		}
+
+		trimmed := strings.TrimSpace(line)
+		if strings.HasPrefix(trimmed, "-") {
+			val := extractValFromList(trimmed)
+			val = strings.TrimSpace(val)
+			val = strings.Trim(val, "'\"")
+			existing[val] = true
+		}
+	}
+
+	return existing
 }
 
 func getIndentCount(line string) int {
