@@ -8,6 +8,13 @@
       "matchStrings": [
         "// renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n.+?\\n\\s*\"[^:\"]+:(?<currentValue>[^\"]+)\""
       ]
+    },
+    {
+      "customType": "regex",
+      "fileMatch": ["^\\.github/workflows/.*\\.yml$"],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n\\s+version: [\"']?(?<currentValue>[^\"'\\n]+)[\"']?"
+      ]
     }
   ]
 }
