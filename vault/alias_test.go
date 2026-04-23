@@ -165,13 +165,13 @@ func TestExtractSecretsWithAliasNested(t *testing.T) {
 	})
 
 	path := "secret/data/complex"
-	secretData := map[string]interface{}{
-		"globalSecrets": map[string]interface{}{
+	secretData := map[string]any{
+		"globalSecrets": map[string]any{
 			"theSecretINeed": "HelloThere!",
 		},
 	}
 
-	_, err := testClient.Logical().Write(path, map[string]interface{}{
+	_, err := testClient.Logical().Write(path, map[string]any{
 		"data": secretData,
 	})
 	if err != nil {
