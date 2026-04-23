@@ -11,25 +11,25 @@ import (
 
 // SecretJSON holds the information about which secrets to fetch and how to save them again
 type SecretJSON struct {
-	Append        *bool         `json:"append,omitempty"      yaml:"append,omitempty"`
-	Format        string        `json:"format,omitempty"      yaml:"format,omitempty"`
-	Output        string        `json:"output,omitempty"      yaml:"output,omitempty"`
-	Owner         *int          `json:"owner,omitempty"       yaml:"owner,omitempty"`
-	Prefix        string        `json:"prefix,omitempty"      yaml:"prefix,omitempty"`
-	UpperCase     *bool         `json:"uppercase,omitempty"   yaml:"uppercase,omitempty"`
-	Secrets       []interface{} `json:"secrets,omitempty"     yaml:"secrets,omitempty"`
-	GcpWorkloadID bool          `json:"gcpWorkloadID,omitempty"     yaml:"gcpWorkloadID,omitempty"`
+	Append        *bool  `json:"append,omitempty"      yaml:"append,omitempty"`
+	Format        string `json:"format,omitempty"      yaml:"format,omitempty"`
+	Output        string `json:"output,omitempty"      yaml:"output,omitempty"`
+	Owner         *int   `json:"owner,omitempty"       yaml:"owner,omitempty"`
+	Prefix        string `json:"prefix,omitempty"      yaml:"prefix,omitempty"`
+	UpperCase     *bool  `json:"uppercase,omitempty"   yaml:"uppercase,omitempty"`
+	Secrets       []any  `json:"secrets,omitempty"     yaml:"secrets,omitempty"`
+	GcpWorkloadID bool   `json:"gcpWorkloadID,omitempty"     yaml:"gcpWorkloadID,omitempty"`
 }
 
 // Secret holds the configuration for a secret
 type Secret struct {
-	Append    *bool         `json:"append,omitempty"      yaml:"append,omitempty"`
-	Prefix    string        `json:"prefix,omitempty"      yaml:"prefix,omitempty"`
-	Format    string        `json:"format,omitempty"      yaml:"format,omitempty"      mapstructure:"format,omitempty"`
-	FileName  string        `json:"filename,omitempty"    yaml:"filename,omitempty"    mapstructure:"filename,omitempty"`
-	UpperCase *bool         `json:"uppercase,omitempty"   yaml:"uppercase,omitempty"`
-	Keys      []interface{} `json:"keys,omitempty"        yaml:"keys,omitempty"`
-	Owner     *int          `json:"owner,omitempty"       yaml:"owner,omitempty"`
+	Append    *bool  `json:"append,omitempty"      yaml:"append,omitempty"`
+	Prefix    string `json:"prefix,omitempty"      yaml:"prefix,omitempty"`
+	Format    string `json:"format,omitempty"      yaml:"format,omitempty"      mapstructure:"format,omitempty"`
+	FileName  string `json:"filename,omitempty"    yaml:"filename,omitempty"    mapstructure:"filename,omitempty"`
+	UpperCase *bool  `json:"uppercase,omitempty"   yaml:"uppercase,omitempty"`
+	Keys      []any  `json:"keys,omitempty"        yaml:"keys,omitempty"`
+	Owner     *int   `json:"owner,omitempty"       yaml:"owner,omitempty"`
 }
 
 // SecretKeys holds the configuration for secret keys

@@ -30,7 +30,7 @@ func TestReadSecretWrongPath(t *testing.T) {
 	}
 }
 
-func testReadSecretKey(path string, key string, expectedValue interface{}, t *testing.T) {
+func testReadSecretKey(path string, key string, expectedValue any, t *testing.T) {
 	// mock the ReadSecret function
 	vaultClient := &API{
 		Client: testClient,
@@ -116,18 +116,18 @@ func TestReadSecretKeyNested(t *testing.T) {
 	path := "secret/data/complex"
 
 	// Define the complex secret structure matching your requirements
-	secretData := map[string]interface{}{
-		"globalSecrets": map[string]interface{}{
+	secretData := map[string]any{
+		"globalSecrets": map[string]any{
 			"theSecretINeed": "HelloThere!",
 		},
-		"list": []interface{}{"item1", "item2"},
-		"users": []interface{}{
-			map[string]interface{}{"name": "Alice"},
-			map[string]interface{}{"name": "Bob"},
+		"list": []any{"item1", "item2"},
+		"users": []any{
+			map[string]any{"name": "Alice"},
+			map[string]any{"name": "Bob"},
 		},
 		"key[with]brackets": "literalValue",
-		"a": map[string]interface{}{
-			"b": map[string]interface{}{
+		"a": map[string]any{
+			"b": map[string]any{
 				"c": "deepValue",
 			},
 		},
@@ -135,7 +135,7 @@ func TestReadSecretKeyNested(t *testing.T) {
 
 	// Write the secret to Vault
 	// We wrap secretData in "data" because the test setup uses KV v2 secret engine
-	_, err := testClient.Logical().Write(path, map[string]interface{}{
+	_, err := testClient.Logical().Write(path, map[string]any{
 		"data": secretData,
 	})
 	if err != nil {
@@ -173,14 +173,14 @@ func TestReadSecretKeyDeeplyNested(t *testing.T) {
 
 	// Construct 7 levels of nesting (mixed maps and lists)
 	// Path: level1[0].level3.level4[1].level6.final
-	secretData := map[string]interface{}{
-		"level1": []interface{}{
-			map[string]interface{}{
-				"level3": map[string]interface{}{
-					"level4": []interface{}{
+	secretData := map[string]any{
+		"level1": []any{
+			map[string]any{
+				"level3": map[string]any{
+					"level4": []any{
 						"dummy", // index 0
-						map[string]interface{}{ // index 1
-							"level6": map[string]interface{}{
+						map[string]any{ // index 1
+							"level6": map[string]any{
 								"final": "FoundIt",
 							},
 						},
@@ -191,7 +191,7 @@ func TestReadSecretKeyDeeplyNested(t *testing.T) {
 	}
 
 	// Write the secret to Vault
-	_, err := testClient.Logical().Write(path, map[string]interface{}{
+	_, err := testClient.Logical().Write(path, map[string]any{
 		"data": secretData,
 	})
 	if err != nil {
@@ -211,20 +211,20 @@ func TestReadSecretKeyLiteralWithDots(t *testing.T) {
 	})
 
 	path := "secret/data/literal_dots"
-	secretData := map[string]interface{}{
+	secretData := map[string]any{
 		"key.with.dots": "literalValue",
-		"key": map[string]interface{}{
-			"with": map[string]interface{}{
+		"key": map[string]any{
+			"with": map[string]any{
 				"dots":         "nestedValue",
 				"dots1.nested": "nextNestedValues",
-				"this.should.also": map[string]interface{}{
+				"this.should.also": map[string]any{
 					"work": "right?",
 				},
 			},
 		},
 	}
 
-	_, err := testClient.Logical().Write(path, map[string]interface{}{
+	_, err := testClient.Logical().Write(path, map[string]any{
 		"data": secretData,
 	})
 	if err != nil {
@@ -247,13 +247,13 @@ func TestReadSecretKeyNestedNotFound(t *testing.T) {
 	})
 
 	path := "secret/data/nested_not_found"
-	secretData := map[string]interface{}{
-		"parent": map[string]interface{}{
+	secretData := map[string]any{
+		"parent": map[string]any{
 			"child": "value",
 		},
 	}
 
-	_, err := testClient.Logical().Write(path, map[string]interface{}{
+	_, err := testClient.Logical().Write(path, map[string]any{
 		"data": secretData,
 	})
 	if err != nil {
