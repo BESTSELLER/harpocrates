@@ -59,7 +59,7 @@ func doIt(cmd *cobra.Command, args []string) []string {
 			return secretEnvs
 		}
 
-		secretItems := make([]interface{}, len(*secret))
+		secretItems := make([]any, len(*secret))
 
 		for i, secretPath := range *secret {
 			secretItems[i] = secretPath

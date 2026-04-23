@@ -11,13 +11,13 @@ import (
 )
 
 // Result holds the result of all the secrets pulled from Vault
-type Result map[string]interface{}
+type Result map[string]any
 
 // envNameRegexp is a precompiled regular expression used by fixEnvName
 var envNameRegexp = regexp.MustCompile("[^a-zA-Z0-9_]+")
 
 // Add will add a new secret to the Result
-func (result Result) Add(key string, value interface{}, prefix string, upperCase bool) {
+func (result Result) Add(key string, value any, prefix string, upperCase bool) {
 	result[ToUpperOrNotToUpper(fmt.Sprintf("%s%s", prefix, key), &upperCase)] = value
 }
 
@@ -101,7 +101,7 @@ func ToUpperOrNotToUpper(something string, currentUpper *bool) string {
 	return something
 }
 
-func getStringRepresentation(val interface{}) string {
+func getStringRepresentation(val any) string {
 	switch val.(type) {
 	case string:
 		return fmt.Sprintf("'%s'", val)

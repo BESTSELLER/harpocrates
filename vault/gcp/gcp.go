@@ -13,13 +13,13 @@ import (
 
 // VaultLoginResult contains the result after logging in.
 type VaultLoginResult struct {
-	RequestID     string      `json:"request_id"`
-	LeaseID       string      `json:"lease_id"`
-	Renewable     bool        `json:"renewable"`
-	LeaseDuration int         `json:"lease_duration"`
-	Data          interface{} `json:"data"`
-	WrapInfo      interface{} `json:"wrap_info"`
-	Warnings      interface{} `json:"warnings"`
+	RequestID     string `json:"request_id"`
+	LeaseID       string `json:"lease_id"`
+	Renewable     bool   `json:"renewable"`
+	LeaseDuration int    `json:"lease_duration"`
+	Data          any    `json:"data"`
+	WrapInfo      any    `json:"wrap_info"`
+	Warnings      any    `json:"warnings"`
 	Auth          struct {
 		ClientToken   string   `json:"client_token"`
 		Accessor      string   `json:"accessor"`
