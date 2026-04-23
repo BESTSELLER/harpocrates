@@ -42,7 +42,12 @@ func Login() error {
 
 	url := config.Config.VaultAddress + "/v1/auth/" + config.Config.AuthName + "/login"
 
-	payload, err := json.Marshal(JWTPayLoad{Jwt: token.Read(), Role: config.Config.RoleName})
+	jwtToken, err := token.Read()
+	if err != nil {
+		return fmt.Errorf("unable to read token: %w", err)
+	}
+
+	payload, err := json.Marshal(JWTPayLoad{Jwt: jwtToken, Role: config.Config.RoleName})
 	if err != nil {
 		return fmt.Errorf("unable to prepare jwt token: %w", err)
 	}

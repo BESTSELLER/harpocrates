@@ -6,7 +6,7 @@ import (
 )
 
 // Read will read a file and return the content as string
-func Read() string {
+func Read() (string, error) {
 	// Defaults to Kubernetes Service Account
 	filePath := "/var/run/secrets/kubernetes.io/serviceaccount/token"
 
