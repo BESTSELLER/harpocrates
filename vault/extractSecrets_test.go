@@ -67,7 +67,10 @@ func TestExtractSecretsWithFormatAsExpected(t *testing.T) {
 	})
 
 	// define input
-	data := files.Read("../test_data/two_secrets_with_format.yaml")
+	data, err := files.Read("../test_data/two_secrets_with_format.yaml")
+	if err != nil {
+		t.Fatalf("Failed to read test data: %v", err)
+	}
 	input := util.ReadInput(data)
 
 	// mock prefix
@@ -104,7 +107,10 @@ func TestExtractSecretsAsExpected(t *testing.T) {
 	})
 
 	// define input
-	data := files.Read("../test_data/single_secret.yaml")
+	data, err := files.Read("../test_data/single_secret.yaml")
+	if err != nil {
+		t.Fatalf("Failed to read test data: %v", err)
+	}
 	input := util.ReadInput(data)
 
 	// mock prefix
@@ -140,7 +146,10 @@ func TestExtractSecretsWithPrefixAsExpected(t *testing.T) {
 	})
 
 	// define input
-	data := files.Read("../test_data/keys_with_prefix.yaml")
+	data, err := files.Read("../test_data/keys_with_prefix.yaml")
+	if err != nil {
+		t.Fatalf("Failed to read test data: %v", err)
+	}
 	input := util.ReadInput(data)
 
 	// mock prefix
@@ -177,7 +186,10 @@ func TestExtractSecretsSaveAsFileAsExpected(t *testing.T) {
 	})
 
 	// define input
-	data := files.Read("../test_data/save_as_file.yaml")
+	data, err := files.Read("../test_data/save_as_file.yaml")
+	if err != nil {
+		t.Fatalf("Failed to read test data: %v", err)
+	}
 	input := util.ReadInput(data)
 
 	// mock prefix
@@ -188,7 +200,7 @@ func TestExtractSecretsSaveAsFileAsExpected(t *testing.T) {
 	}
 
 	// act
-	_, err := vaultClient.ExtractSecrets(input, false)
+	_, err = vaultClient.ExtractSecrets(input, false)
 	if err != nil {
 		t.Error(err)
 	}
