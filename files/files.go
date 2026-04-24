@@ -13,17 +13,17 @@ import (
 var fileNameRegexp = regexp.MustCompile("[^a-zA-Z0-9.-]+")
 
 // Read will read the content of a file and return it as a string.
-func Read(filePath string) string {
+func Read(filePath string) (string, error) {
 	data, err := os.ReadFile(filePath)
 	if err != nil {
-		log.Fatal().Err(err).Msgf("Unable to read the file at path '%s'", filePath)
+		return "", fmt.Errorf("unable to read the file at path '%s': %w", filePath, err)
 	}
 
-	return fmt.Sprint(string(data))
+	return fmt.Sprint(string(data)), nil
 }
 
 // Write will write some string data to a file
-func Write(output string, fileName string, content interface{}, owner *int, append bool) {
+func Write(output string, fileName string, content any, owner *int, append bool) {
 	fileName = fixFileName(fileName)
 	path := filepath.Join(output, fileName)
 

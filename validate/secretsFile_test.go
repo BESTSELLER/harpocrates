@@ -34,7 +34,10 @@ func TestSecretsFile(t *testing.T) {
 	tests := collectTests()
 	for _, test := range tests {
 		log.Debug().Msgf("Testing file: %s\n", test)
-		file := files.Read(test)
+		file, err := files.Read(test)
+		if err != nil {
+			t.Fatalf("Failed to read file %s: %v", test, err)
+		}
 		switch strings.Contains(test, "not_valid") {
 		case true:
 			if SecretsFile(file) {

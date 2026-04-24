@@ -17,7 +17,10 @@ func TestExtractSecretsWithAlias(t *testing.T) {
 	})
 
 	// define input
-	data := files.Read("../test_data/key_alias.yaml")
+	data, err := files.Read("../test_data/key_alias.yaml")
+	if err != nil {
+		t.Fatalf("Failed to read test data: %v", err)
+	}
 	input := util.ReadInput(data)
 
 	// mock prefix
@@ -68,7 +71,10 @@ func TestExtractSecretsWithAliasAndSaveAsFile(t *testing.T) {
 	})
 
 	// define input
-	data := files.Read("../test_data/key_alias_save_as_file.yaml")
+	data, err := files.Read("../test_data/key_alias_save_as_file.yaml")
+	if err != nil {
+		t.Fatalf("Failed to read test data: %v", err)
+	}
 	input := util.ReadInput(data)
 
 	// mock prefix
@@ -83,7 +89,7 @@ func TestExtractSecretsWithAliasAndSaveAsFile(t *testing.T) {
 	defer os.Remove("../.tmp/TEST_key1")    //nolint:errcheck // It's just tests, we don't care
 
 	// act
-	_, err := vaultClient.ExtractSecrets(input, false)
+	_, err = vaultClient.ExtractSecrets(input, false)
 	if err != nil {
 		t.Error(err)
 	}
@@ -114,7 +120,10 @@ func TestExtractSecretsWithKeyLevelUpperCase(t *testing.T) {
 	})
 
 	// define input
-	data := files.Read("../test_data/key_alias_uppercase.yaml")
+	data, err := files.Read("../test_data/key_alias_uppercase.yaml")
+	if err != nil {
+		t.Fatalf("Failed to read test data: %v", err)
+	}
 	input := util.ReadInput(data)
 
 	// mock prefix
@@ -165,13 +174,13 @@ func TestExtractSecretsWithAliasNested(t *testing.T) {
 	})
 
 	path := "secret/data/complex"
-	secretData := map[string]interface{}{
-		"globalSecrets": map[string]interface{}{
+	secretData := map[string]any{
+		"globalSecrets": map[string]any{
 			"theSecretINeed": "HelloThere!",
 		},
 	}
 
-	_, err := testClient.Logical().Write(path, map[string]interface{}{
+	_, err := testClient.Logical().Write(path, map[string]any{
 		"data": secretData,
 	})
 	if err != nil {
@@ -179,7 +188,10 @@ func TestExtractSecretsWithAliasNested(t *testing.T) {
 	}
 
 	// define input
-	data := files.Read("../test_data/key_alias_nested.yaml")
+	data, err := files.Read("../test_data/key_alias_nested.yaml")
+	if err != nil {
+		t.Fatalf("Failed to read test data: %v", err)
+	}
 	input := util.ReadInput(data)
 
 	// mock prefix

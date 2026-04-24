@@ -43,7 +43,12 @@ func doIt(cmd *cobra.Command, args []string) []string {
 	var input util.SecretJSON
 
 	if secretFile != "" {
-		data = files.Read(secretFile)
+		var err error
+		data, err = files.Read(secretFile)
+		if err != nil {
+			log.Fatal().Err(err).Msgf("Unable to read the file at path '%s'", secretFile)
+		}
+
 		validFile := validate.SecretsFile(data)
 		if !validFile {
 			log.Fatal().Msg("Invalid file")
@@ -59,7 +64,7 @@ func doIt(cmd *cobra.Command, args []string) []string {
 			return secretEnvs
 		}
 
-		secretItems := make([]interface{}, len(*secret))
+		secretItems := make([]any, len(*secret))
 
 		for i, secretPath := range *secret {
 			secretItems[i] = secretPath
