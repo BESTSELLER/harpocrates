@@ -106,7 +106,7 @@ func (s *Server) handleMessage(req Request) {
 		if s.tokenErr != nil {
 			s.SendNotification("window/showMessage", ShowMessageParams{
 				Type:    2, // Warning
-				Message: fmt.Sprintf("Harpocrates: Vault token validation failed (%v). Autocomplete and validation may not work.", s.tokenErr),
+				Message: "Harpocrates: Vault token validation failed. Autocomplete and validation may not work. Please make sure you are logged in with with the vault cli.",
 			})
 		}
 
