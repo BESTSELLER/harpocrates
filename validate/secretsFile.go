@@ -11,7 +11,7 @@ import (
 )
 
 //go:embed schema.json
-var schema string
+var Schema string
 
 // SecretsFile validates the secrets file and returns true or false depending on the validation result.
 // Outputs error message if validation fails including what the issue is.
@@ -22,7 +22,7 @@ func SecretsFile(fileToValidate string) bool {
 		panic(err)
 	}
 
-	schemaLoader := gojsonschema.NewStringLoader(schema)
+	schemaLoader := gojsonschema.NewStringLoader(Schema)
 	documentLoader := gojsonschema.NewStringLoader(string(y))
 
 	result, err := gojsonschema.Validate(schemaLoader, documentLoader)
