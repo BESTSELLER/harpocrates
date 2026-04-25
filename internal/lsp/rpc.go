@@ -126,6 +126,7 @@ type CompletionItem struct {
 	Detail        string    `json:"detail,omitempty"`
 	Documentation string    `json:"documentation,omitempty"`
 	InsertText    string    `json:"insertText,omitempty"`
+	FilterText    string    `json:"filterText,omitempty"`
 	TextEdit      *TextEdit `json:"textEdit,omitempty"`
 	Command       *Command  `json:"command,omitempty"`
 }

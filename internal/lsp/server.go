@@ -10,25 +10,25 @@ import (
 	"strings"
 	"time"
 
-	"github.com/BESTSELLER/harpocrates/vault"
 	"github.com/rs/zerolog/log"
 )
 
 // Server represents the LSP server
 type Server struct {
-	documents   map[string]string // URI to document content
-	vaultClient *vault.API
-	vaultCache  *TTLMap
-	tokenErr    error
+	documents          *DocumentStore
+	completionProvider *CompletionProvider
+	tokenErr           error
 }
 
 // NewServer creates a new LSP server
-func NewServer(vaultClient *vault.API, tokenErr error) *Server {
+
+func NewServer(vaultClient VaultClient, tokenErr error) *Server {
+	documents := NewDocumentStore()
+
 	return &Server{
-		documents:   make(map[string]string),
-		vaultClient: vaultClient,
-		vaultCache:  NewTTLMap(time.Minute * 5),
-		tokenErr:    tokenErr,
+		documents:          documents,
+		completionProvider: NewCompletionProvider(documents, vaultClient, time.Minute*5),
+		tokenErr:           tokenErr,
 	}
 }
 
@@ -85,66 +85,95 @@ func (s *Server) Start() {
 func (s *Server) handleMessage(req Request) {
 	switch req.Method {
 	case "initialize":
-		var params InitializeParams
-		if err := json.Unmarshal(req.Params, &params); err != nil {
-			log.Error().Err(err).Msg("failed to unmarshal initialize params")
-			return
-		}
-
-		result := InitializeResult{
-			Capabilities: ServerCapabilities{
-				TextDocumentSync: 1, // Full document sync
-				CompletionProvider: &CompletionOptions{
-					TriggerCharacters: []string{"/", "\n", "\r"},
-				},
-			},
-		}
-
-		s.writeResponse(req.ID, result)
-
+		s.handleInitialize(req)
 	case "initialized":
-		if s.tokenErr != nil {
-			s.SendNotification("window/showMessage", ShowMessageParams{
-				Type:    2, // Warning
-				Message: "Harpocrates: Vault token validation failed. Autocomplete and validation may not work. Please make sure you are logged in with with the vault cli.",
-			})
-		}
-
+		s.handleInitialized()
 	case "textDocument/didOpen":
-		var params DidOpenTextDocumentParams
-		if err := json.Unmarshal(req.Params, &params); err != nil {
-			log.Error().Err(err).Msg("failed to unmarshal didOpen params")
-			return
-		}
-		s.documents[params.TextDocument.URI] = params.TextDocument.Text
-
+		s.handleDidOpen(req)
 	case "textDocument/didChange":
-		var params DidChangeTextDocumentParams
-		if err := json.Unmarshal(req.Params, &params); err != nil {
-			log.Error().Err(err).Msg("failed to unmarshal didChange params")
-			return
-		}
-		if len(params.ContentChanges) > 0 {
-			s.documents[params.TextDocument.URI] = params.ContentChanges[0].Text
-		}
-
+		s.handleDidChange(req)
 	case "textDocument/completion":
-		var params CompletionParams
-		if err := json.Unmarshal(req.Params, &params); err != nil {
-			log.Error().Err(err).Msg("failed to unmarshal completion params")
-			return
-		}
-
-		items := s.provideCompletions(params)
-
-		s.writeResponse(req.ID, items)
-
+		s.handleCompletion(req)
 	case "shutdown":
-		s.writeResponse(req.ID, nil)
-
+		s.handleShutdown(req)
 	case "exit":
-		os.Exit(0)
+		s.handleExit()
 	}
+}
+
+func (s *Server) handleInitialize(req Request) {
+	if _, ok := parseParams[InitializeParams](req.Params, "failed to unmarshal initialize params"); !ok {
+		return
+	}
+
+	result := InitializeResult{
+		Capabilities: ServerCapabilities{
+			TextDocumentSync: 1, // Full document sync
+			CompletionProvider: &CompletionOptions{
+				TriggerCharacters: []string{"/", "-", " "},
+			},
+		},
+	}
+
+	s.writeResponse(req.ID, result)
+}
+
+func (s *Server) handleInitialized() {
+	if s.tokenErr == nil {
+		return
+	}
+
+	s.SendNotification("window/showMessage", ShowMessageParams{
+		Type:    2, // Warning
+		Message: "Harpocrates: Vault token validation failed. Autocomplete and validation may not work. Please make sure you are logged in with with the vault cli.",
+	})
+}
+
+func (s *Server) handleDidOpen(req Request) {
+	params, ok := parseParams[DidOpenTextDocumentParams](req.Params, "failed to unmarshal didOpen params")
+	if !ok {
+		return
+	}
+
+	s.documents.Open(params.TextDocument.URI, params.TextDocument.Text)
+}
+
+func (s *Server) handleDidChange(req Request) {
+	params, ok := parseParams[DidChangeTextDocumentParams](req.Params, "failed to unmarshal didChange params")
+	if !ok {
+		return
+	}
+	if len(params.ContentChanges) == 0 {
+		return
+	}
+
+	s.documents.Change(params.TextDocument.URI, params.ContentChanges[0].Text)
+}
+
+func (s *Server) handleCompletion(req Request) {
+	params, ok := parseParams[CompletionParams](req.Params, "failed to unmarshal completion params")
+	if !ok {
+		return
+	}
+
+	s.writeResponse(req.ID, s.completionProvider.Provide(params))
+}
+
+func (s *Server) handleShutdown(req Request) {
+	s.writeResponse(req.ID, nil)
+}
+
+func (s *Server) handleExit() {
+	os.Exit(0)
+}
+
+func parseParams[T any](params json.RawMessage, errorMessage string) (T, bool) {
+	var decoded T
+	if err := json.Unmarshal(params, &decoded); err != nil {
+		log.Error().Err(err).Msg(errorMessage)
+		return decoded, false
+	}
+	return decoded, true
 }
 
 func (s *Server) writeResponse(id any, result any) {

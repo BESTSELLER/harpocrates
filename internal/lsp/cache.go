@@ -5,49 +5,51 @@ import (
 	"time"
 )
 
-type cacheEntry struct {
-	data      any
+type cacheEntry[T any] struct {
+	data      T
 	expiresAt time.Time
 }
 
-type TTLMap struct {
+type TTLMap[T any] struct {
 	mu    sync.RWMutex
-	items map[string]cacheEntry
+	items map[string]cacheEntry[T]
 	ttl   time.Duration
 }
 
-func NewTTLMap(ttl time.Duration) *TTLMap {
-	m := &TTLMap{
-		items: make(map[string]cacheEntry),
+func NewTTLMap[T any](ttl time.Duration) *TTLMap[T] {
+	m := &TTLMap[T]{
+		items: make(map[string]cacheEntry[T]),
 		ttl:   ttl,
 	}
 	go m.cleanup()
 	return m
 }
 
-func (m *TTLMap) Set(key string, value any) {
+func (m *TTLMap[T]) Set(key string, value T) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	m.items[key] = cacheEntry{
+	m.items[key] = cacheEntry[T]{
 		data:      value,
 		expiresAt: time.Now().Add(m.ttl),
 	}
 }
 
-func (m *TTLMap) Get(key string) (any, bool) {
+func (m *TTLMap[T]) Get(key string) (T, bool) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 	entry, found := m.items[key]
 	if !found {
-		return nil, false
+		var zero T
+		return zero, false
 	}
 	if time.Now().After(entry.expiresAt) {
-		return nil, false
+		var zero T
+		return zero, false
 	}
 	return entry.data, true
 }
 
-func (m *TTLMap) cleanup() {
+func (m *TTLMap[T]) cleanup() {
 	ticker := time.NewTicker(time.Minute)
 	for range ticker.C {
 		m.mu.Lock()
