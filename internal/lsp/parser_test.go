@@ -68,15 +68,16 @@ func TestParseContext(t *testing.T) {
 			wantExisting: map[string]bool{"shared/data/config": true},
 		},
 		{
-			name: "unknown inside nested option block",
+			name: "secret object inside nested option block",
 			document: strings.Join([]string{
 				"secrets:",
 				"  - app/data/config:",
 				"      format: env",
 			}, "\n"),
-			targetLine:   2,
-			wantType:     ContextUnknown,
-			wantExisting: map[string]bool{},
+			targetLine:       2,
+			wantType:         ContextSecretObject,
+			wantParentSecret: "app/data/config",
+			wantExisting:     map[string]bool{},
 		},
 		{
 			name:         "out of range",

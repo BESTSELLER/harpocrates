@@ -15,6 +15,9 @@ const (
 	ContextUnknown CompletionContext = iota
 	ContextSecretsList
 	ContextKeysList
+	ContextRoot
+	ContextSecretObject
+	ContextKeyObject
 )
 
 type CompletionProvider struct {
@@ -30,6 +33,7 @@ type completionRequest struct {
 	trimmedPrefix string
 	needsDash     bool
 	prefix        string
+	fieldName     string
 }
 
 func NewCompletionProvider(documents *DocumentStore, vaultClient VaultClient, cacheTTL time.Duration) *CompletionProvider {
@@ -48,11 +52,30 @@ func (p *CompletionProvider) Provide(params CompletionParams) CompletionList {
 	}
 
 	parsedCtx := parseContext(request.lines, params.Position.Line)
+
+	if request.fieldName != "" {
+		switch parsedCtx.Type {
+		case ContextRoot:
+			return p.completeValue(request, parsedCtx, GetRootFieldVals())
+		case ContextSecretObject, ContextSecretsList:
+			return p.completeValue(request, parsedCtx, GetSecretFieldVals())
+		case ContextKeyObject, ContextKeysList:
+			return p.completeValue(request, parsedCtx, GetKeyFieldVals())
+		}
+		return CompletionList{}
+	}
+
 	switch parsedCtx.Type {
 	case ContextSecretsList:
 		return p.completeSecrets(request)
 	case ContextKeysList:
 		return p.completeKeys(request, parsedCtx)
+	case ContextRoot:
+		return p.completeRoot(request, parsedCtx)
+	case ContextSecretObject:
+		return p.completeSecretObject(request, parsedCtx)
+	case ContextKeyObject:
+		return p.completeKeyObject(request, parsedCtx)
 	default:
 		return CompletionList{}
 	}
@@ -75,24 +98,43 @@ func (p *CompletionProvider) newCompletionRequest(params CompletionParams) (comp
 		prefix = currentLine[:params.Position.Character]
 	}
 
-	if strings.HasSuffix(strings.TrimSpace(prefix), ":") {
-		return completionRequest{}, false
-	}
-
-	if strings.HasSuffix(prefix, " ") {
-		trimmed := strings.TrimSpace(prefix)
-		if trimmed != "" && trimmed != "-" {
-			return completionRequest{}, false
-		}
-	}
-
-	trimmedPrefix := strings.TrimLeft(prefix, " \t-")
-	if idx := strings.LastIndexAny(trimmedPrefix, " :"); idx != -1 {
-		trimmedPrefix = strings.TrimSpace(trimmedPrefix[idx+1:])
-	}
-	trimmedPrefix = strings.TrimLeft(trimmedPrefix, "'\"")
-
+	trimmedPrefix := ""
+	fieldName := ""
 	needsDash := !strings.HasPrefix(strings.TrimSpace(prefix), "-")
+
+	// Check if we're typing a value after a colon
+	colonIdx := strings.LastIndex(prefix, ":")
+	if colonIdx != -1 {
+		// Typing a value after a field name and colon
+		beforeColon := prefix[:colonIdx]
+		fieldNamePart := strings.TrimSpace(beforeColon)
+
+		// Extract the field name (last word before colon)
+		if idx := strings.LastIndexAny(fieldNamePart, " \t-"); idx != -1 {
+			fieldName = strings.TrimSpace(fieldNamePart[idx+1:])
+		} else {
+			fieldName = strings.TrimLeft(fieldNamePart, " \t-")
+		}
+
+		// Get the value part (text after colon)
+		afterColon := prefix[colonIdx+1:]
+		trimmedPrefix = strings.TrimLeft(afterColon, " \t")
+		trimmedPrefix = strings.TrimLeft(trimmedPrefix, "'\"")
+	} else {
+		// Not typing a value yet, still completing field names
+		if strings.HasSuffix(prefix, " ") {
+			trimmed := strings.TrimSpace(prefix)
+			if trimmed != "" && trimmed != "-" {
+				return completionRequest{}, false
+			}
+		}
+
+		trimmedPrefix = strings.TrimLeft(prefix, " \t-")
+		if idx := strings.LastIndexAny(trimmedPrefix, " :"); idx != -1 {
+			trimmedPrefix = strings.TrimSpace(trimmedPrefix[idx+1:])
+		}
+		trimmedPrefix = strings.TrimLeft(trimmedPrefix, "'\"")
+	}
 
 	return completionRequest{
 		params:        params,
@@ -100,6 +142,7 @@ func (p *CompletionProvider) newCompletionRequest(params CompletionParams) (comp
 		trimmedPrefix: trimmedPrefix,
 		needsDash:     needsDash,
 		prefix:        prefix,
+		fieldName:     fieldName,
 	}, true
 }
 
@@ -163,6 +206,46 @@ func (p *CompletionProvider) completeKeys(request completionRequest, parsedCtx P
 		}
 
 		items = append(items, newCompletionItem(key, CompletionItemKindField, request, request.trimmedPrefix, nil))
+	}
+	return CompletionList{Items: items}
+}
+
+func (p *CompletionProvider) completeRoot(request completionRequest, parsedCtx ParserContext) CompletionList {
+	return p.completeSchemaFields(request, parsedCtx, rootFields)
+}
+
+func (p *CompletionProvider) completeSecretObject(request completionRequest, parsedCtx ParserContext) CompletionList {
+	return p.completeSchemaFields(request, parsedCtx, secretFields)
+}
+
+func (p *CompletionProvider) completeKeyObject(request completionRequest, parsedCtx ParserContext) CompletionList {
+	return p.completeSchemaFields(request, parsedCtx, keyFields)
+}
+
+func (p *CompletionProvider) completeSchemaFields(request completionRequest, parsedCtx ParserContext, fields []string) CompletionList {
+	var items []CompletionItem
+	for _, field := range fields {
+		if parsedCtx.Existing[field] || !strings.HasPrefix(field, request.trimmedPrefix) {
+			continue
+		}
+
+		items = append(items, newSchemaFieldCompletionItem(field, request, request.trimmedPrefix))
+	}
+	return CompletionList{Items: items}
+}
+
+func (p *CompletionProvider) completeValue(request completionRequest, parsedCtx ParserContext, fieldVals map[string][]string) CompletionList {
+	vals, ok := fieldVals[request.fieldName]
+	if !ok || len(vals) == 0 {
+		return CompletionList{}
+	}
+
+	var items []CompletionItem
+	for _, val := range vals {
+		if !strings.HasPrefix(val, request.trimmedPrefix) {
+			continue
+		}
+		items = append(items, newValueCompletionItem(val, request, request.trimmedPrefix))
 	}
 	return CompletionList{Items: items}
 }
@@ -256,5 +339,57 @@ func newCompletionItem(label string, kind int, request completionRequest, curren
 			NewText: insertText,
 		},
 		Command: cmd,
+	}
+}
+
+func newSchemaFieldCompletionItem(label string, request completionRequest, currentWord string) CompletionItem {
+	insertText := label + ": "
+	wordStart := request.params.Position.Character - len(currentWord)
+
+	return CompletionItem{
+		Label:      label,
+		Kind:       CompletionItemKindField,
+		InsertText: insertText,
+		FilterText: insertText,
+		TextEdit: &TextEdit{
+			Range: Range{
+				Start: Position{
+					Line:      request.params.Position.Line,
+					Character: wordStart,
+				},
+				End: request.params.Position,
+			},
+			NewText: insertText,
+		},
+		Command: &Command{
+			Title:   "Trigger Suggest",
+			Command: "editor.action.triggerSuggest",
+		},
+	}
+}
+
+func newValueCompletionItem(label string, request completionRequest, currentWord string) CompletionItem {
+	insertText := label
+	if strings.HasSuffix(request.prefix, ":") {
+		insertText = " " + label
+	}
+	wordStart := request.params.Position.Character - len(currentWord)
+
+	return CompletionItem{
+		Label:      label,
+		Kind:       CompletionItemKindValue,
+		InsertText: insertText,
+		FilterText: insertText,
+		TextEdit: &TextEdit{
+			Range: Range{
+				Start: Position{
+					Line:      request.params.Position.Line,
+					Character: wordStart,
+				},
+				End: request.params.Position,
+			},
+			NewText: insertText,
+		},
+		Command: nil,
 	}
 }

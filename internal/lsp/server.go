@@ -92,12 +92,18 @@ func (s *Server) handleMessage(req Request) {
 		s.handleDidOpen(req)
 	case "textDocument/didChange":
 		s.handleDidChange(req)
+	case "textDocument/didSave":
+		// Safely ignore didSave
 	case "textDocument/completion":
 		s.handleCompletion(req)
 	case "shutdown":
 		s.handleShutdown(req)
 	case "exit":
 		s.handleExit()
+	default:
+		if req.ID != nil {
+			s.writeError(req.ID, -32601, "Method not found")
+		}
 	}
 }
 
@@ -110,7 +116,7 @@ func (s *Server) handleInitialize(req Request) {
 		Capabilities: ServerCapabilities{
 			TextDocumentSync: 1, // Full document sync
 			CompletionProvider: &CompletionOptions{
-				TriggerCharacters: []string{"/", "-", " "},
+				TriggerCharacters: []string{"/", "-", " ", "\n", "\r"},
 			},
 		},
 	}
@@ -186,6 +192,25 @@ func (s *Server) writeResponse(id any, result any) {
 	body, err := json.Marshal(resp)
 	if err != nil {
 		log.Error().Err(err).Msg("failed to marshal response")
+		return
+	}
+
+	s.writeMessage(body)
+}
+
+func (s *Server) writeError(id any, code int, message string) {
+	resp := Response{
+		RPC: "2.0",
+		ID:  id,
+		Error: &Error{
+			Code:    code,
+			Message: message,
+		},
+	}
+
+	body, err := json.Marshal(resp)
+	if err != nil {
+		log.Error().Err(err).Msg("failed to marshal error response")
 		return
 	}
 

@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"os"
+
 	"github.com/BESTSELLER/harpocrates/internal/lsp"
 	"github.com/BESTSELLER/harpocrates/vault"
 	"github.com/rs/zerolog/log"
@@ -20,6 +22,8 @@ func init() {
 }
 
 func startLSP() {
+	log.Logger = log.Output(os.Stderr)
+
 	loadLocalVaultToken()
 
 	err := vault.Login()
