@@ -15,7 +15,7 @@ func (client *API) ListTokens(path string) ([]string, error) {
 		return nil, nil
 	}
 
-	keysInterface, ok := secretValues.Data["keys"].([]interface{})
+	keysInterface, ok := secretValues.Data["keys"].([]any)
 	if !ok {
 		return nil, fmt.Errorf("unexpected type for keys at path '%s'", path)
 	}

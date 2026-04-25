@@ -21,7 +21,7 @@ func (result Result) Add(key string, value any, prefix string, upperCase bool) {
 	result[ToUpperOrNotToUpper(fmt.Sprintf("%s%s", prefix, key), &upperCase)] = value
 }
 
-// ToJSON will format a map[string]interface{} to json
+// ToJSON will format a map[string]any to json
 func (result Result) ToJSON() string {
 	log.Debug().Msg("Exporting as JSON")
 	jsonString, err := json.Marshal(result)

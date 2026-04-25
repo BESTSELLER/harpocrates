@@ -157,10 +157,10 @@ func (s *Server) provideCompletions(params CompletionParams) CompletionList {
 			return CompletionList{}
 		}
 
-		var secretData map[string]interface{}
+		var secretData map[string]any
 		cacheKey := "read:" + parsedCtx.ParentSecret
 		if cached, ok := s.vaultCache.Get(cacheKey); ok {
-			secretData = cached.(map[string]interface{})
+			secretData = cached.(map[string]any)
 		} else {
 			// Try to read secret keys
 			var err error

@@ -6,7 +6,7 @@ import (
 )
 
 type cacheEntry struct {
-	data      interface{}
+	data      any
 	expiresAt time.Time
 }
 
@@ -25,7 +25,7 @@ func NewTTLMap(ttl time.Duration) *TTLMap {
 	return m
 }
 
-func (m *TTLMap) Set(key string, value interface{}) {
+func (m *TTLMap) Set(key string, value any) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 	m.items[key] = cacheEntry{
@@ -34,7 +34,7 @@ func (m *TTLMap) Set(key string, value interface{}) {
 	}
 }
 
-func (m *TTLMap) Get(key string) (interface{}, bool) {
+func (m *TTLMap) Get(key string) (any, bool) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 	entry, found := m.items[key]
