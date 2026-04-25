@@ -8,12 +8,12 @@ import (
 )
 
 var (
-	rootFields     []string
-	secretFields   []string
-	keyFields      []string
-	rootFieldVals  map[string][]string
+	rootFields      []string
+	secretFields    []string
+	keyFields       []string
+	rootFieldVals   map[string][]string
 	secretFieldVals map[string][]string
-	keyFieldVals   map[string][]string
+	keyFieldVals    map[string][]string
 )
 
 func init() {

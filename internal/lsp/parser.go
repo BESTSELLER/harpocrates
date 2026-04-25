@@ -192,12 +192,6 @@ func extractValFromList(line string) string {
 	return val
 }
 
-// isOnlyWhitespaceOrDash checks if a line is empty or only contains a dash with whitespace.
-func isOnlyWhitespaceOrDash(line string) bool {
-	trimmed := strings.TrimSpace(line)
-	return trimmed == "" || trimmed == "-"
-}
-
 // extractKeyFromLine extracts the key name from a YAML line like "  fieldName: value".
 func extractKeyFromLine(line string) string {
 	trimmed := strings.TrimSpace(line)
