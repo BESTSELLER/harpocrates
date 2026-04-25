@@ -14,6 +14,9 @@ var (
 	rootFieldVals   map[string][]string
 	secretFieldVals map[string][]string
 	keyFieldVals    map[string][]string
+	rootFieldDesc   map[string]string
+	secretFieldDesc map[string]string
+	keyFieldDesc    map[string]string
 )
 
 func init() {
@@ -30,11 +33,15 @@ func parseSchema() {
 	rootFieldVals = make(map[string][]string)
 	secretFieldVals = make(map[string][]string)
 	keyFieldVals = make(map[string][]string)
+	rootFieldDesc = make(map[string]string)
+	secretFieldDesc = make(map[string]string)
+	keyFieldDesc = make(map[string]string)
 
 	// 1. Root fields
 	if props, ok := schemaRoot["properties"].(map[string]any); ok {
 		rootFields = extractKeys(props)
 		extractFieldValues(props, rootFieldVals)
+		extractFieldDesc(props, rootFieldDesc)
 	}
 
 	// Navigate to patternProperties of the secretsObject
@@ -53,6 +60,7 @@ func parseSchema() {
 	if secProps, ok := secretPattern["properties"].(map[string]any); ok {
 		secretFields = extractKeys(secProps)
 		extractFieldValues(secProps, secretFieldVals)
+		extractFieldDesc(secProps, secretFieldDesc)
 
 		// Navigate to key fields
 		if keysProp, ok := secProps["keys"].(map[string]any); ok {
@@ -72,6 +80,7 @@ func parseSchema() {
 				if keyProps, ok := keyPattern["properties"].(map[string]any); ok {
 					keyFields = extractKeys(keyProps)
 					extractFieldValues(keyProps, keyFieldVals)
+					extractFieldDesc(keyProps, keyFieldDesc)
 				}
 			}
 		}
@@ -109,6 +118,28 @@ func extractFieldValues(props map[string]any, vals map[string][]string) {
 			}
 		}
 	}
+}
+
+func extractFieldDesc(props map[string]any, desc map[string]string) {
+	for fieldName, fieldDef := range props {
+		if fieldObj, ok := fieldDef.(map[string]any); ok {
+			if description, ok := fieldObj["description"].(string); ok {
+				desc[fieldName] = description
+			}
+		}
+	}
+}
+
+func GetRootFieldDescription(fieldName string) string {
+	return rootFieldDesc[fieldName]
+}
+
+func GetSecretFieldDescription(fieldName string) string {
+	return secretFieldDesc[fieldName]
+}
+
+func GetKeyFieldDescription(fieldName string) string {
+	return keyFieldDesc[fieldName]
 }
 
 func GetRootFields() []string {

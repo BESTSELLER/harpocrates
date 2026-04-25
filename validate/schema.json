@@ -4,26 +4,33 @@
   "additionalProperties": false,
   "properties": {
     "append": {
-      "type": "boolean"
+      "type": "boolean",
+      "description": "Append to the output file instead of overwriting."
     },
     "format": {
       "type": "string",
-      "enum": ["env", "json", "secret", "yaml"]
+      "enum": ["env", "json", "secret", "yaml"],
+      "description": "The format to output the secrets in."
     },
     "output": {
-      "type": "string"
+      "type": "string",
+      "description": "The destination directory or file for the secrets."
     },
     "owner": {
-      "type": "integer"
+      "type": "integer",
+      "description": "UID of the owner for the created files."
     },
     "prefix": {
-      "type": "string"
+      "type": "string",
+      "description": "Prefix to prepend to all secret keys."
     },
     "uppercase": {
-      "type": "boolean"
+      "type": "boolean",
+      "description": "Convert all secret keys to uppercase."
     },
     "secrets": {
-      "$ref": "#/$defs/secretsArray"
+      "$ref": "#/$defs/secretsArray",
+      "description": "List of secrets to fetch from Vault."
     }
   },
   "required": ["secrets"],
@@ -51,29 +58,37 @@
           "additionalProperties": false,
           "properties": {
             "append": {
-              "type": "boolean"
+              "type": "boolean",
+              "description": "Append to the output file instead of overwriting."
             },
             "format": {
               "type": "string",
-              "enum": ["env", "json", "secret", "yaml"]
+              "enum": ["env", "json", "secret", "yaml"],
+              "description": "The format to output the secrets in."
             },
             "owner": {
-              "type": "integer"
+              "type": "integer",
+              "description": "UID of the owner for the created files."
             },
             "filename": {
-              "type": "string"
+              "type": "string",
+              "description": "The name of the file to save this secret as."
             },
             "prefix": {
-              "type": "string"
+              "type": "string",
+              "description": "Prefix to prepend to all keys for this secret."
             },
             "saveAsFile": {
-              "type": "boolean"
+              "type": "boolean",
+              "description": "Whether to save this secret as a file."
             },
             "fileName": {
-              "type": "string"
+              "type": "string",
+              "description": "An alias for filename."
             },
             "keys": {
               "type": "array",
+              "description": "Specific keys to extract from this secret.",
               "items": {
                 "anyOf": [
                   {
@@ -87,19 +102,24 @@
                         "additionalProperties": false,
                         "properties": {
                           "append": {
-                            "type": "boolean"
+                            "type": "boolean",
+                            "description": "Append to the output file instead of overwriting."
                           },
                           "prefix": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "Prefix to prepend to this specific key."
                           },
                           "saveAsFile": {
-                            "type": "boolean"
+                            "type": "boolean",
+                            "description": "Whether to save this specific key as a file."
                           },
                           "alias": {
-                            "type": "string"
+                            "type": "string",
+                            "description": "An alias to rename this key in the output."
                           },
                           "uppercase": {
-                            "type": "boolean"
+                            "type": "boolean",
+                            "description": "Convert this specific key to uppercase."
                           }
                         }
                       }

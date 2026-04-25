@@ -96,6 +96,8 @@ func (s *Server) handleMessage(req Request) {
 		// Safely ignore didSave
 	case "textDocument/completion":
 		s.handleCompletion(req)
+	case "textDocument/hover":
+		s.handleHover(req)
 	case "shutdown":
 		s.handleShutdown(req)
 	case "exit":
@@ -118,6 +120,7 @@ func (s *Server) handleInitialize(req Request) {
 			CompletionProvider: &CompletionOptions{
 				TriggerCharacters: []string{"/", "-", " ", "\n", "\r"},
 			},
+			HoverProvider: true,
 		},
 	}
 
@@ -215,6 +218,55 @@ func (s *Server) writeError(id any, code int, message string) {
 	}
 
 	s.writeMessage(body)
+}
+
+func (s *Server) handleHover(req Request) {
+	if params, ok := parseParams[HoverParams](req.Params, "failed to unmarshal hover params"); ok {
+		doc, exists := s.documents.Get(params.TextDocument.URI)
+		if !exists {
+			s.writeResponse(req.ID, nil)
+			return
+		}
+
+		lines := strings.Split(doc, "\n")
+		lineNum := params.Position.Line
+		if lineNum < 0 || lineNum >= len(lines) {
+			s.writeResponse(req.ID, nil)
+			return
+		}
+
+		line := lines[lineNum]
+		key := extractKeyFromLine(line)
+
+		if key == "" {
+			s.writeResponse(req.ID, nil)
+			return
+		}
+
+		ctx := parseContext(lines, lineNum)
+		var description string
+
+		switch ctx.Type {
+		case ContextRoot:
+			description = GetRootFieldDescription(key)
+		case ContextSecretObject:
+			description = GetSecretFieldDescription(key)
+		case ContextKeyObject:
+			description = GetKeyFieldDescription(key)
+		}
+
+		if description != "" {
+			result := Hover{
+				Contents: MarkupContent{
+					Kind:  "markdown",
+					Value: description,
+				},
+			}
+			s.writeResponse(req.ID, result)
+		} else {
+			s.writeResponse(req.ID, nil)
+		}
+	}
 }
 
 func (s *Server) SendNotification(method string, params any) {

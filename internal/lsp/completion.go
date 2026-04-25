@@ -211,25 +211,26 @@ func (p *CompletionProvider) completeKeys(request completionRequest, parsedCtx P
 }
 
 func (p *CompletionProvider) completeRoot(request completionRequest, parsedCtx ParserContext) CompletionList {
-	return p.completeSchemaFields(request, parsedCtx, rootFields)
+	return p.completeSchemaFields(request, parsedCtx, rootFields, GetRootFieldDescription)
 }
 
 func (p *CompletionProvider) completeSecretObject(request completionRequest, parsedCtx ParserContext) CompletionList {
-	return p.completeSchemaFields(request, parsedCtx, secretFields)
+	return p.completeSchemaFields(request, parsedCtx, secretFields, GetSecretFieldDescription)
 }
 
 func (p *CompletionProvider) completeKeyObject(request completionRequest, parsedCtx ParserContext) CompletionList {
-	return p.completeSchemaFields(request, parsedCtx, keyFields)
+	return p.completeSchemaFields(request, parsedCtx, keyFields, GetKeyFieldDescription)
 }
 
-func (p *CompletionProvider) completeSchemaFields(request completionRequest, parsedCtx ParserContext, fields []string) CompletionList {
+func (p *CompletionProvider) completeSchemaFields(request completionRequest, parsedCtx ParserContext, fields []string, descFunc func(string) string) CompletionList {
 	var items []CompletionItem
 	for _, field := range fields {
 		if parsedCtx.Existing[field] || !strings.HasPrefix(field, request.trimmedPrefix) {
 			continue
 		}
 
-		items = append(items, newSchemaFieldCompletionItem(field, request, request.trimmedPrefix))
+		desc := descFunc(field)
+		items = append(items, newSchemaFieldCompletionItem(field, request, request.trimmedPrefix, desc))
 	}
 	return CompletionList{Items: items}
 }
@@ -342,12 +343,17 @@ func newCompletionItem(label string, kind int, request completionRequest, curren
 	}
 }
 
-func newSchemaFieldCompletionItem(label string, request completionRequest, currentWord string) CompletionItem {
+func newSchemaFieldCompletionItem(label string, request completionRequest, currentWord string, description string) CompletionItem {
 	insertText := label + ": "
 	wordStart := request.params.Position.Character - len(currentWord)
 
 	return CompletionItem{
-		Label:      label,
+		Label:  label,
+		Detail: description,
+		Documentation: &MarkupContent{
+			Kind:  "markdown",
+			Value: description,
+		},
 		Kind:       CompletionItemKindField,
 		InsertText: insertText,
 		FilterText: insertText,

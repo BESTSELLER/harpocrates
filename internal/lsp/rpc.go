@@ -44,6 +44,7 @@ type InitializeResult struct {
 type ServerCapabilities struct {
 	TextDocumentSync   int                `json:"textDocumentSync"`
 	CompletionProvider *CompletionOptions `json:"completionProvider,omitempty"`
+	HoverProvider      bool               `json:"hoverProvider,omitempty"`
 }
 
 type CompletionOptions struct {
@@ -121,12 +122,27 @@ type Command struct {
 }
 
 type CompletionItem struct {
-	Label         string    `json:"label"`
-	Kind          int       `json:"kind,omitempty"`
-	Detail        string    `json:"detail,omitempty"`
-	Documentation string    `json:"documentation,omitempty"`
-	InsertText    string    `json:"insertText,omitempty"`
-	FilterText    string    `json:"filterText,omitempty"`
-	TextEdit      *TextEdit `json:"textEdit,omitempty"`
-	Command       *Command  `json:"command,omitempty"`
+	Label         string         `json:"label"`
+	Kind          int            `json:"kind,omitempty"`
+	Detail        string         `json:"detail,omitempty"`
+	Documentation *MarkupContent `json:"documentation,omitempty"`
+	InsertText    string         `json:"insertText,omitempty"`
+	FilterText    string         `json:"filterText,omitempty"`
+	TextEdit      *TextEdit      `json:"textEdit,omitempty"`
+	Command       *Command       `json:"command,omitempty"`
+}
+
+type HoverParams struct {
+	TextDocument TextDocumentIdentifier `json:"textDocument"`
+	Position     Position               `json:"position"`
+}
+
+type Hover struct {
+	Contents MarkupContent `json:"contents"`
+	Range    *Range        `json:"range,omitempty"`
+}
+
+type MarkupContent struct {
+	Kind  string `json:"kind"`
+	Value string `json:"value"`
 }

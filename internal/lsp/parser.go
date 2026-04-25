@@ -148,14 +148,15 @@ func parseContext(lines []string, targetLine int) ParserContext {
 
 		trimmed := strings.TrimSpace(line)
 
-		if blockType == "secrets:" || blockType == "keys:" {
+		switch blockType {
+		case "secrets:", "keys:":
 			if strings.HasPrefix(trimmed, "-") {
 				val := extractValFromList(trimmed)
 				if val != "" {
 					result.Existing[val] = true
 				}
 			}
-		} else if blockType == "object:" {
+		case "object:":
 			// Only collect keys at the exact expected indent for objects
 			if indent == blockIndent+2 && strings.Contains(line, ":") {
 				key := extractKeyFromLine(line)
