@@ -35,4 +35,4 @@ jobs:
           distribution: goreleaser
           # renovate: datasource=github-releases depName=goreleaser/goreleaser
           version: "v2.15.4"
-          args: release --clean --snapshot --skip=sign
+          args: build --clean --snapshot --skip=post-hooks
