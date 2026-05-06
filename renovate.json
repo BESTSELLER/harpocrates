@@ -1,5 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "schedule": ["0 8 1 * *"],
+  "timezone": "Europe/Copenhagen",
   "enabledManagers": ["custom.regex"],
   "customManagers": [
     {
