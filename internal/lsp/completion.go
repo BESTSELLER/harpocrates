@@ -45,10 +45,14 @@ func NewCompletionProvider(documents *DocumentStore, vaultClient VaultClient, ca
 	}
 }
 
+func emptyList() CompletionList {
+	return CompletionList{Items: []CompletionItem{}}
+}
+
 func (p *CompletionProvider) Provide(params CompletionParams) CompletionList {
 	request, ok := p.newCompletionRequest(params)
 	if !ok {
-		return CompletionList{}
+		return emptyList()
 	}
 
 	parsedCtx := parseContext(request.lines, params.Position.Line)
@@ -62,7 +66,7 @@ func (p *CompletionProvider) Provide(params CompletionParams) CompletionList {
 		case ContextKeyObject, ContextKeysList:
 			return p.completeValue(request, parsedCtx, GetKeyFieldVals())
 		}
-		return CompletionList{}
+		return emptyList()
 	}
 
 	switch parsedCtx.Type {
@@ -77,7 +81,7 @@ func (p *CompletionProvider) Provide(params CompletionParams) CompletionList {
 	case ContextKeyObject:
 		return p.completeKeyObject(request, parsedCtx)
 	default:
-		return CompletionList{}
+		return emptyList()
 	}
 }
 
@@ -148,7 +152,7 @@ func (p *CompletionProvider) newCompletionRequest(params CompletionParams) (comp
 
 func (p *CompletionProvider) completeSecrets(request completionRequest) CompletionList {
 	if p.vaultClient == nil {
-		return CompletionList{}
+		return emptyList()
 	}
 
 	basePath := ""
@@ -185,12 +189,12 @@ func (p *CompletionProvider) completeSecrets(request completionRequest) Completi
 
 func (p *CompletionProvider) completeKeys(request completionRequest, parsedCtx ParserContext) CompletionList {
 	if p.vaultClient == nil || parsedCtx.ParentSecret == "" {
-		return CompletionList{}
+		return emptyList()
 	}
 
 	secretData, ok := p.readSecret(parsedCtx.ParentSecret)
 	if !ok {
-		return CompletionList{}
+		return emptyList()
 	}
 
 	keys := make([]string, 0, len(secretData))
@@ -235,10 +239,10 @@ func (p *CompletionProvider) completeSchemaFields(request completionRequest, par
 	return CompletionList{Items: items}
 }
 
-func (p *CompletionProvider) completeValue(request completionRequest, parsedCtx ParserContext, fieldVals map[string][]string) CompletionList {
+func (p *CompletionProvider) completeValue(request completionRequest, _ ParserContext, fieldVals map[string][]string) CompletionList {
 	vals, ok := fieldVals[request.fieldName]
 	if !ok || len(vals) == 0 {
-		return CompletionList{}
+		return emptyList()
 	}
 
 	var items []CompletionItem
@@ -258,9 +262,10 @@ func (p *CompletionProvider) listSecretTokens(basePath string) []string {
 		return tokens
 	}
 
-	tokens, err := p.vaultClient.ListTokens(queryPath)
-	if err != nil {
-		log.Error().Err(err).Str("path", queryPath).Msg("ListTokens failed")
+	tokens, listErr := p.vaultClient.ListTokens(queryPath)
+	if listErr != nil {
+		log.Error().Err(listErr).Str("path", queryPath).Msg("ListTokens failed")
+		return nil
 	}
 
 	if basePath == "" {

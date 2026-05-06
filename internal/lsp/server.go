@@ -32,7 +32,7 @@ func NewServer(vaultClient VaultClient, tokenErr error) *Server {
 	}
 }
 
-// Start stars the LSP blocking loop
+// Start starts the LSP blocking loop
 func (s *Server) Start() {
 	reader := bufio.NewReader(os.Stdin)
 
@@ -104,7 +104,7 @@ func (s *Server) handleMessage(req Request) {
 		s.handleExit()
 	default:
 		if req.ID != nil {
-			s.writeError(req.ID, -32601, "Method not found")
+			s.writeError(req.ID, errMethodNotFound, "Method not found")
 		}
 	}
 }
@@ -133,7 +133,7 @@ func (s *Server) handleInitialized() {
 	}
 
 	s.SendNotification("window/showMessage", ShowMessageParams{
-		Type:    2, // Warning
+		Type:    msgTypeWarning,
 		Message: "Harpocrates: Vault token validation failed. Autocomplete and validation may not work. Please make sure you are logged in with with the vault cli.",
 	})
 }
@@ -221,52 +221,54 @@ func (s *Server) writeError(id any, code int, message string) {
 }
 
 func (s *Server) handleHover(req Request) {
-	if params, ok := parseParams[HoverParams](req.Params, "failed to unmarshal hover params"); ok {
-		doc, exists := s.documents.Get(params.TextDocument.URI)
-		if !exists {
-			s.writeResponse(req.ID, nil)
-			return
-		}
-
-		lines := strings.Split(doc, "\n")
-		lineNum := params.Position.Line
-		if lineNum < 0 || lineNum >= len(lines) {
-			s.writeResponse(req.ID, nil)
-			return
-		}
-
-		line := lines[lineNum]
-		key := extractKeyFromLine(line)
-
-		if key == "" {
-			s.writeResponse(req.ID, nil)
-			return
-		}
-
-		ctx := parseContext(lines, lineNum)
-		var description string
-
-		switch ctx.Type {
-		case ContextRoot:
-			description = GetRootFieldDescription(key)
-		case ContextSecretObject:
-			description = GetSecretFieldDescription(key)
-		case ContextKeyObject:
-			description = GetKeyFieldDescription(key)
-		}
-
-		if description != "" {
-			result := Hover{
-				Contents: MarkupContent{
-					Kind:  "markdown",
-					Value: description,
-				},
-			}
-			s.writeResponse(req.ID, result)
-		} else {
-			s.writeResponse(req.ID, nil)
-		}
+	params, ok := parseParams[HoverParams](req.Params, "failed to unmarshal hover params")
+	if !ok {
+		return
 	}
+
+	doc, exists := s.documents.Get(params.TextDocument.URI)
+	if !exists {
+		s.writeResponse(req.ID, nil)
+		return
+	}
+
+	lines := strings.Split(doc, "\n")
+	lineNum := params.Position.Line
+	if lineNum < 0 || lineNum >= len(lines) {
+		s.writeResponse(req.ID, nil)
+		return
+	}
+
+	line := lines[lineNum]
+	key := extractKeyFromLine(line)
+	if key == "" {
+		s.writeResponse(req.ID, nil)
+		return
+	}
+
+	ctx := parseContext(lines, lineNum)
+	var description string
+
+	switch ctx.Type {
+	case ContextRoot:
+		description = GetRootFieldDescription(key)
+	case ContextSecretObject:
+		description = GetSecretFieldDescription(key)
+	case ContextKeyObject:
+		description = GetKeyFieldDescription(key)
+	}
+
+	if description == "" {
+		s.writeResponse(req.ID, nil)
+		return
+	}
+
+	s.writeResponse(req.ID, Hover{
+		Contents: MarkupContent{
+			Kind:  "markdown",
+			Value: description,
+		},
+	})
 }
 
 func (s *Server) SendNotification(method string, params any) {
@@ -287,8 +289,6 @@ func (s *Server) SendNotification(method string, params any) {
 
 func (s *Server) writeMessage(body []byte) {
 	header := fmt.Sprintf("Content-Length: %d\r\n\r\n", len(body))
-
-	// Write atomically to avoid interleaving
-	os.Stdout.Write([]byte(header)) //nolint:errcheck // If this fails here, there is no reason to handle it.
-	os.Stdout.Write(body)           //nolint:errcheck // If this fails here, there is no reason to handle it.
+	msg := append([]byte(header), body...)
+	os.Stdout.Write(msg) //nolint:errcheck
 }

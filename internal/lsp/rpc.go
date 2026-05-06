@@ -2,6 +2,15 @@ package lsp
 
 import "encoding/json"
 
+const (
+	errMethodNotFound = -32601
+
+	msgTypeError   = 1
+	msgTypeWarning = 2
+	msgTypeInfo    = 3
+	msgTypeLog     = 4
+)
+
 type Request struct {
 	RPC    string          `json:"jsonrpc"`
 	ID     any             `json:"id,omitempty"`
