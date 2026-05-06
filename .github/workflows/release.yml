@@ -72,7 +72,7 @@ jobs:
           # renovate: datasource=github-releases depName=ebourg/jsign
           VERSION: "7.4"
         run: |
-          curl -L -o jsign.deb https://github.com/ebourg/jsign/releases/download/$VERSION/jsign_$VERSION_all.deb
+          curl -L -o jsign.deb https://github.com/ebourg/jsign/releases/download/$VERSION/jsign_$VERSION\_all.deb
           sudo apt-get install -y ./jsign.deb
 
       - name: Prepare Windows code sign certificate
