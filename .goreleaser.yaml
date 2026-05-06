@@ -129,7 +129,7 @@ binary_signs:
       - "--keystore={{ .Env.WINDOWS_SIGN_KEYSTORE }}"
       - "--alias={{ .Env.WINDOWS_SIGN_ALIAS }}"
       - "--storepass={{ .Env.GCP_ACCESS_TOKEN }}"
-      - "--certfile=windows-cert.pem"
+      - "--certfile={{ .Env.WINDOWS_CERT_PATH }}"
       - "--tsaurl=http://timestamp.digicert.com"
       - "--tsmode=RFC3161"
       - "${artifact}"
