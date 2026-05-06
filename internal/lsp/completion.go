@@ -128,7 +128,7 @@ func (p *CompletionProvider) newCompletionRequest(params CompletionParams) (comp
 		// Not typing a value yet, still completing field names
 		if strings.HasSuffix(prefix, " ") {
 			trimmed := strings.TrimSpace(prefix)
-			if trimmed != "" && trimmed != "-" {
+			if trimmed != "-" {
 				return completionRequest{}, false
 			}
 		}
@@ -262,23 +262,22 @@ func (p *CompletionProvider) listSecretTokens(basePath string) []string {
 		return tokens
 	}
 
-	tokens, listErr := p.vaultClient.ListTokens(queryPath)
-	if listErr != nil {
-		log.Error().Err(listErr).Str("path", queryPath).Msg("ListTokens failed")
-		return nil
-	}
-
 	if basePath == "" {
 		engines, err := p.vaultClient.ListSecretEngines()
 		if err != nil {
 			log.Error().Err(err).Msg("ListSecretEngines failed")
-		} else {
-			tokens = append(tokens, engines...)
+			return nil
 		}
-	} else {
-		tokens = p.withEngineSubPath(tokens, basePath)
+		p.secretListCache.Set(cacheKey, engines)
+		return engines
 	}
 
+	tokens, err := p.vaultClient.ListTokens(queryPath)
+	if err != nil {
+		log.Error().Err(err).Str("path", queryPath).Msg("ListTokens failed")
+		return nil
+	}
+	tokens = p.withEngineSubPath(tokens, basePath)
 	p.secretListCache.Set(cacheKey, tokens)
 	return tokens
 }
