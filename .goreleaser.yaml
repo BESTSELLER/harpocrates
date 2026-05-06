@@ -74,8 +74,6 @@ homebrew_casks:
       name: homebrew-tap
     description: "Harpocrates is a lightweight, versatile CLI tool designed to securely fetch, format, and inject secrets from HashiCorp Vault"
     generate_completions_from_executable:
-      args:
-        - completion
       shell_parameter_format: cobra
       shells:
         - bash
