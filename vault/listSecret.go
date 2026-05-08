@@ -2,6 +2,7 @@ package vault
 
 import (
 	"fmt"
+	"slices"
 )
 
 // ListKeys lists the sub-paths or secrets at a specific Vault path.
@@ -45,6 +46,8 @@ func (client *API) ListSecretEngines() ([]string, error) {
 			engines = append(engines, path)
 		}
 	}
+
+	slices.Sort(engines)
 
 	return engines, nil
 }
