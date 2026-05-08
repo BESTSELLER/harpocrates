@@ -134,7 +134,7 @@ func (s *Server) handleInitialized() {
 
 	s.SendNotification("window/showMessage", ShowMessageParams{
 		Type:    msgTypeWarning,
-		Message: "Harpocrates: Vault token validation failed. Autocomplete and validation may not work. Please make sure you are logged in with with the vault cli.",
+		Message: "Harpocrates: Vault token validation failed. Autocomplete and validation may not work. Please make sure you are logged in with the vault cli.",
 	})
 }
 
