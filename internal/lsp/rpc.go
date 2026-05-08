@@ -3,7 +3,13 @@ package lsp
 import "encoding/json"
 
 const (
+	// Defined by JSON-RPC
+	// Keeping them here if we need them in the future
+	errParseError     = -32700
+	errInvalidRequest = -32600
 	errMethodNotFound = -32601
+	errInvalidParams  = -32602
+	errInternalError  = -32603
 
 	msgTypeError   = 1
 	msgTypeWarning = 2

@@ -111,6 +111,7 @@ func (s *Server) handleMessage(req Request) {
 
 func (s *Server) handleInitialize(req Request) {
 	if _, ok := parseParams[InitializeParams](req.Params, "failed to unmarshal initialize params"); !ok {
+		s.writeError(req.ID, errInvalidParams, "Invalid params")
 		return
 	}
 
