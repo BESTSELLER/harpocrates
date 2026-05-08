@@ -4,8 +4,8 @@ import (
 	"fmt"
 )
 
-// ListTokens lists the sub-paths or secrets at a specific Vault path.
-func (client *API) ListTokens(path string) ([]string, error) {
+// ListKeys lists the sub-paths or secrets at a specific Vault path.
+func (client *API) ListKeys(path string) ([]string, error) {
 	secretValues, err := client.Client.Logical().List(path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list keys at path '%s': %v", path, err)

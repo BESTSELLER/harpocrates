@@ -272,9 +272,9 @@ func (p *CompletionProvider) listSecretTokens(basePath string) []string {
 		return engines
 	}
 
-	tokens, err := p.vaultClient.ListTokens(queryPath)
+	tokens, err := p.vaultClient.ListKeys(queryPath)
 	if err != nil {
-		log.Error().Err(err).Str("path", queryPath).Msg("ListTokens failed")
+		log.Error().Err(err).Str("path", queryPath).Msg("ListKeys failed")
 		return nil
 	}
 	tokens = p.withEngineSubPath(tokens, basePath)
