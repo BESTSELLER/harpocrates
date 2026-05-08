@@ -56,7 +56,7 @@ func (s *Server) Start() {
 			}
 
 			if strings.HasPrefix(line, "Content-Length:") {
-				parts := strings.Split(line, ":")
+				parts := strings.SplitN(line, ":", 2)
 				if len(parts) == 2 {
 					contentLength, _ = strconv.Atoi(strings.TrimSpace(parts[1]))
 				}
