@@ -22,7 +22,11 @@ func (client *API) ListTokens(path string) ([]string, error) {
 
 	var keys []string
 	for _, k := range keysInterface {
-		keys = append(keys, k.(string))
+		s, ok := k.(string)
+		if !ok {
+			continue
+		}
+		keys = append(keys, s)
 	}
 
 	return keys, nil
