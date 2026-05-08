@@ -8,7 +8,7 @@ import (
 func (client *API) ListKeys(path string) ([]string, error) {
 	secretValues, err := client.Client.Logical().List(path)
 	if err != nil {
-		return nil, fmt.Errorf("failed to list keys at path '%s': %v", path, err)
+		return nil, fmt.Errorf("failed to list keys at path '%s': %w", path, err)
 	}
 
 	if secretValues == nil || secretValues.Data == nil {
@@ -36,7 +36,7 @@ func (client *API) ListKeys(path string) ([]string, error) {
 func (client *API) ListSecretEngines() ([]string, error) {
 	mounts, err := client.Client.Sys().ListMounts()
 	if err != nil {
-		return nil, fmt.Errorf("failed to list secret engines: %v", err)
+		return nil, fmt.Errorf("failed to list secret engines: %w", err)
 	}
 
 	var engines []string
@@ -53,7 +53,7 @@ func (client *API) ListSecretEngines() ([]string, error) {
 func (client *API) GetEngineSubPath(mountPath string) (string, error) {
 	mounts, err := client.Client.Sys().ListMounts()
 	if err != nil {
-		return "", fmt.Errorf("failed to list mounts: %v", err)
+		return "", fmt.Errorf("failed to list mounts: %w", err)
 	}
 
 	mount, ok := mounts[mountPath]
