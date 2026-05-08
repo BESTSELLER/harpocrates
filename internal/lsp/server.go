@@ -18,6 +18,7 @@ type Server struct {
 	documents          *DocumentStore
 	completionProvider *CompletionProvider
 	tokenErr           error
+	shutdownRequested  bool
 }
 
 // NewServer creates a new LSP server
@@ -170,11 +171,15 @@ func (s *Server) handleCompletion(req Request) {
 }
 
 func (s *Server) handleShutdown(req Request) {
+	s.shutdownRequested = true
 	s.writeResponse(req.ID, nil)
 }
 
 func (s *Server) handleExit() {
-	os.Exit(0)
+	if s.shutdownRequested {
+		os.Exit(0)
+	}
+	os.Exit(1)
 }
 
 func parseParams[T any](params json.RawMessage, errorMessage string) (T, bool) {
