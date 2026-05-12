@@ -32,7 +32,7 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON, appendToFile bool)
 		if _, isString := secretEntry.(string); !isString {
 			secretMapRaw, ok := secretEntry.(map[string]any)
 			if !ok {
-				return nil, fmt.Errorf("expected map[string]interface{}, got: '%s'", secretEntry)
+				return nil, fmt.Errorf("expected map[string]any, got type %T with value %v", secretEntry, secretEntry)
 			}
 
 			secretConfigMap := map[string]util.Secret{}
