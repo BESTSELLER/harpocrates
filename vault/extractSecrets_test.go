@@ -58,7 +58,7 @@ func setupVault(t *testing.T) {
 	testClient = client
 }
 
-// TestExtractSecretsWithFormatAsExpected tests if a two secrets one with a format is extracted correct
+// TestExtractSecretsWithFormatAsExpected tests if a two secrets one with a format is extracted correctly
 func TestExtractSecretsWithFormatAsExpected(t *testing.T) {
 	// arrange
 	setupVault(t)
@@ -98,7 +98,7 @@ func TestExtractSecretsWithFormatAsExpected(t *testing.T) {
 
 }
 
-// TestExtractSecretsAsExpected tests if a simple secret is extracted correct
+// TestExtractSecretsAsExpected tests if a simple secret is extracted correctly
 func TestExtractSecretsAsExpected(t *testing.T) {
 	// arrange
 	setupVault(t)
@@ -137,7 +137,7 @@ func TestExtractSecretsAsExpected(t *testing.T) {
 
 }
 
-// TestExtractSecretsWithPrefixAsExpected tests if a simple secret is extracted correct
+// TestExtractSecretsWithPrefixAsExpected tests if a simple secret is extracted correctly
 func TestExtractSecretsWithPrefixAsExpected(t *testing.T) {
 	// arrange
 	setupVault(t)
@@ -177,7 +177,7 @@ func TestExtractSecretsWithPrefixAsExpected(t *testing.T) {
 
 }
 
-// TestExtractSecretsSaveAsFileAsExpected tests if a simple secret is extracted correct
+// TestExtractSecretsSaveAsFileAsExpected tests if a simple secret is extracted correctly
 func TestExtractSecretsSaveAsFileAsExpected(t *testing.T) {
 	// arrange
 	setupVault(t)
