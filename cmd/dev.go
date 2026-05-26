@@ -7,7 +7,6 @@ import (
 	"os/exec"
 	"os/signal"
 	"path"
-	"strings"
 	"syscall"
 
 	"github.com/BESTSELLER/harpocrates/config"
@@ -26,12 +25,18 @@ The dev command fetches secrets from Vault and makes them available to a child p
 It creates temporary files for the secrets and cleans them up after the command has finished executing.
 This is useful for local development, where you want to run an application with secrets from Vault without storing them in plaintext on your machine.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) == 0 {
+			log.Fatal().Msg("No command provided to execute")
+		}
 		// Create temporary directory and file
 		dir, err := os.MkdirTemp("", "harpocrates")
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed to create temporary directory")
 		}
-		defer os.RemoveAll(dir) //nolint:errcheck // Best-effort cleanup of the temp folder; ignore errors as failure is non-critical and the OS will eventually reclaim the space.
+		cleanup := func() {
+			os.RemoveAll(dir) //nolint:errcheck
+		}
+		defer cleanup() // Best-effort cleanup of the temp folder; ignore errors as failure is non-critical and the OS will eventually reclaim the space.
 
 		config.Config.Output = path.Join(dir, config.Config.Output)
 
@@ -46,27 +51,27 @@ This is useful for local development, where you want to run an application with 
 		signal.Notify(signals, os.Interrupt, syscall.SIGTERM)
 		go func() {
 			<-signals
+			cleanup()
 			cancel()
 		}()
 
 		fmt.Println(config.Config.Output)
 		// Start the child application with the temporary file path using the context
-		// cmd := exec.CommandContext(ctx, "bash", "-c", "echo $HEJSA")
-		fmt.Println("args:", args)
-		execCmd := exec.CommandContext(ctx, "bash", "-c", strings.Join(args, " "))
+		var execCmd *exec.Cmd
+		if len(args) == 1 {
+			execCmd = exec.CommandContext(ctx, args[0])
+		} else {
+			execCmd = exec.CommandContext(ctx, args[0], args[1:]...)
+		}
 
 		finalEnvs := append(secretEnvs, fmt.Sprintf("SECRET_PATH=%s", config.Config.Output))
 		finalEnvs = append(os.Environ(), finalEnvs...)
 		execCmd.Env = finalEnvs
 
 		if err := util.RunCmdPTY(execCmd, secretEnvs, redact); err != nil {
+			cleanup() // Clean up the temporary directory manually before os.Exit or log.Fatal since defer won't run
 			if exitErr, ok := err.(*exec.ExitError); ok {
-				// Clean up the temporary directory manually before os.Exit since defer won't run
-				os.RemoveAll(dir) //nolint:errcheck
-
-				code := exitErr.ExitCode()
-
-				os.Exit(code)
+				os.Exit(exitErr.ExitCode())
 			}
 			log.Fatal().Err(err).Msg("Command execution failed")
 		}
