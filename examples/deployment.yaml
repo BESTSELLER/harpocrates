@@ -39,4 +39,6 @@ spec:
               name: secrets
       volumes: # volume spec
         - name: secrets
-          emptyDir: {}
+          emptyDir:
+            medium: Memory
+            sizeLimit: 1Mi
