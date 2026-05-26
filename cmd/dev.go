@@ -7,7 +7,6 @@ import (
 	"os/exec"
 	"os/signal"
 	"path"
-	"strings"
 	"syscall"
 
 	"github.com/BESTSELLER/harpocrates/config"
@@ -26,6 +25,9 @@ The dev command fetches secrets from Vault and makes them available to a child p
 It creates temporary files for the secrets and cleans them up after the command has finished executing.
 This is useful for local development, where you want to run an application with secrets from Vault without storing them in plaintext on your machine.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		if len(args) == 0 {
+			log.Fatal().Msg("No command provided to execute")
+		}
 		// Create temporary directory and file
 		dir, err := os.MkdirTemp("", "harpocrates")
 		if err != nil {
@@ -51,9 +53,12 @@ This is useful for local development, where you want to run an application with 
 
 		fmt.Println(config.Config.Output)
 		// Start the child application with the temporary file path using the context
-		// cmd := exec.CommandContext(ctx, "bash", "-c", "echo $HEJSA")
-		fmt.Println("args:", args)
-		execCmd := exec.CommandContext(ctx, "bash", "-c", strings.Join(args, " "))
+		var execCmd *exec.Cmd
+		if len(args) == 1 {
+			execCmd = exec.CommandContext(ctx, args[0])
+		} else {
+			execCmd = exec.CommandContext(ctx, args[0], args[1:]...)
+		}
 
 		finalEnvs := append(secretEnvs, fmt.Sprintf("SECRET_PATH=%s", config.Config.Output))
 		finalEnvs = append(os.Environ(), finalEnvs...)
