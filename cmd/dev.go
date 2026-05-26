@@ -7,7 +7,6 @@ import (
 	"os/exec"
 	"os/signal"
 	"path"
-	"strings"
 	"syscall"
 
 	"github.com/BESTSELLER/harpocrates/config"
