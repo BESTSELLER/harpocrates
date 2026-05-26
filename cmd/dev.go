@@ -31,7 +31,10 @@ This is useful for local development, where you want to run an application with 
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed to create temporary directory")
 		}
-		defer os.RemoveAll(dir) //nolint:errcheck // Best-effort cleanup of the temp folder; ignore errors as failure is non-critical and the OS will eventually reclaim the space.
+		cleanup := func() {
+			os.RemoveAll(dir) //nolint:errcheck
+		}
+		defer cleanup() // Best-effort cleanup of the temp folder; ignore errors as failure is non-critical and the OS will eventually reclaim the space.
 
 		config.Config.Output = path.Join(dir, config.Config.Output)
 
@@ -46,6 +49,7 @@ This is useful for local development, where you want to run an application with 
 		signal.Notify(signals, os.Interrupt, syscall.SIGTERM)
 		go func() {
 			<-signals
+			cleanup()
 			cancel()
 		}()
 
@@ -60,13 +64,9 @@ This is useful for local development, where you want to run an application with 
 		execCmd.Env = finalEnvs
 
 		if err := util.RunCmdPTY(execCmd, secretEnvs, redact); err != nil {
+			cleanup() // Clean up the temporary directory manually before os.Exit or log.Fatal since defer won't run
 			if exitErr, ok := err.(*exec.ExitError); ok {
-				// Clean up the temporary directory manually before os.Exit since defer won't run
-				os.RemoveAll(dir) //nolint:errcheck
-
-				code := exitErr.ExitCode()
-
-				os.Exit(code)
+				os.Exit(exitErr.ExitCode())
 			}
 			log.Fatal().Err(err).Msg("Command execution failed")
 		}
