@@ -85,6 +85,7 @@ var redact bool
 
 func init() {
 	devCmd.PersistentFlags().BoolVar(&redact, "redact", false, "`Redact secrets from output, defaults to false`")
+	devCmd.Flags().SetInterspersed(false)
 
 	rootCmd.AddCommand(devCmd)
 }
