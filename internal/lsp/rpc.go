@@ -38,8 +38,13 @@ type ShowMessageParams struct {
 type Response struct {
 	RPC    string `json:"jsonrpc"`
 	ID     any    `json:"id"`
-	Result any    `json:"result,omitempty"`
-	Error  *Error `json:"error,omitempty"`
+	Result any    `json:"result"`
+}
+
+type ResponseError struct {
+	RPC   string `json:"jsonrpc"`
+	ID    any    `json:"id"`
+	Error *Error `json:"error"`
 }
 
 type Error struct {

@@ -208,7 +208,7 @@ func (s *Server) writeResponse(id any, result any) {
 }
 
 func (s *Server) writeError(id any, code int, message string) {
-	resp := Response{
+	resp := ResponseError{
 		RPC: "2.0",
 		ID:  id,
 		Error: &Error{
