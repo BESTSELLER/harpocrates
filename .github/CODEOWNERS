@@ -1,4 +1,6 @@
 # The last matching pattern takes precedence.
 # https://help.github.com/articles/about-codeowners/
 
-*       @BESTSELLER/developer-platform
+*               @BESTSELLER/developer-platform
+cmd/lsp.go      @Gaardsholt
+internal/lsp/*  @Gaardsholt
