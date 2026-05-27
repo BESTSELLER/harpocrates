@@ -11,6 +11,7 @@ import (
 
 	"github.com/BESTSELLER/harpocrates/config"
 	"github.com/BESTSELLER/harpocrates/util"
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
@@ -25,6 +26,8 @@ The dev command fetches secrets from Vault and makes them available to a child p
 It creates temporary files for the secrets and cleans them up after the command has finished executing.
 This is useful for local development, where you want to run an application with secrets from Vault without storing them in plaintext on your machine.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: zerolog.TimeFieldFormat})
+
 		if len(args) == 0 {
 			log.Fatal().Msg("No command provided to execute")
 		}
@@ -40,7 +43,7 @@ This is useful for local development, where you want to run an application with 
 
 		config.Config.Output = path.Join(dir, config.Config.Output)
 
-		fmt.Println("output:", config.Config.Output)
+		log.Info().Str("output", config.Config.Output).Send()
 
 		secretEnvs := doIt(cmd, args)
 
@@ -55,7 +58,6 @@ This is useful for local development, where you want to run an application with 
 			cancel()
 		}()
 
-		fmt.Println(config.Config.Output)
 		// Start the child application with the temporary file path using the context
 		var execCmd *exec.Cmd
 		if len(args) == 1 {
