@@ -86,7 +86,7 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON, appendToFile bool)
 							if keyConfig.SaveAsFile != nil {
 								secretValue, err := vaultClient.ReadSecretKey(secretPath, vaultKey)
 								if err != nil {
-									if keyConfig.Optional != nil && *keyConfig.Optional {
+									if *keyConfig.Optional {
 										log.Info().Msgf("Optional secret key '%s' not found in '%s', skipping.", vaultKey, secretPath)
 										continue
 									}
@@ -100,7 +100,7 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON, appendToFile bool)
 							} else {
 								secretValue, err := vaultClient.ReadSecretKey(secretPath, vaultKey)
 								if err != nil {
-									if keyConfig.Optional != nil && *keyConfig.Optional {
+									if *keyConfig.Optional {
 										log.Info().Msgf("Optional secret key '%s' not found in '%s', skipping.", vaultKey, secretPath)
 										continue
 									}
@@ -114,7 +114,7 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON, appendToFile bool)
 					} else {
 						secretValue, err := vaultClient.ReadSecretKey(secretPath, fmt.Sprintf("%s", keyEntry))
 						if err != nil {
-							if secretConfig.Optional != nil && *secretConfig.Optional {
+							if *secretConfig.Optional {
 								log.Info().Msgf("Optional secret key '%s' not found in '%s', skipping.", keyEntry, secretPath)
 								continue
 							}
