@@ -28,6 +28,7 @@ type Secret struct {
 	Format    string `json:"format,omitempty"      yaml:"format,omitempty"      mapstructure:"format,omitempty"`
 	FileName  string `json:"filename,omitempty"    yaml:"filename,omitempty"    mapstructure:"filename,omitempty"`
 	UpperCase *bool  `json:"uppercase,omitempty"   yaml:"uppercase,omitempty"`
+	Optional  *bool  `json:"optional,omitempty"    yaml:"optional,omitempty"    mapstructure:"optional,omitempty"`
 	Keys      []any  `json:"keys,omitempty"        yaml:"keys,omitempty"`
 	Owner     *int   `json:"owner,omitempty"       yaml:"owner,omitempty"`
 }
@@ -37,6 +38,7 @@ type SecretKeys struct {
 	Append     *bool  `json:"append,omitempty"         yaml:"append,omitempty"`
 	Prefix     string `json:"prefix,omitempty"         yaml:"prefix,omitempty"      mapstructure:"prefix,omitempty"`
 	UpperCase  *bool  `json:"uppercase,omitempty"      yaml:"uppercase,omitempty"   mapstructure:"uppercase,omitempty"`
+	Optional   *bool  `json:"optional,omitempty"       yaml:"optional,omitempty"    mapstructure:"optional,omitempty"`
 	SaveAsFile *bool  `json:"saveAsFile,omitempty"     yaml:"saveAsFile,omitempty"`
 	Alias      string `json:"alias,omitempty"          yaml:"alias,omitempty"       mapstructure:"alias,omitempty"`
 }
