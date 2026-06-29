@@ -4,29 +4,23 @@
   "additionalProperties": false,
   "properties": {
     "append": {
-      "type": "boolean",
-      "description": "Append to the output file instead of overwriting."
+      "$ref": "#/$defs/append"
     },
     "format": {
-      "type": "string",
-      "enum": ["env", "json", "secret", "yaml"],
-      "description": "The format to output the secrets in."
+      "$ref": "#/$defs/format"
     },
     "output": {
       "type": "string",
       "description": "The destination directory or file for the secrets."
     },
     "owner": {
-      "type": "integer",
-      "description": "UID of the owner for the created files."
+      "$ref": "#/$defs/owner"
     },
     "prefix": {
-      "type": "string",
-      "description": "Prefix to prepend to all secret keys."
+      "$ref": "#/$defs/prefix"
     },
     "uppercase": {
-      "type": "boolean",
-      "description": "Convert all secret keys to uppercase."
+      "$ref": "#/$defs/uppercase"
     },
     "secrets": {
       "$ref": "#/$defs/secretsArray",
@@ -35,6 +29,35 @@
   },
   "required": ["secrets"],
   "$defs": {
+    "append": {
+      "type": "boolean",
+      "description": "Append to the output file instead of overwriting."
+    },
+    "format": {
+      "type": "string",
+      "enum": ["env", "json", "secret", "yaml"],
+      "description": "The format to output the secrets in."
+    },
+    "owner": {
+      "type": "integer",
+      "description": "UID of the owner for the created files."
+    },
+    "prefix": {
+      "type": "string",
+      "description": "Prefix to prepend to the output key."
+    },
+    "uppercase": {
+      "type": "boolean",
+      "description": "Convert the output key(s) to uppercase."
+    },
+    "saveAsFile": {
+      "type": "boolean",
+      "description": "Whether to save the current target as a file."
+    },
+    "optional": {
+      "type": "boolean",
+      "description": "Whether to ignore it and continue if the target doesn't exist."
+    },
     "secretsArray": {
       "type": "array",
       "items": {
@@ -58,33 +81,26 @@
           "additionalProperties": false,
           "properties": {
             "append": {
-              "type": "boolean",
-              "description": "Append to the output file instead of overwriting."
+              "$ref": "#/$defs/append"
             },
             "format": {
-              "type": "string",
-              "enum": ["env", "json", "secret", "yaml"],
-              "description": "The format to output the secrets in."
+              "$ref": "#/$defs/format"
             },
             "owner": {
-              "type": "integer",
-              "description": "UID of the owner for the created files."
+              "$ref": "#/$defs/owner"
             },
             "filename": {
               "type": "string",
               "description": "The name of the file to save this secret as."
             },
             "prefix": {
-              "type": "string",
-              "description": "Prefix to prepend to all keys for this secret."
+              "$ref": "#/$defs/prefix"
             },
             "saveAsFile": {
-              "type": "boolean",
-              "description": "Whether to save this secret as a file."
+              "$ref": "#/$defs/saveAsFile"
             },
             "optional": {
-              "type": "boolean",
-              "description": "Whether to ignore it and continue if the secret doesn't exist."
+              "$ref": "#/$defs/optional"
             },
             "fileName": {
               "type": "string",
@@ -106,28 +122,23 @@
                         "additionalProperties": false,
                         "properties": {
                           "append": {
-                            "type": "boolean",
-                            "description": "Append to the output file instead of overwriting."
+                            "$ref": "#/$defs/append"
                           },
                           "prefix": {
-                            "type": "string",
-                            "description": "Prefix to prepend to this specific key."
+                            "$ref": "#/$defs/prefix"
                           },
                           "saveAsFile": {
-                            "type": "boolean",
-                            "description": "Whether to save this specific key as a file."
+                            "$ref": "#/$defs/saveAsFile"
                           },
                           "alias": {
                             "type": "string",
                             "description": "An alias to rename this key in the output."
                           },
                           "optional": {
-                            "type": "boolean",
-                            "description": "Whether to ignore it and continue if the key doesn't exist."
+                            "$ref": "#/$defs/optional"
                           },
                           "uppercase": {
-                            "type": "boolean",
-                            "description": "Convert this specific key to uppercase."
+                            "$ref": "#/$defs/uppercase"
                           }
                         }
                       }
