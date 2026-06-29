@@ -59,8 +59,7 @@ This is useful for local development, where you want to run an application with 
 		}()
 
 		// Start the child application with the temporary file path using the context
-		var execCmd *exec.Cmd
-		execCmd = exec.CommandContext(ctx, args[0], args[1:]...)
+		execCmd := exec.CommandContext(ctx, args[0], args[1:]...)
 
 		finalEnvs := append(secretEnvs, fmt.Sprintf("SECRET_PATH=%s", config.Config.Output))
 		finalEnvs = append(os.Environ(), finalEnvs...)
