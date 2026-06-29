@@ -3,15 +3,15 @@
   "type": "object",
   "additionalProperties": false,
   "properties": {
+    "output": {
+      "type": "string",
+      "description": "The destination directory or file for the secrets."
+    },
     "append": {
       "$ref": "#/$defs/append"
     },
     "format": {
       "$ref": "#/$defs/format"
-    },
-    "output": {
-      "type": "string",
-      "description": "The destination directory or file for the secrets."
     },
     "owner": {
       "$ref": "#/$defs/owner"
@@ -23,8 +23,7 @@
       "$ref": "#/$defs/uppercase"
     },
     "secrets": {
-      "$ref": "#/$defs/secretsArray",
-      "description": "List of secrets to fetch from Vault."
+      "$ref": "#/$defs/secretsArray"
     }
   },
   "required": ["secrets"],
@@ -60,6 +59,7 @@
     },
     "secretsArray": {
       "type": "array",
+      "description": "List of secrets to fetch from Vault.",
       "items": {
         "anyOf": [
           {
