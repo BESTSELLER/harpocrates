@@ -8,6 +8,7 @@ import (
 	"github.com/BESTSELLER/harpocrates/secrets"
 	"github.com/BESTSELLER/harpocrates/util"
 	"github.com/go-viper/mapstructure/v2"
+	"github.com/rs/zerolog/log"
 )
 
 // Outputs represents the output format for secrets
@@ -49,6 +50,10 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON, appendToFile bool)
 				if len(secretConfig.Keys) == 0 {
 					secretValue, err := vaultClient.ReadSecret(secretPath)
 					if err != nil {
+						if secretConfig.Optional != nil && *secretConfig.Optional {
+							log.Info().Msgf("Optional secret '%s' not found, skipping.", secretPath)
+							continue
+						}
 						return nil, err
 					}
 					var thisResult = make(secrets.Result)
@@ -81,6 +86,10 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON, appendToFile bool)
 							if keyConfig.SaveAsFile != nil {
 								secretValue, err := vaultClient.ReadSecretKey(secretPath, vaultKey)
 								if err != nil {
+									if *keyConfig.Optional {
+										log.Info().Msgf("Optional secret key '%s' not found in '%s', skipping.", vaultKey, secretPath)
+										continue
+									}
 									return nil, err
 								}
 								if *keyConfig.SaveAsFile {
@@ -91,6 +100,10 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON, appendToFile bool)
 							} else {
 								secretValue, err := vaultClient.ReadSecretKey(secretPath, vaultKey)
 								if err != nil {
+									if *keyConfig.Optional {
+										log.Info().Msgf("Optional secret key '%s' not found in '%s', skipping.", vaultKey, secretPath)
+										continue
+									}
 									return nil, err
 								}
 								result.Add(keyName, secretValue, currentPrefix, currentUpperCase)
@@ -101,6 +114,10 @@ func (vaultClient *API) ExtractSecrets(input util.SecretJSON, appendToFile bool)
 					} else {
 						secretValue, err := vaultClient.ReadSecretKey(secretPath, fmt.Sprintf("%s", keyEntry))
 						if err != nil {
+							if *secretConfig.Optional {
+								log.Info().Msgf("Optional secret key '%s' not found in '%s', skipping.", keyEntry, secretPath)
+								continue
+							}
 							return nil, err
 						}
 						result.Add(fmt.Sprintf("%s", keyEntry), secretValue, currentPrefix, currentUpperCase)

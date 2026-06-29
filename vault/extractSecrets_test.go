@@ -58,6 +58,145 @@ func setupVault(t *testing.T) {
 	testClient = client
 }
 
+// TestExtractSecretsWithOptionalSecret verifies that a missing optional secret is skipped without error
+func TestExtractSecretsWithOptionalSecret(t *testing.T) {
+	// arrange
+	setupVault(t)
+	t.Cleanup(func() {
+		testClient = nil
+	})
+
+	// define input
+	data, err := files.Read("../test_data/optional_secret.yaml")
+	if err != nil {
+		t.Fatalf("Failed to read test data: %v", err)
+	}
+	input := util.ReadInput(data)
+
+	// mock prefix
+	config.Config.Prefix = input.Prefix
+
+	vaultClient := &API{
+		Client: testClient,
+	}
+
+	// act
+	result, err := vaultClient.ExtractSecrets(input, false)
+
+	// assert
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+
+	// Should still extract the key1 from secret/secret
+	expectedSize := 1
+	if len(result[0].Result) != expectedSize {
+		t.Errorf("Expected %d secret, got %d", expectedSize, len(result[0].Result))
+	}
+}
+
+// TestExtractSecretsWithOptionalSecretKey verifies that a missing optional secret key is skipped without error
+func TestExtractSecretsWithOptionalSecretKey(t *testing.T) {
+	// arrange
+	setupVault(t)
+	t.Cleanup(func() {
+		testClient = nil
+	})
+
+	// define input
+	data, err := files.Read("../test_data/optional_secret_key.yaml")
+	if err != nil {
+		t.Fatalf("Failed to read test data: %v", err)
+	}
+	input := util.ReadInput(data)
+
+	// mock prefix
+	config.Config.Prefix = input.Prefix
+
+	vaultClient := &API{
+		Client: testClient,
+	}
+
+	// act
+	result, err := vaultClient.ExtractSecrets(input, false)
+
+	// assert
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+
+	// Should still extract key1
+	expectedSize := 1
+	if len(result[0].Result) != expectedSize {
+		t.Errorf("Expected %d secret, got %d", expectedSize, len(result[0].Result))
+	}
+}
+
+// TestExtractSecretsWithOptionalSecretPlainKey verifies that a missing plain key inside an optional secret is skipped
+func TestExtractSecretsWithOptionalSecretPlainKey(t *testing.T) {
+	// arrange
+	setupVault(t)
+	t.Cleanup(func() {
+		testClient = nil
+	})
+
+	// define input
+	data, err := files.Read("../test_data/optional_secret_plain_key.yaml")
+	if err != nil {
+		t.Fatalf("Failed to read test data: %v", err)
+	}
+	input := util.ReadInput(data)
+
+	// mock prefix
+	config.Config.Prefix = input.Prefix
+
+	vaultClient := &API{
+		Client: testClient,
+	}
+
+	// act
+	result, err := vaultClient.ExtractSecrets(input, false)
+
+	// assert
+	if err != nil {
+		t.Errorf("Expected no error, got %v", err)
+	}
+
+	// Should still extract key1
+	expectedSize := 1
+	if len(result[0].Result) != expectedSize {
+		t.Errorf("Expected %d secret, got %d", expectedSize, len(result[0].Result))
+	}
+}
+
+// TestExtractSecretsWithNonOptional verifies that a missing non-optional secret still fails
+func TestExtractSecretsWithNonOptional(t *testing.T) {
+	// arrange
+	setupVault(t)
+	t.Cleanup(func() {
+		testClient = nil
+	})
+
+	// define input
+	data, err := files.Read("../test_data/non_optional_secret.yaml")
+	if err != nil {
+		t.Fatalf("Failed to read test data: %v", err)
+	}
+	input := util.ReadInput(data)
+
+	vaultClient := &API{
+		Client: testClient,
+	}
+
+	// act
+	_, err = vaultClient.ExtractSecrets(input, false)
+
+	// assert
+	if err == nil {
+		t.Errorf("Expected error, got nil")
+	}
+}
+
 // TestExtractSecretsWithFormatAsExpected tests if a two secrets one with a format is extracted correctly
 func TestExtractSecretsWithFormatAsExpected(t *testing.T) {
 	// arrange
