@@ -32,14 +32,14 @@ func (result Result) ToJSON() string {
 }
 
 func (result Result) toKV(prefix string) string {
-	var returnString string
+	var returnString strings.Builder
 
 	for key, val := range result {
 		leKey := fixEnvName(key)
 		log.Info().Msgf("Exporting key: %s", leKey)
-		returnString += fmt.Sprintf("%s%s=%s\n", prefix, leKey, getStringRepresentation(val))
+		fmt.Fprintf(&returnString, "%s%s=%s\n", prefix, leKey, getStringRepresentation(val))
 	}
-	return returnString
+	return returnString.String()
 }
 
 // ToKVarray converts the result to a key=value array
@@ -53,13 +53,13 @@ func (result Result) ToKVarray(prefix string) (returnString []string) {
 }
 
 func (result Result) toSecretKV() string {
-	var returnString string
+	var returnString strings.Builder
 
 	for key, val := range result {
 		log.Info().Msgf("Exporting key: %s", key)
-		returnString += fmt.Sprintf("%s=%s\n", key, getStringRepresentation(val))
+		returnString.WriteString(fmt.Sprintf("%s=%s\n", key, getStringRepresentation(val)))
 	}
-	return returnString
+	return returnString.String()
 }
 
 // ToENV will format a map[string]string to a env file

@@ -28,7 +28,7 @@ func parseContext(lines []string, targetLine int) ParserContext {
 	if targetIndent == 0 {
 		result.Type = ContextRoot
 		// Collect existing root keys
-		for i := 0; i < len(lines); i++ {
+		for i := range lines {
 			if i == targetLine {
 				continue
 			}
@@ -196,8 +196,8 @@ func extractValFromList(line string) string {
 // extractKeyFromLine extracts the key name from a YAML line like "  fieldName: value".
 func extractKeyFromLine(line string) string {
 	trimmed := strings.TrimSpace(line)
-	if idx := strings.Index(trimmed, ":"); idx != -1 {
-		key := strings.TrimSpace(trimmed[:idx])
+	if before, _, ok := strings.Cut(trimmed, ":"); ok {
+		key := strings.TrimSpace(before)
 		return key
 	}
 	return ""
