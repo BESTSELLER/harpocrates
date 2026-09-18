@@ -8,14 +8,18 @@
   "customManagers": [
     {
       "customType": "regex",
-      "fileMatch": ["^vault/.*\\.go$"],
+      "managerFilePatterns": [
+        "/^vault/.*\\.go$/"
+      ],
       "matchStrings": [
         "// renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n.+?\\n\\s*\"[^:\"]+:(?<currentValue>[^\"]+)\""
       ]
     },
     {
       "customType": "regex",
-      "fileMatch": ["^\\.github/workflows/.*\\.yml$"],
+      "managerFilePatterns": [
+        "/^\\.github/workflows/.*\\.yml$/"
+      ],
       "matchStrings": [
         "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\n\\s+(?:[Vv]ersion|VERSION): [\"']?(?<currentValue>[^\"'\\n]+)[\"']?"
       ]
