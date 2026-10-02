@@ -7,16 +7,18 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/creack/pty"
+	pty "github.com/aymanbagabas/go-pty"
+	"golang.org/x/term"
 )
 
-func handleResize(ptyFile *os.File) func() {
+func handleResize(p pty.Pty) func() {
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, syscall.SIGWINCH)
 	go func() {
 		for range ch {
-			// Will try and inherit the size, we don't really care if it fails.
-			pty.InheritSize(os.Stdin, ptyFile) //nolint:errcheck
+			if w, h, err := term.GetSize(int(os.Stdin.Fd())); err == nil {
+				_ = p.Resize(w, h)
+			}
 		}
 	}()
 	ch <- syscall.SIGWINCH // initial resize trigger

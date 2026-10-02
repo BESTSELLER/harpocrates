@@ -300,7 +300,6 @@ secrets:
 | file, -f      | -                    | yaml or json file configuration with secrets to apply                                                      |                          -                          |
 | log-level     | LOG_LEVEL            | logging level: debug, info, warn, error                                                                    |                        warn                         |
 | validate      | -                    | will only validate the secrets file                                                                        |                        false                        |
-| redact        | -                    | [dev command only] Redact secrets from output                                                              |                        false                        |
 | -             | HARPOCRATES_FILENAME | overwrites the default output filename                                                                     |                       secrets                       |
 | gcpWorkloadID | GCP_WORKLOAD_ID      | set to true to enable GCP workload identity, useful when running in GCP                                    |                        false                        |
 

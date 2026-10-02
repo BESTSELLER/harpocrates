@@ -58,14 +58,10 @@ This is useful for local development, where you want to run an application with 
 			cancel()
 		}()
 
-		// Start the child application with the temporary file path using the context
-		execCmd := exec.CommandContext(ctx, args[0], args[1:]...)
-
 		finalEnvs := append(secretEnvs, fmt.Sprintf("SECRET_PATH=%s", config.Config.Output))
 		finalEnvs = append(os.Environ(), finalEnvs...)
-		execCmd.Env = finalEnvs
 
-		if err := util.RunCmdPTY(execCmd, secretEnvs, redact); err != nil {
+		if err := util.RunCommand(ctx, args[0], args[1:], finalEnvs); err != nil {
 			cleanup() // Clean up the temporary directory manually before os.Exit or log.Fatal since defer won't run
 			if exitErr, ok := err.(*exec.ExitError); ok {
 				os.Exit(exitErr.ExitCode())
@@ -76,10 +72,7 @@ This is useful for local development, where you want to run an application with 
 	},
 }
 
-var redact bool
-
 func init() {
-	devCmd.PersistentFlags().BoolVar(&redact, "redact", false, "Redact secrets from output, defaults to false")
 	devCmd.Flags().SetInterspersed(false)
 
 	rootCmd.AddCommand(devCmd)
