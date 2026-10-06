@@ -25,7 +25,6 @@ func RunCommand(ctx context.Context, name string, args []string, env []string) e
 		// Failed to allocate pseudo-terminal (e.g. ConPTY unavailable on older Windows), fall back to pipe execution
 		return runPipe(ctx, name, args, env)
 	}
-	defer func() { _ = p.Close() }()
 
 	if w, h, err := term.GetSize(int(os.Stdin.Fd())); err == nil {
 		_ = p.Resize(w, h)
@@ -36,6 +35,7 @@ func RunCommand(ctx context.Context, name string, args []string, env []string) e
 
 	oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
 	if err != nil {
+		_ = p.Close()
 		return runPipe(ctx, name, args, env)
 	}
 	defer func() { _ = term.Restore(int(os.Stdin.Fd()), oldState) }()
@@ -44,6 +44,7 @@ func RunCommand(ctx context.Context, name string, args []string, env []string) e
 	cmd.Env = env
 
 	if err := cmd.Start(); err != nil {
+		_ = p.Close()
 		return err
 	}
 
@@ -51,15 +52,26 @@ func RunCommand(ctx context.Context, name string, args []string, env []string) e
 		_, _ = io.Copy(p, os.Stdin)
 	}()
 
-	_, err = io.Copy(os.Stdout, p)
-	if err != nil {
-		var pathErr *os.PathError
-		if !errors.Is(err, io.EOF) && !errors.Is(err, syscall.EIO) && (!errors.As(err, &pathErr) || pathErr.Err != syscall.EIO) {
-			os.Stderr.WriteString("error reading pty output: " + err.Error() + "\n") //nolint:errcheck
+	outputDone := make(chan struct{})
+	go func() {
+		defer close(outputDone)
+		_, err := io.Copy(os.Stdout, p)
+		if err != nil {
+			var pathErr *os.PathError
+			if !errors.Is(err, io.EOF) && !errors.Is(err, syscall.EIO) && (!errors.As(err, &pathErr) || pathErr.Err != syscall.EIO) {
+				os.Stderr.WriteString("error reading pty output: " + err.Error() + "\n") //nolint:errcheck
+			}
 		}
-	}
+	}()
 
-	return cmd.Wait()
+	waitErr := cmd.Wait()
+
+	// Closing the pseudo-terminal signals ClosePseudoConsole on Windows and tears down the master PTY,
+	// allowing io.Copy(os.Stdout, p) to unblock with EOF.
+	_ = p.Close()
+	<-outputDone
+
+	return waitErr
 }
 
 func runPipe(ctx context.Context, name string, args []string, env []string) error {
