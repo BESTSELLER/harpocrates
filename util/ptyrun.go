@@ -58,7 +58,7 @@ func RunCommand(ctx context.Context, name string, args []string, env []string) e
 		_, err := io.Copy(os.Stdout, p)
 		if err != nil {
 			var pathErr *os.PathError
-			if !errors.Is(err, io.EOF) && !errors.Is(err, syscall.EIO) && (!errors.As(err, &pathErr) || pathErr.Err != syscall.EIO) {
+			if !errors.Is(err, io.EOF) && !errors.Is(err, os.ErrClosed) && !errors.Is(err, syscall.EIO) && (!errors.As(err, &pathErr) || (pathErr.Err != syscall.EIO && pathErr.Err != os.ErrClosed)) {
 				os.Stderr.WriteString("error reading pty output: " + err.Error() + "\n") //nolint:errcheck
 			}
 		}
