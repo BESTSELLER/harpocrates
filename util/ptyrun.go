@@ -66,8 +66,6 @@ func RunCommand(ctx context.Context, name string, args []string, env []string) e
 
 	waitErr := cmd.Wait()
 
-	// Closing the pseudo-terminal signals ClosePseudoConsole on Windows and tears down the master PTY,
-	// allowing io.Copy(os.Stdout, p) to unblock with EOF.
 	_ = p.Close()
 	<-outputDone
 
