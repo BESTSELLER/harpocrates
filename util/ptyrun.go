@@ -1,65 +1,82 @@
 package util
 
 import (
+	"context"
+	"errors"
 	"io"
 	"os"
 	"os/exec"
 	"syscall"
 
-	"github.com/creack/pty"
+	pty "github.com/aymanbagabas/go-pty"
 	"golang.org/x/term"
 )
 
-// RunCmdPTY runs the given command in a pseudo-terminal
-func RunCmdPTY(cmd *exec.Cmd, secretEnvs []string, redact bool) error {
-	// Start the command with a pseudo-terminal.
-	ptyFile, err := pty.Start(cmd)
+// RunCommand runs the given command. If stdin is a terminal, it runs inside a pseudo-terminal (PTY/ConPTY);
+// otherwise, it falls back to standard process execution with standard I/O pipes.
+func RunCommand(ctx context.Context, name string, args []string, env []string) error {
+	isTerm := term.IsTerminal(int(os.Stdin.Fd()))
+	if !isTerm {
+		return runPipe(ctx, name, args, env)
+	}
+
+	p, err := pty.New()
 	if err != nil {
+		// Failed to allocate pseudo-terminal (e.g. ConPTY unavailable on older Windows), fall back to pipe execution
+		return runPipe(ctx, name, args, env)
+	}
+
+	if w, h, err := term.GetSize(int(os.Stdin.Fd())); err == nil {
+		_ = p.Resize(w, h)
+	}
+
+	cleanupResize := handleResize(p)
+	defer cleanupResize()
+
+	oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
+	if err != nil {
+		_ = p.Close()
+		return runPipe(ctx, name, args, env)
+	}
+	defer func() { _ = term.Restore(int(os.Stdin.Fd()), oldState) }()
+
+	cmd := p.CommandContext(ctx, name, args...)
+	cmd.Env = env
+
+	if err := cmd.Start(); err != nil {
+		_ = p.Close()
 		return err
 	}
-	defer func() { _ = ptyFile.Close() }() // Best effort cleanup - we don't care about errors here.
 
-	// Check if stdin is a terminal. If not, we skip terminal-specific features.
-	isTerm := term.IsTerminal(int(os.Stdin.Fd()))
-
-	if isTerm {
-		// Handle standard input window resizing
-		cleanupResize := handleResize(ptyFile)
-		defer cleanupResize()
-
-		// Put the true os.Stdin into raw mode to capture Ctrl+C, etc.
-		oldState, err := term.MakeRaw(int(os.Stdin.Fd()))
-		if err != nil {
-			// Will try cleanup up the process so that we don't have any zombie processes.
-			cmd.Process.Kill() //nolint:errcheck // We are already in an error state, don't care if this also fails
-			cmd.Wait()         //nolint:errcheck // We are already in an error state, don't care if this also fails
-			return err
-		}
-		defer func() { _ = term.Restore(int(os.Stdin.Fd()), oldState) }() // Important: Restore on exit
-	}
-
-	// Copy os.Stdin directly to the pseudo-terminal
 	go func() {
-		_, _ = io.Copy(ptyFile, os.Stdin)
+		_, _ = io.Copy(p, os.Stdin)
 	}()
 
-	redactor := &Redactor{
-		Writer: os.Stdout,
-		Envs:   secretEnvs,
-		Redact: redact,
-	}
-
-	// Copy the ptyFile output through our redactor back to os.Stdout
-	_, err = io.Copy(redactor, ptyFile)
-	if err != nil {
-		pathErr, ok := err.(*os.PathError)
-		if !ok || pathErr.Err != syscall.EIO {
-			// It's a real error, print it but don't fail the command yet.
-			// The caller typically cares more about the exit code.
-			os.Stderr.WriteString("error reading pty output: " + err.Error() + "\n") //nolint:errcheck // We are already in an error state, don't care if this also fails
+	outputDone := make(chan struct{})
+	go func() {
+		defer close(outputDone)
+		_, err := io.Copy(os.Stdout, p)
+		if err != nil {
+			var pathErr *os.PathError
+			if !errors.Is(err, io.EOF) && !errors.Is(err, os.ErrClosed) && !errors.Is(err, syscall.EIO) && (!errors.As(err, &pathErr) || (pathErr.Err != syscall.EIO && pathErr.Err != os.ErrClosed)) {
+				os.Stderr.WriteString("error reading pty output: " + err.Error() + "\n") //nolint:errcheck
+			}
 		}
-	}
+	}()
 
-	// Wait for the command to terminate to return its exit error mapping.
-	return cmd.Wait()
+	waitErr := cmd.Wait()
+
+	_ = p.Close()
+	<-outputDone
+
+	return waitErr
+}
+
+func runPipe(ctx context.Context, name string, args []string, env []string) error {
+	cmd := exec.CommandContext(ctx, name, args...)
+	cmd.Env = env
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
 }
