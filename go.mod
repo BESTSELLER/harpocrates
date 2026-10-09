@@ -3,7 +3,7 @@ module github.com/BESTSELLER/harpocrates
 go 1.27.0
 
 require (
-	cloud.google.com/go/compute/metadata v0.9.1
+	cloud.google.com/go/compute/metadata v0.10.0
 	github.com/creack/pty v1.1.24
 	github.com/go-viper/mapstructure/v2 v2.5.0
 	github.com/gookit/color v1.6.1
