@@ -1,29 +1,45 @@
 package util
 
 import (
+	"context"
 	"os/exec"
+	"runtime"
 	"testing"
 )
 
-func TestRunCmdPTY_Success(t *testing.T) {
-	cmd := exec.Command("sh", "-c", "echo 'hello, world'")
-	secretEnvs := []string{"SUPER_SECRET_ENV"}
-	redact := false
+func TestRunCommand_Success(t *testing.T) {
+	ctx := context.Background()
+	var name string
+	var args []string
 
-	// This should run smoothly and not throw EIO or panics
-	// even when standard input is not a real terminal (like in `go test` and CI).
-	err := RunCmdPTY(cmd, secretEnvs, redact)
+	if runtime.GOOS == "windows" {
+		name = "cmd.exe"
+		args = []string{"/c", "echo hello, world"}
+	} else {
+		name = "sh"
+		args = []string{"-c", "echo 'hello, world'"}
+	}
+
+	err := RunCommand(ctx, name, args, nil)
 	if err != nil {
 		t.Fatalf("expected no error, got: %v", err)
 	}
 }
 
-func TestRunCmdPTY_ExitCode(t *testing.T) {
-	cmd := exec.Command("sh", "-c", "exit 42")
-	secretEnvs := []string{}
-	redact := false
+func TestRunCommand_ExitCode(t *testing.T) {
+	ctx := context.Background()
+	var name string
+	var args []string
 
-	err := RunCmdPTY(cmd, secretEnvs, redact)
+	if runtime.GOOS == "windows" {
+		name = "cmd.exe"
+		args = []string{"/c", "exit 42"}
+	} else {
+		name = "sh"
+		args = []string{"-c", "exit 42"}
+	}
+
+	err := RunCommand(ctx, name, args, nil)
 	if err == nil {
 		t.Fatalf("expected error due to non-zero exit code, got nil")
 	}

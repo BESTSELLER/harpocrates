@@ -4,7 +4,7 @@ go 1.27.0
 
 require (
 	cloud.google.com/go/compute/metadata v0.10.0
-	github.com/creack/pty v1.1.24
+	github.com/aymanbagabas/go-pty v0.2.3
 	github.com/go-viper/mapstructure/v2 v2.5.0
 	github.com/gookit/color v1.6.1
 	github.com/hashicorp/vault/api v1.23.0
@@ -28,6 +28,7 @@ require (
 	github.com/containerd/log v0.2.0 // indirect
 	github.com/containerd/platforms v0.2.1 // indirect
 	github.com/cpuguy83/dockercfg v0.3.2 // indirect
+	github.com/creack/pty v1.1.24 // indirect
 	github.com/distribution/reference v0.6.0 // indirect
 	github.com/docker/go-connections v0.8.1 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
@@ -75,6 +76,7 @@ require (
 	github.com/testcontainers/testcontainers-go v0.44.0 // indirect
 	github.com/tklauser/go-sysconf v0.4.0 // indirect
 	github.com/tklauser/numcpus v0.12.0 // indirect
+	github.com/u-root/u-root v0.16.0 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
 	github.com/xeipuuv/gojsonreference v0.0.0-20180127040603-bd5ef7bd5415 // indirect
 	github.com/xo/terminfo v1.2.0 // indirect
