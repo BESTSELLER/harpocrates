@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go/compute/metadata v0.10.0
 	github.com/aymanbagabas/go-pty v0.2.3
 	github.com/go-viper/mapstructure/v2 v2.5.0
-	github.com/gookit/color v1.6.1
+	github.com/gookit/color v1.6.3
 	github.com/hashicorp/vault/api v1.23.0
 	github.com/rs/zerolog v1.35.1
 	github.com/spf13/cobra v1.10.2
