@@ -44,6 +44,13 @@ It can output the secrets in different formats:
   ```bash
   value
   ```
+- INI, where nested objects become sections and top-level keys go into `[default]`.
+  ```ini
+  [pgbouncer]
+  admin_users = someuser
+  listen_addr = localhost
+  listen_port = 6432
+  ```
 
 <br/><br/>
 
@@ -125,7 +132,7 @@ YAML is a great option for readability and replication of configs. YAML options 
 
 | Option        | Required | Value                                                        | default      |
 | ------------- | -------- | ------------------------------------------------------------ | ------------ |
-| format        | no       | one of: env, json, secret, yaml                              | env          |
+| format        | no       | one of: env, json, secret, yaml, ini                         | env          |
 | output        | no       | /path/to/output/folder                                       | /secrets     |
 | owner         | no       | UID of the user e.g 0, can be set on "root" and secret level | current user |
 | prefix        | no       | prefix, can be set on any level                              | -            |
@@ -144,6 +151,49 @@ Run harpocrates with the subcommand `fetch` and the `-f` flag to fetch secrets f
 
 ```bash
 harpocrates fetch -f /path/to/file.yaml
+```
+
+<br/>
+
+### INI output
+
+Set `format: ini` to write the secrets as an INI file. A key whose Vault value is an object
+becomes a section and its members become `key = value` lines; top-level scalar keys go into
+`[default]`. Sections and keys are sorted, keys and section names are sanitised to
+`[a-zA-Z0-9_]`, and values are written raw (no quotes). Only one level of nesting is supported.
+`default` is a reserved section name: a Vault key called `default` merges with the synthetic
+`[default]` section. Names that sanitise to the same string with different values abort the run
+rather than silently dropping a secret.
+
+A secret containing:
+
+```json
+{
+  "databases": { "template1": "host=localhost dbname=template1 auth_user=someuser" },
+  "pgbouncer": {
+    "pool_mode": "session", "listen_port": "6432", "listen_addr": "localhost",
+    "auth_type": "md5", "auth_file": "users.txt", "logfile": "pgbouncer.log",
+    "pidfile": "pgbouncer.pid", "admin_users": "someuser", "stats_users": "stat_collector"
+  }
+}
+```
+
+is written as:
+
+```ini
+[databases]
+template1 = host=localhost dbname=template1 auth_user=someuser
+
+[pgbouncer]
+admin_users = someuser
+auth_file = users.txt
+auth_type = md5
+listen_addr = localhost
+listen_port = 6432
+logfile = pgbouncer.log
+pidfile = pgbouncer.pid
+pool_mode = session
+stats_users = stat_collector
 ```
 
 <br/>
@@ -290,7 +340,7 @@ secrets:
 | role-name     | ROLE_NAME            | Vault role name, used at login                                                                             |                          -                          |
 | token-path    | TOKEN_PATH           | /path/to/token, uses clustername and path to login and exchange a vault token which is used in vault_token | /var/run/secrets/kubernetes.io/serviceaccount/token |
 | vault-token   | VAULT_TOKEN          | token as a string. If empty token_path will be queried                                                     |                          -                          |
-| format        | FORMAT               | env, json, secret or yaml                                                                                  |                         env                         |
+| format        | FORMAT               | env, json, secret, yaml or ini                                                                             |                         env                         |
 | output        | -                    | /path/to/output                                                                                            |                   none (required)                   |
 | owner         | -                    | UID of the user e.g 0                                                                                      |                    current user                     |
 | prefix        | PREFIX               | prefix keys, eg. K8S\_                                                                                     |                          -                          |
