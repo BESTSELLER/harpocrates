@@ -1,0 +1,7 @@
+output: ../.tmp/
+secrets:
+  - secret/secret:
+      keys:
+        - keyThatDoesNotExist:
+            saveAsFile: false
+        - key1

@@ -197,6 +197,40 @@ func TestExtractSecretsWithNonOptional(t *testing.T) {
 	}
 }
 
+// TestExtractSecretsMissingKeyWithoutOptional verifies that a missing key with no optional field returns an error instead of panicking
+func TestExtractSecretsMissingKeyWithoutOptional(t *testing.T) {
+	setupVault(t)
+	t.Cleanup(func() {
+		testClient = nil
+	})
+
+	tests := []string{
+		"../test_data/missing_key_no_optional.yaml",
+		"../test_data/missing_key_no_optional_save_as_file.yaml",
+		"../test_data/missing_plain_key_no_optional.yaml",
+	}
+
+	for _, path := range tests {
+		t.Run(path, func(t *testing.T) {
+			data, err := files.Read(path)
+			if err != nil {
+				t.Fatalf("Failed to read test data: %v", err)
+			}
+			input := util.ReadInput(data)
+
+			vaultClient := &API{
+				Client: testClient,
+			}
+
+			_, err = vaultClient.ExtractSecrets(input, false)
+
+			if err == nil {
+				t.Errorf("Expected error, got nil")
+			}
+		})
+	}
+}
+
 // TestExtractSecretsWithFormatAsExpected tests if a two secrets one with a format is extracted correctly
 func TestExtractSecretsWithFormatAsExpected(t *testing.T) {
 	// arrange

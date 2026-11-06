@@ -1,0 +1,5 @@
+secrets:
+  - secret/secret:
+      keys:
+        - keyThatDoesNotExist
+        - key1
