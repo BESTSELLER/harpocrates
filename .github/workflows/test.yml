@@ -46,7 +46,7 @@ jobs:
           go fmt ./...
 
       - name: Suggest changes
-        uses: reviewdog/action-suggester@8219e3d2e54a63ddecf1318659aa541bd1fa7202 # v1.26.2
+        uses: reviewdog/action-suggester@fd22a83b1ebc13fd8aee5d57b06793fce6f20fb9 # v1.27.1
         with:
           tool_name: go static analysis
 
