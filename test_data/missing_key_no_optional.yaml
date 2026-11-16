@@ -1,0 +1,6 @@
+secrets:
+  - secret/secret:
+      keys:
+        - keyThatDoesNotExist:
+            alias: SOME_ALIAS
+        - key1
