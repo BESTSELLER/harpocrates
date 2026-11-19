@@ -99,8 +99,8 @@ func doIt(cmd *cobra.Command, args []string) []string {
 		log.Fatal().Err(err).Msg("failed to extract secrets from Vault")
 	}
 
-	if cmd.Flags().Changed("format") && (config.Config.Format != "json" && config.Config.Format != "env" && config.Config.Format != "secret" && config.Config.Format != "yaml") {
-		log.Error().Msg("Please use a valid format of either: json, env, secret or yaml")
+	if cmd.Flags().Changed("format") && (config.Config.Format != "json" && config.Config.Format != "env" && config.Config.Format != "secret" && config.Config.Format != "yaml" && config.Config.Format != "ini") {
+		log.Error().Msg("Please use a valid format of either: json, env, secret, yaml or ini")
 		cmd.Help() //nolint:errcheck // We don't care about errors from this
 		return secretEnvs
 	}
@@ -121,6 +121,8 @@ func doIt(cmd *cobra.Command, args []string) []string {
 			files.Write(config.Config.Output, fileName, output.Result.ToK8sSecret(), output.Owner, config.Config.Append)
 		case "yaml":
 			files.Write(config.Config.Output, fileName, output.Result.ToYAML(), output.Owner, config.Config.Append)
+		case "ini":
+			files.Write(config.Config.Output, fileName, output.Result.ToINI(), output.Owner, config.Config.Append)
 		}
 		log.Debug().Msgf("Secrets written to file: %s/%s", config.Config.Output, fileName)
 	}

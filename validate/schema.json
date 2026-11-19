@@ -34,7 +34,7 @@
     },
     "format": {
       "type": "string",
-      "enum": ["env", "json", "secret", "yaml"],
+      "enum": ["env", "ini", "json", "secret", "yaml"],
       "description": "The format to output the secrets in."
     },
     "owner": {
